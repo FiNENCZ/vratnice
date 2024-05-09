@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration>
+	<property name="LOGS" value="./logs" />
+	
+	<appender name="RollingFile"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/vratnice-logger.log</file>
+        <encoder
+            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1} [%t] %m%n</Pattern>
+			<charset>UTF-8</charset>      
+        </encoder>
+ 
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 10 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/vratnice-logger-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+            <maxFileSize>50MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+	
+
+	<!-- Configure the Console appender -->
+	<appender name="Console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+			<charset>UTF-8</charset>      
+		</encoder>
+	</appender>
+
+	<appender name="ASYNC_CONSOLE"
+		class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+		<appender-ref ref="Console" />
+		<queueSize>1</queueSize> <!-- default 256 -->
+		<includeCallerData>false</includeCallerData><!-- default false -->
+		<neverBlock>true</neverBlock><!-- default false, set to true to cause the 
+			Appender not block the application and just drop the messages -->
+	</appender>
+
+	<appender name="ASYNC_FILE"
+		class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold> <!-- default 20, means drop lower event when has 20% capacity remaining -->
+		<appender-ref ref="RollingFile" />
+		<queueSize>1</queueSize> <!-- default 256 -->
+		<includeCallerData>false</includeCallerData><!-- default false -->
+		<neverBlock>true</neverBlock><!-- default false, set to true to cause the 
+			Appender not block the application and just drop the messages -->
+	</appender>
+
+	<!-- Configure the Sentry appender, overriding the logging threshold to 
+		the WARN level -->
+	<appender name="Sentry" class="io.sentry.logback.SentryAppender">
+		<options>
+			<!-- <dsn>https://afe634a0779b43889068409907bed6eb@sentry.pragodata.com/21</dsn> -->
+			<dsn>${sentry.dsn}</dsn>
+		</options>	
+		<!-- Optionally change minimum Event level. Default for Events is ERROR -->
+		<!-- <minimumEventLevel>WARN</minimumEventLevel> -->
+		<!-- Optionally change minimum Breadcrumbs level. Default for Breadcrumbs is INFO -->
+		<!-- <minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>	 -->
+	</appender>
+
+	<!-- Enable the Console and Sentry appenders, Console is provided as an 
+		example of a non-Sentry logger that is set to a different logging threshold -->
+	<root level="INFO">
+		<appender-ref ref="ASYNC_CONSOLE" level="INFO" />
+		<appender-ref ref="ASYNC_FILE" level="INFO" />
+		<appender-ref ref="Sentry"/>
+	</root>
+
+	<logger name="cz.pragodata" level="TRACE" additivity="false">
+		<appender-ref ref="ASYNC_CONSOLE" />
+		<appender-ref ref="ASYNC_FILE" />
+		<appender-ref ref="Sentry"/>
+	</logger>
+
+</configuration>

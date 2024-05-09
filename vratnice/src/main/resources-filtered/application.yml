@@ -1,0 +1,5 @@
+application:
+  version:
+    @project.version@  
+  description:
+    @project.description@  
