@@ -84,7 +84,7 @@ public class UzivatelController extends BaseController {
 
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
 			List<RoleEnum> role = Arrays.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU });
-			List<Uzivatel> list = uzivatelServices.getList(null, new FilterOpravneniDto(appUserDto.getIdUzivatel(), role));
+			List<Uzivatel> list = uzivatelServices.getList(null, new FilterOpravneniDto(appUserDto.getIdUzivatel(), role), aktivni);
 			if (list != null && list.size() > 0) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.add(Calendar.DAY_OF_MONTH, -2);

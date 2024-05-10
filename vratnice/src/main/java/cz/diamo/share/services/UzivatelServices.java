@@ -69,7 +69,8 @@ public class UzivatelServices {
     }
 
     @TransactionalROE
-    public Uzivatel getDetail(String idUzivatel, boolean preklady) throws RecordNotFoundException, NoSuchMessageException {
+    public Uzivatel getDetail(String idUzivatel, boolean preklady)
+            throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelRepository.getDetail(idUzivatel);
 
         if (uzivatel != null) {
@@ -82,18 +83,30 @@ public class UzivatelServices {
 
             if (preklady && uzivatel.getRole() != null && uzivatel.getRole().size() > 0) {
                 for (Role role : uzivatel.getRole()) {
-                    role.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), role.getNazevResx()));
+                    role.setNazev(
+                            resourcesComponent.getResources(LocaleContextHolder.getLocale(), role.getNazevResx()));
                 }
             }
         }
         return uzivatel;
     }
 
+    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Boolean aktivita)
+            throws RecordNotFoundException {
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), aktivita);
+    }
+
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni) throws RecordNotFoundException {
         return getList(idZavod, opravneni, Calendar.getInstance().getTime());
     }
 
-    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni) throws RecordNotFoundException {
+    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni)
+            throws RecordNotFoundException {
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), null);
+    }
+
+    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni, Boolean aktivita)
+            throws RecordNotFoundException {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Uzivatel s");
@@ -104,10 +117,13 @@ public class UzivatelServices {
 
         if (idZavod != null)
             queryString.append(" and zavod.idZavod = :idZavod");
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
         if (opravneni != null)
             queryString.append(" and " + opravneni.getHqlWhere("s.idUzivatel"));
         if (platnostKeDni != null)
-            queryString.append(" and (s.datumOd is null or s.datumOd < :platnostKeDni) and (s.datumDo is null or s.datumDo > :platnostKeDni)");
+            queryString.append(
+                    " and (s.datumOd is null or s.datumOd < :platnostKeDni) and (s.datumDo is null or s.datumDo > :platnostKeDni)");
         queryString.append(" and s.aktivita = true");
 
         queryString.append(" order by s.prijmeni ASC, s.jmeno ASC");
@@ -116,6 +132,8 @@ public class UzivatelServices {
 
         if (idZavod != null)
             vysledek.setParameter("idZavod", idZavod);
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
         if (opravneni != null)
             vysledek.setParameter("idVedouci", opravneni.getIdVedouci());
         if (platnostKeDni != null)
@@ -128,12 +146,16 @@ public class UzivatelServices {
     }
 
     @TransactionalWrite
-    public Uzivatel save(Uzivatel uzivatel, boolean ukladatRole, boolean ukladatZavody, boolean ukladatModuly) throws BaseException {
+    public Uzivatel save(Uzivatel uzivatel, boolean ukladatRole, boolean ukladatZavody, boolean ukladatModuly)
+            throws BaseException {
 
         // kontrola jedinečnosti sapId
-        Integer existSapId = uzivatelRepository.existsBySapId(uzivatel.getSapId(), Utils.toString(uzivatel.getIdUzivatel()));
+        Integer existSapId = uzivatelRepository.existsBySapId(uzivatel.getSapId(),
+                Utils.toString(uzivatel.getIdUzivatel()));
         if (existSapId > 0)
-            throw new UniqueValueException(messageSource.getMessage("sapid.unique", null, LocaleContextHolder.getLocale()), uzivatel.getSapId(), true);
+            throw new UniqueValueException(
+                    messageSource.getMessage("sapid.unique", null, LocaleContextHolder.getLocale()),
+                    uzivatel.getSapId(), true);
 
         uzivatel.setCasZmn(Utils.getCasZmn());
         uzivatel.setZmenuProvedl(Utils.getZmenuProv());
@@ -146,7 +168,8 @@ public class UzivatelServices {
 
         // uložení rolí
         if (ukladatRole) {
-            List<Opravneni> opravneniPuvodni = uzivatelOpravneniRepository.listOpravneni(uzivatel.getIdUzivatel(), true);
+            List<Opravneni> opravneniPuvodni = uzivatelOpravneniRepository.listOpravneni(uzivatel.getIdUzivatel(),
+                    true);
             List<Opravneni> opravneniNove = new ArrayList<Opravneni>();
 
             if (listOpravneni != null && listOpravneni.size() > 0) {
@@ -253,7 +276,8 @@ public class UzivatelServices {
         }
 
         // ukončení
-        if (uzivatel.getDatumDo() != null && !uzivatel.getDatumDo().equals(Utils.getMaxDate(true)) && !uzivatel.getUkonceno()) {
+        if (uzivatel.getDatumDo() != null && !uzivatel.getDatumDo().equals(Utils.getMaxDate(true))
+                && !uzivatel.getUkonceno()) {
 
             // příznak ukončení
             uzivatel.setUkonceno(true);
