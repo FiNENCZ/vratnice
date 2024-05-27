@@ -3,10 +3,10 @@ package cz.diamo.vratnice.dto;
 import java.io.Serializable;
 import java.sql.Date;
 
+import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import cz.diamo.vratnice.enums.StavZadostKlic;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,13 +20,13 @@ public class ZadostKlicDto implements Serializable{
 
     private String idZadostiKey;
 
-    private Klic klic;
+    private KlicDto klic;
 
-    private Uzivatel uzivatel;
+    private UzivatelDto uzivatel;
 
     @NotBlank(message = "Building is required")
     @Size(max = 30, message = "Building cannot exceed 30 characters")
-    private StavZadostKlic stav; // vyžádán/schválen
+    private String stav = "vyžádáno"; // vyžádán/schválen
 
     private Boolean trvala = true;
 
@@ -40,8 +40,8 @@ public class ZadostKlicDto implements Serializable{
         }
 
         this.idZadostiKey = zadostKlic.getIdZadostKlic();
-        this.klic = zadostKlic.getKlic();
-        this.uzivatel = zadostKlic.getUzivatel();
+        this.klic = new KlicDto(zadostKlic.getKlic());
+        this.uzivatel = new UzivatelDto(zadostKlic.getUzivatel());
         this.stav = zadostKlic.getStav();
         this.trvala = zadostKlic.getTrvala();
         this.datumOd = zadostKlic.getDatumOd();
@@ -50,9 +50,10 @@ public class ZadostKlicDto implements Serializable{
 
     public ZadostKlic toEntity() {
         ZadostKlic zadostKlic = new ZadostKlic();
+        
         zadostKlic.setIdZadostKlic(this.idZadostiKey);
-        zadostKlic.setKlic(this.klic);
-        zadostKlic.setUzivatel(this.uzivatel);
+        zadostKlic.setKlic(new Klic(getKlic().getIdKey()));
+        zadostKlic.setUzivatel(new Uzivatel(getUzivatel().getId()));
         zadostKlic.setStav(this.stav);
         zadostKlic.setTrvala(this.trvala);
         zadostKlic.setDatumOd(this.datumOd);

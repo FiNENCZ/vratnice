@@ -13,5 +13,14 @@ public enum StavZadostKlic {
     public String getValue() {
         return value;
     }
+    public static StavZadostKlic convertToStavZadostKlic(String stavValue) {
+        if ("vyžádáno".equals(stavValue)) {
+            return StavZadostKlic.VYZADANO;
+        } else if ("schváleno".equals(stavValue)) {
+            return StavZadostKlic.SCHVALENO;
+        } else {
+            throw new IllegalArgumentException("Nepodporovaná hodnota stavu: " + stavValue);
+        }
+    }
 
 }

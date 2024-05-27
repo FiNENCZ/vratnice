@@ -7,11 +7,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
 import cz.diamo.share.entity.Uzivatel;
-import cz.diamo.vratnice.enums.StavZadostKlic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -46,9 +43,8 @@ public class ZadostKlic implements Serializable {
     @JoinColumn(name = "id_uzivatel")
     private Uzivatel uzivatel;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "stav")
-    private StavZadostKlic stav; // vyžádán/schválen
+    private String stav = "vyžádáno"; // vyžádán/schválen
 
     
     @Column(name = "trvala")
@@ -64,5 +60,6 @@ public class ZadostKlic implements Serializable {
     public ZadostKlic(String idZadostKlic) {
         setIdZadostKlic(idZadostKlic);
     }
+    
 
 }

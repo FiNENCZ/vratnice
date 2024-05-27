@@ -15,4 +15,6 @@ public interface KlicRepository extends JpaRepository<Klic, String>{
     @Query(sqlSelect + "where s.chipCode = :chipCode")
     Klic getDetailByChipCode(String chipCode);
 
+    
+
 }
