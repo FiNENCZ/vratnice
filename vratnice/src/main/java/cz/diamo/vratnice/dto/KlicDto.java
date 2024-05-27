@@ -18,7 +18,7 @@ public class KlicDto implements Serializable {
     private String idKey;
 
     @NotNull(message = "Special flag is required")
-    private Boolean special;
+    private Boolean special = false;
 
     @NotBlank(message = "Name is required")
     @Size(max = 50, message = "Name cannot exceed 50 characters")
