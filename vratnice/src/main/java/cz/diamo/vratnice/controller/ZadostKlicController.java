@@ -52,4 +52,14 @@ public class ZadostKlicController extends BaseController{
         return ResponseEntity.ok(new ZadostKlicDto(zadostKlic));
     }
 
+    @GetMapping("/zadost-klic/zadosti-dle-stavu")
+    public  ResponseEntity<List<ZadostKlicDto>> getZadostiByKlic(@RequestParam String stav) {
+        List<ZadostKlicDto> zadostiKlic = zadostKlicService.getZadostiByKlic(stav).stream()
+            .map(ZadostKlicDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(zadostiKlic);
+        
+    }
+    
+
 }

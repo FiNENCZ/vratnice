@@ -1,5 +1,7 @@
 package cz.diamo.vratnice.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,4 +12,7 @@ public interface ZadostKlicRepository extends JpaRepository<ZadostKlic, String> 
 
     @Query(sqlSelect + "where s.idZadostKlic = :idZadostKlic")
     ZadostKlic getDetail(String idZadostKlic);
+
+    @Query(sqlSelect + "where s.stav = :stav")
+    List<ZadostKlic> getZadostiByStav(String stav);
 }

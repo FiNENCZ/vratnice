@@ -28,4 +28,8 @@ public class ZadostKlicService {
         return zadostiKlicRepository.getDetail(idZadostiKlic);
     }
 
+    public List<ZadostKlic> getZadostiByKlic(String stav) {
+        return zadostiKlicRepository.getZadostiByStav(stav);
+    }
+
 }
