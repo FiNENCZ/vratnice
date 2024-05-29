@@ -35,6 +35,14 @@ public class ZadostKlicController extends BaseController{
         return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
     }
 
+    @PostMapping("/zadost-klic/zmena-stavu")
+    public ResponseEntity<ZadostKlicDto> zmenaStavuZadosti(@RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) {
+        zadostKlicDto.setStav(stav);
+        ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicDto.toEntity());
+        return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+    }
+    
+
     @GetMapping("/zadosti-klic/list-all")
     public ResponseEntity<List<ZadostKlicDto>> getAll() {
         List<ZadostKlicDto> zadostiKlic = zadostKlicService.getAll().stream()
@@ -58,7 +66,6 @@ public class ZadostKlicController extends BaseController{
             .map(ZadostKlicDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(zadostiKlic);
-        
     }
     
 
