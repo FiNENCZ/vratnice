@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.repository.ZadostKlicRepository;
 import jakarta.transaction.Transactional;
@@ -28,8 +29,12 @@ public class ZadostKlicService {
         return zadostiKlicRepository.getDetail(idZadostiKlic);
     }
 
-    public List<ZadostKlic> getZadostiByKlic(String stav) {
+    public List<ZadostKlic> getZadostiByStav(String stav) {
         return zadostiKlicRepository.getZadostiByStav(stav);
+    }
+
+    public List<ZadostKlic> findByKlic(Klic klic){
+        return zadostiKlicRepository.findByKlic(klic);
     }
 
 }

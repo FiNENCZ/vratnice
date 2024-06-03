@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 
 public interface ZadostKlicRepository extends JpaRepository<ZadostKlic, String> {
@@ -15,4 +16,7 @@ public interface ZadostKlicRepository extends JpaRepository<ZadostKlic, String> 
 
     @Query(sqlSelect + "where s.stav = :stav")
     List<ZadostKlic> getZadostiByStav(String stav);
+
+    @Query(sqlSelect + "where s.klic = :klic")
+    List<ZadostKlic> findByKlic(Klic klic);
 }
