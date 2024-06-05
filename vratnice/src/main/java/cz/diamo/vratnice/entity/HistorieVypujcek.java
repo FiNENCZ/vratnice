@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NamedQuery;
 
 import cz.diamo.share.constants.Constants;
+import cz.diamo.share.entity.Uzivatel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,8 +43,13 @@ public class HistorieVypujcek  implements Serializable{
     @Column(name = "datum")
     private Date datum;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vratny")
+    private Uzivatel vratny;
+
     public HistorieVypujcek(String idHistorieVypujcek) {
         setIdHistorieVypujcek(idHistorieVypujcek);
     }
+
 
 }

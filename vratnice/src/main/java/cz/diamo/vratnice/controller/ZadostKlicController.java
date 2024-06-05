@@ -1,9 +1,5 @@
 package cz.diamo.vratnice.controller;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +32,7 @@ public class ZadostKlicController extends BaseController{
     @Autowired
     private ZadostKlicService zadostKlicService;
 
+
     @PostMapping("/zadost-klic/save")
     public ResponseEntity<ZadostKlicDto> saveKey(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
         ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicDto.toEntity());
@@ -44,16 +41,6 @@ public class ZadostKlicController extends BaseController{
 
     @PostMapping("/zadost-klic/zmena-stavu")
     public ResponseEntity<ZadostKlicDto> zmenaStavuZadosti(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) {
-            // Získání jména uživatele
-        String userName = appUserDto.getName();
-        System.out.println(userName);
-
-        // Zápis jména uživatele do souboru
-        try {
-            Files.write(Paths.get("userTest.txt"), userName.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         zadostKlicDto.setStav(stav);
         ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicDto.toEntity());

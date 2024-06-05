@@ -3,6 +3,8 @@ package cz.diamo.vratnice.dto;
 import java.io.Serializable;
 import java.util.Date;
 
+import cz.diamo.share.dto.UzivatelDto;
+import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +27,8 @@ public class HistorieVypujcekDto implements Serializable {
 
     private Date datum;
 
+    private UzivatelDto vratny;
+
     public HistorieVypujcekDto(HistorieVypujcek historieVypujcek) {
         if (historieVypujcek == null) {
             return;
@@ -34,6 +38,7 @@ public class HistorieVypujcekDto implements Serializable {
         this.zadostKlic = new ZadostKlicDto(historieVypujcek.getZadostKlic());
         this.stav = historieVypujcek.getStav();
         this.datum = historieVypujcek.getDatum();
+        this.vratny = new UzivatelDto(historieVypujcek.getVratny());
     }
 
     public HistorieVypujcek toEntity() {
@@ -43,6 +48,7 @@ public class HistorieVypujcekDto implements Serializable {
         historieVypujcek.setZadostKlic(new ZadostKlic(getZadostKlic().getIdZadostiKey()));
         historieVypujcek.setStav(this.stav);
         historieVypujcek.setDatum(this.datum);
+        historieVypujcek.setVratny(new Uzivatel(getVratny().getId()));
 
         return historieVypujcek;
     }

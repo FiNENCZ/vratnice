@@ -25,4 +25,8 @@ public class HistorieVypujcekService {
         return historieVypujcekRepository.findByZadostKlic(zadostKlic);
     }
 
+    
+    
+
+
 }
