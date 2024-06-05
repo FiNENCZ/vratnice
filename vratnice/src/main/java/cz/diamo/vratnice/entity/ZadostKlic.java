@@ -57,6 +57,9 @@ public class ZadostKlic implements Serializable {
     @Column(name = "datum_do")
     private Date datumDo;
 
+    @Column(name = "duvod")
+    private String duvod;
+
     public ZadostKlic(String idZadostKlic) {
         setIdZadostKlic(idZadostKlic);
     }

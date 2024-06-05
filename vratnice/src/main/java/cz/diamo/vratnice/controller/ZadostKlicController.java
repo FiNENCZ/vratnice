@@ -6,12 +6,16 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.service.ZadostKlicService;
@@ -31,6 +35,9 @@ public class ZadostKlicController extends BaseController{
 
     @Autowired
     private ZadostKlicService zadostKlicService;
+
+    @Autowired
+    private UzivatelServices uzivatelServices;
 
 
     @PostMapping("/zadost-klic/save")
@@ -72,6 +79,22 @@ public class ZadostKlicController extends BaseController{
             .collect(Collectors.toList());
         return ResponseEntity.ok(zadostiKlic);
     }
+
+    @GetMapping("/zadost-klic/list-by-id-uzivatel")
+    public ResponseEntity<List<ZadostKlicDto>> listByIdUzivatel(@RequestParam String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
+        Uzivatel uzivatel = uzivatelServices.getDetail(idUzivatel);
+
+        if (uzivatel == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<ZadostKlicDto> zadostiKlic = zadostKlicService.findByUzivatel(uzivatel).stream()
+            .map(ZadostKlicDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(zadostiKlic);
+
+    }
+    
     
 
 }

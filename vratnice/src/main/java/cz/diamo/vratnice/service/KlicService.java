@@ -31,4 +31,8 @@ public class KlicService {
         return keyRepository.getDetailByChipCode(chipCode);
     }
 
+    public List<Klic> getBySpecialni(Boolean specialni) {
+        return keyRepository.getBySpecialni(specialni);
+    }
+
 }

@@ -34,6 +34,8 @@ public class ZadostKlicDto implements Serializable{
 
     private Date datumDo;
 
+    private String duvod;
+
     public ZadostKlicDto(ZadostKlic zadostKlic) {
         if (zadostKlic == null) {
             return;
@@ -46,6 +48,7 @@ public class ZadostKlicDto implements Serializable{
         this.trvala = zadostKlic.getTrvala();
         this.datumOd = zadostKlic.getDatumOd();
         this.datumDo = zadostKlic.getDatumDo();
+        this.duvod = zadostKlic.getDuvod();
     }
 
     public ZadostKlic toEntity() {
@@ -58,6 +61,7 @@ public class ZadostKlicDto implements Serializable{
         zadostKlic.setTrvala(this.trvala);
         zadostKlic.setDatumOd(this.datumOd);
         zadostKlic.setDatumDo(this.datumDo);
+        zadostKlic.setDuvod(this.duvod);
         return zadostKlic;
     }
 
@@ -69,5 +73,11 @@ public class ZadostKlicDto implements Serializable{
         return true;
     }
 
-
+    @AssertTrue(message = "Důvod je povinný, pokud je klíč speciální.")
+    public boolean isDuvodValid() {
+        if (klic != null && Boolean.TRUE.equals(klic.getSpecial())) {
+            return duvod != null && !duvod.trim().isEmpty();
+        }
+        return true;
+    }
 }

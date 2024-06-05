@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.repository.ZadostKlicRepository;
@@ -35,6 +36,10 @@ public class ZadostKlicService {
 
     public List<ZadostKlic> findByKlic(Klic klic){
         return zadostiKlicRepository.findByKlic(klic);
+    }
+
+    public List<ZadostKlic> findByUzivatel(Uzivatel uzivatel){
+        return zadostiKlicRepository.findByUzivatel(uzivatel);
     }
 
 }
