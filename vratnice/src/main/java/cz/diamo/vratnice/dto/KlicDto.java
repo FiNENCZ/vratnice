@@ -17,38 +17,38 @@ public class KlicDto implements Serializable {
 
     private String idKey;
 
-    @NotNull(message = "Special flag is required")
+    @NotNull(message = "{klic.specialni.povinny}")
     private Boolean special = false;
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 50, message = "Name cannot exceed 50 characters")
+    @NotBlank(message = "{klic.nazev.povinny}")
+    @Size(max = 50, message = "{klic.nazev.max.50}")
     private String name;
 
-    @NotBlank(message = "Chip code is required")
-    @Size(max = 50, message = "Chip code cannot exceed 50 characters")
+    @NotBlank(message = "{klic.rfid.povinny}")
+    @Size(max = 50, message = "{klic.rfid.max.50}")
     private String chipCode;
 
-    @NotBlank(message = "Location is required")
-    @Size(max = 50, message = "Location cannot exceed 50 characters")
+    @NotBlank(message = "{klic.lokace.povinny}")
+    @Size(max = 50, message = "{klic.lokace.max.50}")
     private String location;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 50, message = "Building cannot exceed 50 characters")
+    @NotBlank(message = "{klic.budova.povinny}")
+    @Size(max = 50, message = "{klic.budova.max.50}")
     private String building;
 
-    @NotNull(message = "Floor is required")
+    @NotNull(message = "{klic.podlazi.povinny}")
     private Integer floor;
 
-    @NotBlank(message = "Room is required")
-    @Size(max = 50, message = "Room cannot exceed 50 characters")
+    @NotBlank(message = "{klic.mistnost.povinny}")
+    @Size(max = 50, message = "{klic.mistnost.max.50}")
     private String room;
 
-    @NotBlank(message = "Key type is required")
-    @Size(max = 50, message = "Key type cannot exceed 50 characters")
+    @NotBlank(message = "{klic.typ_klice.povinny}")
+    @Size(max = 50, message = "{klic.typ_klice.max.50}")
     private String keyType;
 
-    @NotBlank(message = "State is required")
-    @Size(max = 20, message = "State cannot exceed 20 characters")
+    @NotBlank(message = "{klic.stav.povinny}")
+    @Size(max = 20, message = "{klic.stav.max.20}")
     private String state = "aktivní";
 
     public KlicDto(Klic key) {
