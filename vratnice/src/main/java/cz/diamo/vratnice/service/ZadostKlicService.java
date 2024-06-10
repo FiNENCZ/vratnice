@@ -42,4 +42,8 @@ public class ZadostKlicService {
         return zadostiKlicRepository.findByUzivatel(uzivatel);
     }
 
+    public long countByUzivatel(Uzivatel uzivatel) {
+        return zadostiKlicRepository.countByUzivatel(uzivatel);
+    }
+
 }

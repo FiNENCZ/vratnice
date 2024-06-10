@@ -23,4 +23,7 @@ public interface ZadostKlicRepository extends JpaRepository<ZadostKlic, String> 
 
     @Query(sqlSelect + "where s.uzivatel = :uzivatel")
     List<ZadostKlic> findByUzivatel(Uzivatel uzivatel);
+
+    @Query("select count(s) from ZadostKlic s where s.uzivatel = :uzivatel")
+    long countByUzivatel(Uzivatel uzivatel);
 }

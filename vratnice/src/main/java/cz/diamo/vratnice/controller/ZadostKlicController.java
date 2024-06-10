@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,11 +28,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 @RestController
 public class ZadostKlicController extends BaseController{
 
     final static Logger logger = LogManager.getLogger(ZadostKlicController.class);
+    private int MAX_POCET_VYPUJCEK = 15;
 
     @Autowired
     private ZadostKlicService zadostKlicService;
@@ -41,9 +42,29 @@ public class ZadostKlicController extends BaseController{
 
 
     @PostMapping("/zadost-klic/save")
-    public ResponseEntity<ZadostKlicDto> saveKey(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
-        ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicDto.toEntity());
-        return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+    public ResponseEntity<?> saveKey(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
+        // kontrola zda nebylo přesaženo max počtu výpůjček
+        ZadostKlic zadostKlicEntity = zadostKlicDto.toEntity();
+        Uzivatel uzivatel = zadostKlicEntity.getUzivatel();
+        long pocetVypujcek = zadostKlicService.countByUzivatel(uzivatel);
+        int dostupnychVypujcek = MAX_POCET_VYPUJCEK - (int) pocetVypujcek;
+
+        // úprava existující žádosti
+        String idZadostiKey = zadostKlicDto.getIdZadostiKey();
+        if (idZadostiKey != null && !idZadostiKey.isEmpty()) {
+            ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicEntity);
+            return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+        }
+
+        // nová žádost
+        if(dostupnychVypujcek > 0) {
+            //vytvoření záznamu žádosti klíče
+            ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicEntity);
+            return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body("Žádost nelze provést, protože bylo dosaženo maximálního počtu žádostí o klíče.");
+        }
     }
 
     @PostMapping("/zadost-klic/zmena-stavu")
@@ -93,6 +114,20 @@ public class ZadostKlicController extends BaseController{
             .collect(Collectors.toList());
         return ResponseEntity.ok(zadostiKlic);
 
+    }
+
+    @GetMapping("/zadost-klic/vypujcek-k-dispozici")
+    public ResponseEntity<Integer> getPocetVypujcekByUzivatel(@RequestParam String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
+        Uzivatel uzivatel = uzivatelServices.getDetail(idUzivatel);
+        if (uzivatel == null) {
+            return ResponseEntity.notFound().build();
+        }
+        long pocetVypujcek = zadostKlicService.countByUzivatel(uzivatel);
+
+        int dostupnychVypujcek = MAX_POCET_VYPUJCEK - (int) pocetVypujcek;
+
+
+        return ResponseEntity.ok(dostupnychVypujcek);
     }
     
     
