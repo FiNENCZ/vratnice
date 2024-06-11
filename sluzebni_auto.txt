@@ -1,0 +1,17 @@
+idSluzebniVozidlo: XXZA0000000007
+idSluzebniVozidlo: XXZA0000000007
+idzavod: XXZA0000000007zavod nazev: Darkovbarva pisma: #ffffff
+idzavod: XXZA0000000007zavod nazev: Darkovbarva pisma: #ffffff
+idzavod: XXZA0000000006zavod nazev: HBZSbarva pisma: #ffffff
+idzavod: XXZA0000000006zavod nazev: HBZSbarva pisma: #ffffff
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006
+idSluzebniVozidlo: XXZA0000000006

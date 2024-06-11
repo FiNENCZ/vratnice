@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ZadostKlicController extends BaseController{
 
     final static Logger logger = LogManager.getLogger(ZadostKlicController.class);
+    
     private int MAX_POCET_VYPUJCEK = 15;
 
     @Autowired
