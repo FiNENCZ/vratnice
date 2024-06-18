@@ -75,6 +75,15 @@ public class KlicController extends BaseController {
     @PostMapping("/key/toggle-aktivita")
     public ResponseEntity<KlicDto> toggleAktivita(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid KlicDto klicDto) {
         klicDto.setAktivita(!klicDto.getAktivita());
+        
+
+        Boolean aktualniAktivita = klicDto.getAktivita();
+        if (aktualniAktivita == true) {
+            klicDto.setState("dostupný");
+        } else {
+            klicDto.setState("odstraněno");
+        }
+
         Klic newKlic = keyService.createKey(klicDto.toEntity());
 
         return ResponseEntity.ok(new KlicDto(newKlic));

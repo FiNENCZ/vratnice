@@ -111,7 +111,16 @@ public class SluzebniVozidloController extends BaseController {
 
     @PostMapping("/sluzebni-vozidlo/toggle-aktivita")
     public ResponseEntity<SluzebniVozidloDto> toggleAktivita(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException {
+        //změna aktivity
         sluzebniVozidloDto.setAktivita(!sluzebniVozidloDto.getAktivita());
+
+        Boolean aktualniAktivita = sluzebniVozidloDto.getAktivita();
+        if (aktualniAktivita == true) {
+            sluzebniVozidloDto.setStav("aktivní");
+        } else {
+            sluzebniVozidloDto.setStav("odstraněno");
+        }
+
         SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
 
         // Vytvoření historie odstraněno/obnoveno služebního auta
@@ -120,7 +129,7 @@ public class SluzebniVozidloController extends BaseController {
         HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
         historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
 
-        Boolean aktualniAktivita = newSluzebniVozidlo.getAktivita();
+        
         if (aktualniAktivita == true) {
             historieSluzebniVozidloDto.setAkce("obnoveno");
         } else {
