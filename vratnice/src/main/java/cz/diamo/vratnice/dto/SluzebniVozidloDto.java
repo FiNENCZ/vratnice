@@ -9,6 +9,7 @@ import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,6 +44,9 @@ public class SluzebniVozidloDto implements Serializable {
     @Column(name = "datum_od")
     private Date datumOd;
 
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
+
     public SluzebniVozidloDto(SluzebniVozidlo sluzebniVozidlo) {
         if (sluzebniVozidlo == null) {
             return;
@@ -56,6 +60,7 @@ public class SluzebniVozidloDto implements Serializable {
         this.stav = sluzebniVozidlo.getStav();
         this.lokalita = sluzebniVozidlo.getLokalita();
         this.datumOd = sluzebniVozidlo.getDatumOd();
+        this.aktivita = sluzebniVozidlo.getAktivita();
     }
 
     public SluzebniVozidlo toEntity() {
@@ -69,6 +74,7 @@ public class SluzebniVozidloDto implements Serializable {
         sluzebniVozidlo.setLokalita(this.lokalita);
         sluzebniVozidlo.setStav(this.stav);
         sluzebniVozidlo.setDatumOd(this.datumOd);
+        sluzebniVozidlo.setAktivita(this.aktivita);
         return sluzebniVozidlo;
     }
 

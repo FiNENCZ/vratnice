@@ -51,6 +51,8 @@ public class SluzebniVozidlo implements Serializable {
     @Column(name = "datum_od")
     private Date datumOd;
 
+    private Boolean aktivita = true;
+
     public SluzebniVozidlo(String idSluzebniVozidlo) {
         setIdSluzebniVozidlo(idSluzebniVozidlo);
     }

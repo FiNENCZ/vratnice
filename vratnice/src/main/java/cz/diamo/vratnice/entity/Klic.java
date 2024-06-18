@@ -53,7 +53,9 @@ public class Klic implements Serializable {
     private String keyType;
 
     @Column(name = "status")
-    private String state = "aktivní";
+    private String state = "dostupný";
+
+    private Boolean aktivita = true;
 
     public Klic(String idKey) {
         setIdKey(idKey);

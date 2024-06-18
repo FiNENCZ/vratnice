@@ -49,7 +49,10 @@ public class KlicDto implements Serializable {
 
     @NotBlank(message = "{klic.stav.povinny}")
     @Size(max = 20, message = "{klic.stav.max.20}")
-    private String state = "aktivní";
+    private String state = "dostupný";
+
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
 
     public KlicDto(Klic key) {
         if (key == null) {
@@ -65,6 +68,7 @@ public class KlicDto implements Serializable {
         this.room = key.getRoom();
         this.keyType = key.getKeyType();
         this.state = key.getState();
+        this.aktivita = key.getAktivita();
     }
 
     public Klic toEntity() {
@@ -79,6 +83,7 @@ public class KlicDto implements Serializable {
         key.setRoom(this.room);
         key.setKeyType(this.keyType);
         key.setState(this.state);
+        key.setAktivita(this.aktivita);
         return key;
     }
 }
