@@ -43,6 +43,14 @@ public class KlicController extends BaseController {
         return ResponseEntity.ok(keys);
     }
 
+    @GetMapping("/key/list-by-aktivita")
+    public ResponseEntity<List<KlicDto>> listByAktivita(@RequestParam Boolean aktivita) {
+        List<KlicDto> sluzebniVozidla = keyService.getKlicByAktivita(aktivita).stream()
+            .map(KlicDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(sluzebniVozidla);
+    }
+
     @GetMapping("key/list-by-specialni")
     public ResponseEntity<List<KlicDto>> listBySpecialni(@RequestParam Boolean specialni) {
         List<KlicDto> keys = keyService.getBySpecialni(specialni).stream()

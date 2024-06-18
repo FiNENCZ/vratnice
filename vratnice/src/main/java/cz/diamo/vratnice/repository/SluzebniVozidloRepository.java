@@ -16,4 +16,7 @@ public interface SluzebniVozidloRepository extends JpaRepository<SluzebniVozidlo
     @Query(sqlSelect + "where s.stav = :stav")
     List<SluzebniVozidlo> getSluzebniVozidloByStav(String stav);
 
+    @Query(sqlSelect + "where s.aktivita = :aktivita")
+    List<SluzebniVozidlo> findByAktivita(Boolean aktivita);
+
 }

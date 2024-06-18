@@ -35,4 +35,9 @@ public class KlicService {
         return keyRepository.getBySpecialni(specialni);
     }
 
+
+    public List<Klic> getKlicByAktivita(Boolean aktivita) {
+        return keyRepository.findByAktivita(aktivita);
+    }
+
 }

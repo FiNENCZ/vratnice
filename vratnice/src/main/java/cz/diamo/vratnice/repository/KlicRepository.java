@@ -20,6 +20,8 @@ public interface KlicRepository extends JpaRepository<Klic, String>{
     @Query(sqlSelect + "where s.special = :special")
     List<Klic> getBySpecialni(Boolean special);
 
+    @Query(sqlSelect + "where s.aktivita = :aktivita")
+    List<Klic> findByAktivita(Boolean aktivita);
 
     
 

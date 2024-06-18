@@ -37,4 +37,8 @@ public class SluzebniVozidloService {
         return sluzebniVozidloRepository.getSluzebniVozidloByStav(stav);
     }
 
+    public List<SluzebniVozidlo> getSluzebniVozidloByAktivita(Boolean aktivita) {
+        return sluzebniVozidloRepository.findByAktivita(aktivita);
+    }
+
 }

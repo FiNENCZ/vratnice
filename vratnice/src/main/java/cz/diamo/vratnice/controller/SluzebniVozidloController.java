@@ -65,7 +65,7 @@ public class SluzebniVozidloController extends BaseController {
         else {
             historieSluzebniVozidloDto.setAkce("vytvořeno");
         }
-        
+
         historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
 
@@ -82,6 +82,15 @@ public class SluzebniVozidloController extends BaseController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(sluzebniVozidla);
     }
+
+    @GetMapping("/sluzebni-vozidlo/list-by-aktivita")
+    public ResponseEntity<List<SluzebniVozidloDto>> listByAktivita(@RequestParam Boolean aktivita) {
+        List<SluzebniVozidloDto> sluzebniVozidla = sluzebniVozidloService.getSluzebniVozidloByAktivita(aktivita).stream()
+            .map(SluzebniVozidloDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(sluzebniVozidla);
+    }
+    
 
     @GetMapping("/sluzebni-vozidlo/detail")
     public ResponseEntity<SluzebniVozidloDto> getDetail(@RequestParam String id) {
