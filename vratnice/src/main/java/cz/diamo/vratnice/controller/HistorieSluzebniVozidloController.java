@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class HistorieSluzebniVozidloController extends BaseController {
 
-    final static Logger logger = LogManager.getLogger(HistorieVypujcekController.class);
+    final static Logger logger = LogManager.getLogger(HistorieSluzebniVozidloController.class);
 
     @Autowired
     private HistorieSluzebniVozidloService historieSluzebniVozidloService;

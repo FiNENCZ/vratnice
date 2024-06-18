@@ -25,4 +25,5 @@ public class HistorieSluzebniVozidloService {
         return historieSluzebniVozidloRepository.findBySluzebniVozidlo(sluzebniVozidlo);
     }
 
+
 }
