@@ -2,16 +2,20 @@ package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
 import cz.diamo.share.entity.Zavod;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.GeneratedValue;
@@ -50,14 +54,20 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "duvod_zadosti")
     private String duvodZadosti;
 
+    @ElementCollection
     @Column(name = "rz_vozidla")
-    private String rzVozidla;
+    private List<String> rzVozidla;
 
+    @ElementCollection
     @Column(name = "typ_vozidla")
-    private String typVozidla;
+    private List<String> typVozidla;
 
     @Column(name = "zeme_registrace_vozidla")
     private String zemeRegistraceVozidla;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ridic")
+    private Ridic ridic;
 
     @Column(name = "spolecnost_vozidla")
     private String spolecnostVozidla;
@@ -68,12 +78,18 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "datum_do")
     private Date datumDo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_zavod")
-    private Zavod zavod;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "povoleni_vjezdu_vozidla_zavod",
+        joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"),
+        inverseJoinColumns = @JoinColumn(name = "id_zavod")
+    )
+    private List<Zavod> zavod;
 
     @Column(name = "opakovany_vjezd")
     private Boolean opakovanyVjezd;
+
+    private String stav = "vyžádáno";
 
     public PovoleniVjezduVozidla(String idPovoleniVjezduVozidla) {
         setIdPovoleniVjezduVozidla(idPovoleniVjezduVozidla);
