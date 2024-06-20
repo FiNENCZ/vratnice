@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
 import cz.diamo.share.entity.Zavod;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -55,10 +56,12 @@ public class PovoleniVjezduVozidla implements Serializable{
     private String duvodZadosti;
 
     @ElementCollection
+    @CollectionTable(name = "povoleni_vjezdu_vozidla_rz_vozidla", joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"))
     @Column(name = "rz_vozidla")
     private List<String> rzVozidla;
 
     @ElementCollection
+    @CollectionTable(name = "povoleni_vjezdu_vozidla_typ_vozidla", joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"))
     @Column(name = "typ_vozidla")
     private List<String> typVozidla;
 

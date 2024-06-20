@@ -33,7 +33,7 @@ public class Ridic implements Serializable {
 
     private String prijmeni;
 
-    @Column(name = "cislo_op")
+    @Column(name = "cislo_op", unique = true)
     private String cisloOp;
 
     private String firma;

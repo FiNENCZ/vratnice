@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class PovoleniVjezduVozidlaDto implements Serializable {
     private static final long serialVersionUID = 1L;
 

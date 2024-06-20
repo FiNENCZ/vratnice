@@ -14,4 +14,6 @@ public interface RidicRepository extends JpaRepository<Ridic, String> {
     @Query(sqlSelect + "where s.cisloOp = :cisloOp")
     Ridic getRidicByCisloOp(String cisloOp);
 
+    Boolean existsByCisloOp(String cisloOp);
+
 }

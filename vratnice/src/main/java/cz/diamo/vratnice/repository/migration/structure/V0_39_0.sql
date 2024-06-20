@@ -1,0 +1,1 @@
+ALTER TABLE vratnice.ridic ADD CONSTRAINT unique_cislo_op UNIQUE (cislo_op);
