@@ -18,7 +18,7 @@ public class RidicService {
 
     @Transactional
     public Ridic create(Ridic ridic) {
-        if (ridic.getIdRidic() == null && ridic.getIdRidic().isEmpty()) {
+        if (ridic.getIdRidic() == null || ridic.getIdRidic().isEmpty()){
             if(ridicRepository.existsByCisloOp(ridic.getCisloOp())){
                 throw new DuplicateCisloOpException("Číslo OP musí být unikátní. V databázi již existuje řidič se stejným OP.");
             }

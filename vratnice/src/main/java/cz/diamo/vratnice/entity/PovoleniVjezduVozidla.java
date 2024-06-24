@@ -90,7 +90,7 @@ public class PovoleniVjezduVozidla implements Serializable{
     private List<Zavod> zavod;
 
     @Column(name = "opakovany_vjezd")
-    private Boolean opakovanyVjezd;
+    private Boolean opakovanyVjezd = false;
 
     private String stav = "vyžádáno";
 

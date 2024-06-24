@@ -19,6 +19,9 @@ public interface ZavodRepository extends JpaRepository<Zavod, String> {
 	@Query(sqlSelect + "where (:aktivita is null or s.aktivita = :aktivita) order by s.nazev asc")
 	List<Zavod> getList(Boolean aktivita);
 
+	@Query(sqlSelect + "where s.nazev = :nazev")
+	Zavod getByNazev(String nazev);
+
 	@Query("select count(s) from Zavod s where s.sapId = :sapId and s.idZavod != :idZavod")
 	Integer existsBySapId(String sapId, String idZavod);
 }

@@ -59,7 +59,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     @NotNull(message = "Musí být vybrána alespoň jedna lokalita (závod)")
     private List<ZavodDto> zavod;
 
-    private Boolean opakovanyVjezd;
+    private Boolean opakovanyVjezd = false;
 
     private String stav = "vyžádáno";
 

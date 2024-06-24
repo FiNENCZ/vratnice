@@ -79,6 +79,10 @@ public class ZavodServices {
         return list;
     }
 
+    public Zavod getByNazev (String nazev) {
+        return zavodRepository.getByNazev(nazev);
+    }
+
     @TransactionalWrite
     public Zavod save(Zavod zavod) throws UniqueValueException, NoSuchMessageException {
 
