@@ -1,5 +1,8 @@
 package cz.diamo.vratnice.controller;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,12 @@ public class VjezdVozidlaController extends BaseController{
         if (vjezdVozidladDto.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(vjezdVozidladDto.getRidic().toEntity());
             vjezdVozidladDto.setRidic(new RidicDto(savedRidic));
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("casy.txt", true))) {
+            writer.write(vjezdVozidladDto.getCasPrijezdu().toString());
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         VjezdVozidla vjezdVozidla = vjezdVozidlaService.create(vjezdVozidladDto.toEntity());
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));

@@ -1,7 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.time.ZonedDateTime;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -47,7 +47,7 @@ public class VjezdVozidla implements Serializable {
     private Integer opakovanyVjezd;
 
     @Column(name = "cas_prijezdu")
-    private Date casPrijezdu;
+    private ZonedDateTime casPrijezdu;
 
     public VjezdVozidla(String idVjezdVozidla){
         setIdVjezdVozidla(idVjezdVozidla);

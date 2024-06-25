@@ -1,7 +1,7 @@
 package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.time.ZonedDateTime;
 
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +30,7 @@ public class VjezdVozidlaDto implements Serializable {
     private Integer opakovanyVjezd;
 
     @NotNull(message = "Datum do je povinná položka")
-    private Date casPrijezdu;
+    private ZonedDateTime casPrijezdu;
 
     public VjezdVozidlaDto(VjezdVozidla vjezdVozidla) {
         if (vjezdVozidla == null){
