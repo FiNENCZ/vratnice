@@ -21,8 +21,8 @@ public class HistorieVypujcekDto implements Serializable {
     
     private ZadostKlicDto zadostKlic;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 30, message = "State cannot exceed 30 characters")
+    @NotBlank(message = "{historie_vypujcek.stav.require}")
+    @Size(max = 30, message = "{historie_vypujcek.stav.max.30}")
     private String stav;
 
     private Date datum;

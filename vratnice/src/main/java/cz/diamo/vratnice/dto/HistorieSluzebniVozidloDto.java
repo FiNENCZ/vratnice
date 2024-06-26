@@ -21,8 +21,8 @@ public class HistorieSluzebniVozidloDto implements Serializable {
 
     private SluzebniVozidloDto sluzebniVozidlo;
 
-    @NotBlank(message = "Akce je nutné vyplnit")
-    @Size(max = 30, message = "Akce nesmí přesahovat 30 znaků")
+    @NotBlank(message = "{historie_sluzebni_vozidlo.akce.require}")
+    @Size(max = 30, message = "{historie_sluzebni_vozidlo.akce.max.30}")
     private String akce;
 
     private Date datum;

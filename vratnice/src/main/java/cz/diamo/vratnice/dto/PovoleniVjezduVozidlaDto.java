@@ -21,42 +21,42 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
 
     private String idPovoleniVjezduVozidla;
 
-    @NotBlank(message = "Jméno žadatele je povinná položka")
-    @Size(max = 30, message = "Jméno žadatele nemůže přesáhnout 30 znaků")
+    @NotBlank(message = "{povoleni.vjezdu.vozidla.jmeno_zadatele.require}")
+    @Size(max = 30, message = "{povoleni.vjezdu.vozidla.jmeno_zadatele.max.30}")
     private String jmenoZadatele;
 
-    @NotBlank(message = "Příjmení žadatele je povinná položka")
-    @Size(max = 30, message = "Příjmení žadatele nemůže přesáhnout 30 znaků")
+    @NotBlank(message = "{povoleni.vjezdu.vozidla.prijmeni_zadatele.require}")
+    @Size(max = 30, message = "{povoleni.vjezdu.vozidla.prijmeni_zadatele.max.30}")
     private String prijmeniZadatele;
 
-    @NotBlank(message = "Společnost žadatele je povinná položka")
-    @Size(max = 120, message = "Společnost žadatele nemůže přesáhnout 120 znaků")
+    @NotBlank(message = "{povoleni.vjezdu.vozidla.spolecnost_zadatele.require}")
+    @Size(max = 120, message = "{povoleni.vjezdu.vozidla.spolecnost_zadatele.max.120}")
     private String spolecnostZadatele;
 
     private String icoZadatele;
 
     private String duvodZadosti;
 
-    @NotNull(message = "Musí být vyplněna alespoň jedna registrační značka vozidla")
+    @NotNull(message = "{povoleni.vjezdu.vozidla.rz_vozidla.require}")
     private List<String> rzVozidla;
 
-    @NotNull(message = "Musí být vyplněn alespoň jeden typ vozidla")
+    @NotNull(message = "{povoleni.vjezdu.vozidla.typ_vozidla.require}")
     private List<String> typVozidla;
 
-    @NotBlank(message = "Země registrace vozidla je povinná položka")
+    @NotBlank(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
     private String zemeRegistraceVozidla;
 
     private RidicDto ridic;
 
     private String spolecnostVozidla;
 
-    @NotNull(message = "Datum od je povinná položka")
+    @NotNull(message = "{povoleni.vjezdu.vozidla.datum_od.require}")
     private Date datumOd;
 
-    @NotNull(message = "Datum do je povinná položka")
+    @NotNull(message = "{povoleni.vjezdu.vozidla.datum_do.require}")
     private Date datumDo;
 
-    @NotNull(message = "Musí být vybrána alespoň jedna lokalita (závod)")
+    @NotNull(message = "{povoleni.vjezdu.vozidla.zavod.require}")
     private List<ZavodDto> zavod;
 
     private Boolean opakovanyVjezd = false;

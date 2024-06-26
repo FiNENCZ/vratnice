@@ -17,37 +17,37 @@ public class KlicDto implements Serializable {
 
     private String idKey;
 
-    @NotNull(message = "{klic.specialni.povinny}")
+    @NotNull(message = "{klic.specialni.require}")
     private Boolean special = false;
 
-    @NotBlank(message = "{klic.nazev.povinny}")
+    @NotBlank(message = "{klic.nazev.require}")
     @Size(max = 50, message = "{klic.nazev.max.50}")
     private String name;
 
-    @NotBlank(message = "{klic.rfid.povinny}")
+    @NotBlank(message = "{klic.rfid.require}")
     @Size(max = 50, message = "{klic.rfid.max.50}")
     private String chipCode;
 
-    @NotBlank(message = "{klic.lokace.povinny}")
+    @NotBlank(message = "{klic.lokace.require}")
     @Size(max = 50, message = "{klic.lokace.max.50}")
     private String location;
 
-    @NotBlank(message = "{klic.budova.povinny}")
+    @NotBlank(message = "{klic.budova.require}")
     @Size(max = 50, message = "{klic.budova.max.50}")
     private String building;
 
-    @NotNull(message = "{klic.podlazi.povinny}")
+    @NotNull(message = "{klic.podlazi.require}")
     private Integer floor;
 
-    @NotBlank(message = "{klic.mistnost.povinny}")
+    @NotBlank(message = "{klic.mistnost.require}")
     @Size(max = 50, message = "{klic.mistnost.max.50}")
     private String room;
 
-    @NotBlank(message = "{klic.typ_klice.povinny}")
+    @NotBlank(message = "{klic.typ_klice.require}")
     @Size(max = 50, message = "{klic.typ_klice.max.50}")
     private String keyType;
 
-    @NotBlank(message = "{klic.stav.povinny}")
+    @NotBlank(message = "{klic.stav.require}")
     @Size(max = 20, message = "{klic.stav.max.20}")
     private String state = "dostupný";
 
