@@ -1,0 +1,57 @@
+package cz.diamo.vratnice.entity;
+
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+
+import org.hibernate.annotations.GenericGenerator;
+
+import cz.diamo.share.constants.Constants;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "vyjezd_vozidla", schema = Constants.SCHEMA)
+@NamedQuery(name = "VyjezdVozidla.findAll", query = "SELECT s from VyjezdVozidla s")
+public class VyjezdVozidla implements Serializable{
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GeneratedValue(generator = "id")
+    @Column(name = "id_vyjezd_vozidla")
+    private String idVyjezdVozidla;
+
+    @Column(name = "rz_vozidla")
+    private String rzVozidla;
+
+    private Boolean naklad = false;
+
+    @Column(name = "cislo_pruchodky")
+    private String cisloPruchodky;
+
+    @Column(name = "opakovany_vjezd")
+    private Boolean opakovanyVjezd;
+
+    @Column(name = "cas_odjezdu")
+    private ZonedDateTime casOdjezdu;
+
+    public VyjezdVozidla(String idVyjezdVozidla){
+        setIdVyjezdVozidla(idVyjezdVozidla);
+    }
+
+
+
+//     RZ vozidla – vstup z kamery nebo vyhledání nad DB vjezdů (nemůže vyjet nic, co nevjede)
+// Náklad (ano/ne)
+// Číslo průchodky – pouze pokud je zaškrtnuto ano v položce Náklad. Do budoucna bude zdigitalizováno.
+// Opakovaný výjezd – vrácení tabule pro opakovaný výjezd (check box)
+
+}
