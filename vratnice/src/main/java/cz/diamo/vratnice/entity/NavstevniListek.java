@@ -45,13 +45,13 @@ public class NavstevniListek implements Serializable {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "navstevni_listek_navsteva_osoba",
+        name = "navstevni_listek_uzivatel",
         joinColumns = @JoinColumn(name = "id_navstevni_listek"),
         inverseJoinColumns = @JoinColumn(name = "id_uzivatel")
     )
     private List<Uzivatel> uzivatel;
 
-    private String stav;
+    private String stav = "vyžádáno";
 
     public NavstevniListek(String idNavstevniListek) {
         setIdNavstevniListek(idNavstevniListek);

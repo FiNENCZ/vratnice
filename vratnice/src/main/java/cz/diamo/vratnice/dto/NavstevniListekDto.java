@@ -29,7 +29,7 @@ public class NavstevniListekDto implements Serializable{
 
     @NotBlank(message = "{navstevni_listek.stav.require}")
     @Size(message = "{navstevni_listek.stav.max.30}")
-    private String stav;
+    private String stav = "vyžádáno";
 
     public NavstevniListekDto(NavstevniListek navstevniListek) {
         if (navstevniListek == null) {
@@ -44,6 +44,7 @@ public class NavstevniListekDto implements Serializable{
                 navstevaOsobaDtos.add(new NavstevaOsobaDto(navstevaOsoba));
             }
         }
+        this.setNavstevaOsoba(navstevaOsobaDtos);
 
         List<UzivatelDto> uzivatelDtos = new ArrayList<>();
         if(navstevniListek.getNavstevaOsoba() != null) {
@@ -51,6 +52,7 @@ public class NavstevniListekDto implements Serializable{
                 uzivatelDtos.add(new UzivatelDto(uzivatel));
             }
         }
+        this.setUzivatel(uzivatelDtos);
 
         this.stav = navstevniListek.getStav();
     }
@@ -61,11 +63,12 @@ public class NavstevniListekDto implements Serializable{
         navstevniListek.setIdNavstevniListek(this.idNavstevniListek);
     
         List<NavstevaOsoba> navstevaOsobas = new ArrayList<>();
-        if (getNavstevaOsoba() != null) {
+        if (this.getNavstevaOsoba() != null) {
             for (NavstevaOsobaDto navstevaOsobaDto : this.getNavstevaOsoba()) {
                 navstevaOsobas.add(new NavstevaOsoba(navstevaOsobaDto.getIdNavstevaOsoba()));
             }
         }
+        navstevniListek.setNavstevaOsoba(navstevaOsobas);
 
         List<Uzivatel> uzivatels = new ArrayList<>();
         if (getUzivatel() != null) {
@@ -73,6 +76,7 @@ public class NavstevniListekDto implements Serializable{
                 uzivatels.add(new Uzivatel(uzivatelDto.getId()));
             }
         }
+        navstevniListek.setUzivatel(uzivatels);
 
         navstevniListek.setStav(this.stav);
 

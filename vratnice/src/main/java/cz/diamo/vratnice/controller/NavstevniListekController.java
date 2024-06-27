@@ -41,26 +41,27 @@ public class NavstevniListekController extends BaseController {
 
     @Autowired
     private UzivatelServices uzivatelService;
-
     @PostMapping("/navstevni-listek/create")
     public ResponseEntity<NavstevniListekDto> save(@RequestBody @Valid NavstevniListekDto navstevniListekDto) {
         if (navstevniListekDto.getNavstevaOsoba() != null && !navstevniListekDto.getNavstevaOsoba().isEmpty()) {
+    
             List<NavstevaOsoba> navstevaOsobaEntities = navstevniListekDto.getNavstevaOsoba().stream()
                 .map(NavstevaOsobaDto::toEntity)
                 .collect(Collectors.toList());
-
+    
             List<NavstevaOsoba> savedNavstevaOsoby = navstevaOsobaEntities.stream()
                 .map(navstevaOsobaService::create)
                 .collect(Collectors.toList());
-
+    
             navstevniListekDto.setNavstevaOsoba(savedNavstevaOsoby.stream()
                 .map(NavstevaOsobaDto::new)
                 .collect(Collectors.toList()));
         }
-
+    
         NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto.toEntity());
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
     }
+    
 
     @GetMapping("/navstevni-listek/list-all")
     public ResponseEntity<List<NavstevniListekDto>> getAll() {
@@ -81,16 +82,20 @@ public class NavstevniListekController extends BaseController {
     
     
     @GetMapping("/navstevni-listek/get-by-uzivatel")
-    public ResponseEntity<List<NavstevniListek>> getNavstevniListkyByUzivatel(@RequestParam String uzivatelId) throws RecordNotFoundException, NoSuchMessageException {
+    public ResponseEntity<List<NavstevniListekDto>> getNavstevniListkyByUzivatel(@RequestParam String uzivatelId) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelService.getDetail(uzivatelId); 
-        List<NavstevniListek> navstevniListky = navstevniListekService.getNavstevniListkyByUzivatel(uzivatel);
+        List<NavstevniListekDto> navstevniListky = navstevniListekService.getNavstevniListkyByUzivatel(uzivatel).stream()
+            .map(NavstevniListekDto::new)
+            .collect(Collectors.toList());
         return ResponseEntity.ok(navstevniListky);
     }
 
     @GetMapping("/navstevni-listek/get-by-navsteva-osoba")
-    public ResponseEntity<List<NavstevniListek>> getNavstevniListkyByNavstevaOsoba(@RequestParam String navstevaOsobaId) throws RecordNotFoundException, NoSuchMessageException {
+    public ResponseEntity<List<NavstevniListekDto>> getNavstevniListkyByNavstevaOsoba(@RequestParam String navstevaOsobaId) throws RecordNotFoundException, NoSuchMessageException {
         NavstevaOsoba navstevaOsoba = navstevaOsobaService.getDetail(navstevaOsobaId);
-        List<NavstevniListek> navstevniListky = navstevniListekService.getNavstevniListkyByNavstevaOsoba(navstevaOsoba);
+        List<NavstevniListekDto> navstevniListky = navstevniListekService.getNavstevniListkyByNavstevaOsoba(navstevaOsoba).stream()
+            .map(NavstevniListekDto::new)
+            .collect(Collectors.toList());
         return ResponseEntity.ok(navstevniListky);
     }
 

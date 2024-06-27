@@ -38,4 +38,5 @@ public class NavstevniListekService {
         return navstevniListekRepository.findByNavstevaOsoba(navstevaOsoba);
     }
 
+
 }
