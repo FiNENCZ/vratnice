@@ -14,6 +14,7 @@ import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
+import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
@@ -43,6 +44,20 @@ public class NavstevniListekController extends BaseController {
 
     @PostMapping("/navstevni-listek/create")
     public ResponseEntity<NavstevniListekDto> save(@RequestBody @Valid NavstevniListekDto navstevniListekDto) {
+        if (navstevniListekDto.getNavstevaOsoba() != null && !navstevniListekDto.getNavstevaOsoba().isEmpty()) {
+            List<NavstevaOsoba> navstevaOsobaEntities = navstevniListekDto.getNavstevaOsoba().stream()
+                .map(NavstevaOsobaDto::toEntity)
+                .collect(Collectors.toList());
+
+            List<NavstevaOsoba> savedNavstevaOsoby = navstevaOsobaEntities.stream()
+                .map(navstevaOsobaService::create)
+                .collect(Collectors.toList());
+
+            navstevniListekDto.setNavstevaOsoba(savedNavstevaOsoby.stream()
+                .map(NavstevaOsobaDto::new)
+                .collect(Collectors.toList()));
+        }
+
         NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto.toEntity());
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
     }
@@ -67,14 +82,14 @@ public class NavstevniListekController extends BaseController {
     
     @GetMapping("/navstevni-listek/get-by-uzivatel")
     public ResponseEntity<List<NavstevniListek>> getNavstevniListkyByUzivatel(@RequestParam String uzivatelId) throws RecordNotFoundException, NoSuchMessageException {
-        Uzivatel uzivatel = uzivatelService.getDetail(uzivatelId); // Assuming Uzivatel entity has a constructor with ID parameter
+        Uzivatel uzivatel = uzivatelService.getDetail(uzivatelId); 
         List<NavstevniListek> navstevniListky = navstevniListekService.getNavstevniListkyByUzivatel(uzivatel);
         return ResponseEntity.ok(navstevniListky);
     }
 
     @GetMapping("/navstevni-listek/get-by-navsteva-osoba")
     public ResponseEntity<List<NavstevniListek>> getNavstevniListkyByNavstevaOsoba(@RequestParam String navstevaOsobaId) throws RecordNotFoundException, NoSuchMessageException {
-        NavstevaOsoba navstevaOsoba = navstevaOsobaService.getDetail(navstevaOsobaId); // Assuming NavstevaOsoba entity has a constructor with ID parameter
+        NavstevaOsoba navstevaOsoba = navstevaOsobaService.getDetail(navstevaOsobaId);
         List<NavstevniListek> navstevniListky = navstevniListekService.getNavstevniListkyByNavstevaOsoba(navstevaOsoba);
         return ResponseEntity.ok(navstevniListky);
     }

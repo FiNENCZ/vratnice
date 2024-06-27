@@ -6,7 +6,6 @@ import java.util.Date;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,29 +21,28 @@ public class SluzebniVozidloDto implements Serializable {
 
     private String idSluzebniVozidlo;
 
-    @NotBlank(message = "{klic.nazev.povinny}")
-    @Size(max = 50, message = "{klic.nazev.max.50}")
+    @NotBlank(message = "{sluzebni_vozidlo.typ.require}")
+    @Size(max = 50, message = "{sluzebni_vozidlo.typ.max.50}")
     private String typ;
 
-    @NotBlank(message = "{klic.nazev.povinny}")
-    @Size(max = 50, message = "{klic.nazev.max.50}")
+    @NotBlank(message = "{sluzebni_vozidlo.kategorie.require}")
+    @Size(max = 50, message = "{sluzebni_vozidlo.kategorie.max.50}")
     private String kategorie;
 
-    @Size(max = 50, message = "{klic.nazev.max.50}")
+    @Size(max = 50, message = "{sluzebni_vozidlo.funkce.max.50}")
     private String funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
 
     private ZavodDto zavod; // výběr z číselníku (i vícenásobný), kam může vozidlo jet, manažerské může kamkoliv, ostatní jen závod, jinak se žádá sekretariát
 
     private String lokalita;
     
-    @NotBlank(message = "{klic.nazev.povinny}")
-    @Size(max = 50, message = "{klic.nazev.max.50}")
+    @NotBlank(message = "{sluzebni_vozidlo.stav.require}")
+    @Size(max = 50, message = "{sluzebni_vozidlo.stav.max.50}")
     private String stav;
 
-    @Column(name = "datum_od")
     private Date datumOd;
 
-    @NotNull(message = "{aktivita.require}")
+    @NotNull(message = "{sluzebni_vozidlo.aktivita.require}")
     private Boolean aktivita = true;
 
     public SluzebniVozidloDto(SluzebniVozidlo sluzebniVozidlo) {

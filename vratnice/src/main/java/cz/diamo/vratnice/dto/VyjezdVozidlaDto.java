@@ -18,8 +18,8 @@ public class VyjezdVozidlaDto implements Serializable {
 
     private String idVyjezdVozidla;
 
-    @NotBlank(message = "RZ vozidla je povinný parametr")
-    @Size(max = 30, message = "RZ vozidla nemůže překročit 30 znaků")
+    @NotBlank(message = "{vyjezd_vozidla.rz_vozidla.require}")
+    @Size(max = 30, message = "{vyjezd_vozidla.rz_vozidla.max.30}")
     private String rzVozidla;
 
     private Boolean naklad = false;
@@ -28,7 +28,7 @@ public class VyjezdVozidlaDto implements Serializable {
 
     private Boolean opakovanyVjezd;
 
-    @NotNull(message = "Datum do je povinná položka")
+    @NotNull(message = "{vyjezd_vozidla.cas_odjezdu.require}")
     private ZonedDateTime casOdjezdu;
 
     public VyjezdVozidlaDto(VyjezdVozidla vyjezdVozidla) {
@@ -57,7 +57,7 @@ public class VyjezdVozidlaDto implements Serializable {
         return vyjezdVozidla;
     }
     
-    @AssertTrue(message = "Číslo průchodky je povinný, pokud je náklad označen")
+    @AssertTrue(message = "{vyjezd_vozidla.cislo_pruchody.require}")
     private boolean isCisloPruchodkyValid() {
         if (Boolean.TRUE.equals(naklad)) {
             return cisloPruchodky != null && !cisloPruchodky.trim().isEmpty();

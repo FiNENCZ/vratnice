@@ -19,17 +19,17 @@ public class VjezdVozidlaDto implements Serializable {
 
     private RidicDto ridic;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 30, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{vjezd_vozidla.rz_vozidla.require}")
+    @Size(max = 30, message = "{vjezd_vozidla.tz_vozidla.max.30}")
     private String rzVozidla;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 30, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{vjezd_vozidla.typ_vozidla.require}")
+    @Size(max = 30, message = "{vjezd_vozidla.typ_vozidla.max.30}")
     private String typVozidla;
 
     private Integer opakovanyVjezd;
 
-    @NotNull(message = "Datum do je povinná položka")
+    @NotNull(message = "{vjezd_vozidla.cas_prijezdu.require}")
     private ZonedDateTime casPrijezdu;
 
     public VjezdVozidlaDto(VjezdVozidla vjezdVozidla) {

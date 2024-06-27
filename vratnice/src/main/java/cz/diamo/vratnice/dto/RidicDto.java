@@ -16,19 +16,19 @@ public class RidicDto implements Serializable {
 
     private String idRidic;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 50, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{ridic.jmeno.require}")
+    @Size(max = 50, message = "{ridic.jmeno.max.50}")
     private String jmeno;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 50, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{ridic.prijmeni.require}")
+    @Size(max = 50, message = "{ridic.prijmeni.max.50}")
     private String prijmeni;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 30, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{ridic.cisloOp.require}")
+    @Size(max = 30, message = "{ridic.cisloOp.max.30}")
     private String cisloOp;
 
-    @Size(max = 120, message = "Building cannot exceed 30 characters")
+    @Size(max = 120, message = "{ridic.firma.max.120}")
     private String firma;
 
     private Date datumPouceni;

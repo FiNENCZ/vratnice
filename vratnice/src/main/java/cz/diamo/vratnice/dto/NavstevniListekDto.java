@@ -8,7 +8,9 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +27,8 @@ public class NavstevniListekDto implements Serializable{
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     private List<UzivatelDto> uzivatel;
 
+    @NotBlank(message = "{navstevni_listek.stav.require}")
+    @Size(message = "{navstevni_listek.stav.max.30}")
     private String stav;
 
     public NavstevniListekDto(NavstevniListek navstevniListek) {

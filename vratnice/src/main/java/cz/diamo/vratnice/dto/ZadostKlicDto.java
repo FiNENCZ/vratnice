@@ -24,8 +24,8 @@ public class ZadostKlicDto implements Serializable{
 
     private UzivatelDto uzivatel;
 
-    @NotBlank(message = "Building is required")
-    @Size(max = 30, message = "Building cannot exceed 30 characters")
+    @NotBlank(message = "{zadost_klic.stav.require}")
+    @Size(max = 30, message = "{zadost_klic.stav.max.30}")
     private String stav = "vyžádáno"; // vyžádán/schválen
 
     private Boolean trvala = true;
@@ -65,7 +65,7 @@ public class ZadostKlicDto implements Serializable{
         return zadostKlic;
     }
 
-    @AssertTrue(message = "datumOd and datumDo must be provided if trvala is false")
+    @AssertTrue(message = "{zadost_klic.datum_od_do.require}")
     public boolean isDatumValid() {
         if (Boolean.FALSE.equals(trvala)) {
             return datumOd != null && datumDo != null;
@@ -73,7 +73,7 @@ public class ZadostKlicDto implements Serializable{
         return true;
     }
 
-    @AssertTrue(message = "Důvod je povinný, pokud je klíč speciální.")
+    @AssertTrue(message = "{zadost_klic.duvod.require}")
     public boolean isDuvodValid() {
         if (klic != null && Boolean.TRUE.equals(klic.getSpecial())) {
             return duvod != null && !duvod.trim().isEmpty();
