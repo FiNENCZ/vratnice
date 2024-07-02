@@ -55,7 +55,7 @@ public class ZadostKlicDto implements Serializable{
         ZadostKlic zadostKlic = new ZadostKlic();
         
         zadostKlic.setIdZadostKlic(this.idZadostiKey);
-        zadostKlic.setKlic(new Klic(getKlic().getIdKey()));
+        zadostKlic.setKlic(new Klic(getKlic().getIdKlic()));
         zadostKlic.setUzivatel(new Uzivatel(getUzivatel().getId()));
         zadostKlic.setStav(this.stav);
         zadostKlic.setTrvala(this.trvala);
@@ -75,7 +75,7 @@ public class ZadostKlicDto implements Serializable{
 
     @AssertTrue(message = "{zadost_klic.duvod.require}")
     public boolean isDuvodValid() {
-        if (klic != null && Boolean.TRUE.equals(klic.getSpecial())) {
+        if (klic != null && Boolean.TRUE.equals(klic.getSpecialni())) {
             return duvod != null && !duvod.trim().isEmpty();
         }
         return true;

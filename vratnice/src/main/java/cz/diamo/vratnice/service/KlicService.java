@@ -12,32 +12,32 @@ import jakarta.transaction.Transactional;
 public class KlicService {
 
     @Autowired
-    private KlicRepository keyRepository;
+    private KlicRepository klicRepository;
 
     public List<Klic> getAllKeys() {
-        return keyRepository.findAll();
+        return klicRepository.findAll();
     }
 
     @Transactional
-    public Klic createKey(Klic key) {
-        return keyRepository.save(key);
+    public Klic createKey(Klic klic) {
+        return klicRepository.save(klic);
     }
 
-    public Klic getDetail(String idKey) {
-        return keyRepository.getDetail(idKey);
+    public Klic getDetail(String idKlic) {
+        return klicRepository.getDetail(idKlic);
     }
 
-    public Klic getDetailByChipCode(String chipCode) {
-        return keyRepository.getDetailByChipCode(chipCode);
+    public Klic getDetailByChipCode(String kodCipu) {
+        return klicRepository.getDetailByKodCipu(kodCipu);
     }
 
     public List<Klic> getBySpecialni(Boolean specialni) {
-        return keyRepository.getBySpecialni(specialni);
+        return klicRepository.getBySpecialni(specialni);
     }
 
 
     public List<Klic> getKlicByAktivita(Boolean aktivita) {
-        return keyRepository.findByAktivita(aktivita);
+        return klicRepository.findByAktivita(aktivita);
     }
 
 }

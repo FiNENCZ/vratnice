@@ -15,37 +15,37 @@ public class KlicDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String idKey;
+    private String idKlic;
 
     @NotNull(message = "{klic.specialni.require}")
-    private Boolean special = false;
+    private Boolean specialni = false;
 
     @NotBlank(message = "{klic.nazev.require}")
     @Size(max = 50, message = "{klic.nazev.max.50}")
-    private String name;
+    private String nazev;
 
     @NotBlank(message = "{klic.rfid.require}")
     @Size(max = 50, message = "{klic.rfid.max.50}")
-    private String chipCode;
+    private String kodCipu;
 
     @NotBlank(message = "{klic.lokace.require}")
     @Size(max = 50, message = "{klic.lokace.max.50}")
-    private String location;
+    private String lokace;
 
     @NotBlank(message = "{klic.budova.require}")
     @Size(max = 50, message = "{klic.budova.max.50}")
-    private String building;
+    private String budova;
 
     @NotNull(message = "{klic.podlazi.require}")
-    private Integer floor;
+    private Integer poschodi;
 
     @NotBlank(message = "{klic.mistnost.require}")
     @Size(max = 50, message = "{klic.mistnost.max.50}")
-    private String room;
+    private String mistnost;
 
     @NotBlank(message = "{klic.typ_klice.require}")
     @Size(max = 50, message = "{klic.typ_klice.max.50}")
-    private String keyType;
+    private String typKlice;
 
     @NotBlank(message = "{klic.stav.require}")
     @Size(max = 20, message = "{klic.stav.max.20}")
@@ -58,30 +58,30 @@ public class KlicDto implements Serializable {
         if (key == null) {
             return;
         }
-        this.idKey = key.getIdKlic();
-        this.special = key.isSpecialni();
-        this.name = key.getName();
-        this.chipCode = key.getKodCipu();
-        this.location = key.getLokalita();
-        this.building = key.getBudova();
-        this.floor = key.getPoschodi();
-        this.room = key.getMistnost();
-        this.keyType = key.getTypKlice();
+        this.idKlic = key.getIdKlic();
+        this.specialni = key.isSpecialni();
+        this.nazev = key.getNazev();
+        this.kodCipu = key.getKodCipu();
+        this.lokace = key.getLokalita();
+        this.budova = key.getBudova();
+        this.poschodi = key.getPoschodi();
+        this.mistnost = key.getMistnost();
+        this.typKlice = key.getTypKlice();
         this.state = key.getStav();
         this.aktivita = key.getAktivita();
     }
 
     public Klic toEntity() {
         Klic key = new Klic();
-        key.setIdKlic(this.idKey);
-        key.setSpecialni(this.special);
-        key.setName(this.name);
-        key.setKodCipu(this.chipCode);
-        key.setLokalita(this.location);
-        key.setBudova(this.building);
-        key.setPoschodi(this.floor);
-        key.setMistnost(this.room);
-        key.setTypKlice(this.keyType);
+        key.setIdKlic(this.idKlic);
+        key.setSpecialni(this.specialni);
+        key.setNazev(this.nazev);
+        key.setKodCipu(this.kodCipu);
+        key.setLokalita(this.lokace);
+        key.setBudova(this.budova);
+        key.setPoschodi(this.poschodi);
+        key.setMistnost(this.mistnost);
+        key.setTypKlice(this.typKlice);
         key.setStav(this.state);
         key.setAktivita(this.aktivita);
         return key;

@@ -26,38 +26,38 @@ public class Klic implements Serializable {
     @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name="id_klic")
-    private String idKey;
+    private String idKlic;
 
     @Column(name = "specialni")
-    private boolean special;
+    private boolean specialni;
 
     @Column(name = "nazev")
-    private String name;
+    private String nazev;
 
     @Column(name = "kod_cipu")
-    private String chipCode;
+    private String kodCipu;
 
     @Column(name = "lokalita")
-    private String location;
+    private String lokalita;
 
     @Column(name = "budova")
-    private String building;
+    private String budova;
 
     @Column(name = "poschodi")
-    private Integer floor;
+    private Integer poschodi;
 
     @Column(name = "mistnost")
-    private String room;
+    private String mistnost;
 
     @Column(name = "typ_klice")
-    private String keyType;
+    private String typKlice;
 
     @Column(name = "status")
-    private String state = "dostupný";
+    private String stav = "dostupný";
 
     private Boolean aktivita = true;
 
-    public Klic(String idKey) {
-        setIdKey(idKey);
+    public Klic(String idKlic) {
+        setIdKlic(idKlic);
     }
 }

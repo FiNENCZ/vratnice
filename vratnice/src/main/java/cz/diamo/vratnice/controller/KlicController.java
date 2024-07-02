@@ -30,49 +30,49 @@ public class KlicController extends BaseController {
     final static Logger logger = LogManager.getLogger(KlicController.class);
 
     @Autowired
-    private KlicService keyService;
+    private KlicService klicService;
 
-    @PostMapping("/key/create-key")
-    public ResponseEntity<KlicDto> createKey(@RequestBody @Valid KlicDto keyDto) {
-        Klic newKey = keyService.createKey(keyDto.toEntity());
+    @PostMapping("/klic/save")
+    public ResponseEntity<KlicDto> save(@RequestBody @Valid KlicDto keyDto) {
+        Klic newKey = klicService.createKey(keyDto.toEntity());
         return ResponseEntity.ok(new KlicDto(newKey));
     }
 
-    @GetMapping("/key/list-all")
-    public ResponseEntity<List<KlicDto>> getAllKeys() {
-        List<KlicDto> keys = keyService.getAllKeys().stream()
+    @GetMapping("/klic/list-all")
+    public ResponseEntity<List<KlicDto>> listAll() {
+        List<KlicDto> keys = klicService.getAllKeys().stream()
             .map(KlicDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(keys);
     }
 
-    @GetMapping("/key/list-by-aktivita")
+    @GetMapping("/klic/list-by-aktivita")
     public ResponseEntity<List<KlicDto>> listByAktivita(@RequestParam Boolean aktivita) {
-        List<KlicDto> sluzebniVozidla = keyService.getKlicByAktivita(aktivita).stream()
+        List<KlicDto> klice = klicService.getKlicByAktivita(aktivita).stream()
             .map(KlicDto::new)
             .collect(Collectors.toList());
-        return ResponseEntity.ok(sluzebniVozidla);
+        return ResponseEntity.ok(klice);
     }
 
-    @GetMapping("key/list-by-specialni")
+    @GetMapping("klic/list-by-specialni")
     public ResponseEntity<List<KlicDto>> listBySpecialni(@RequestParam Boolean specialni) {
-        List<KlicDto> keys = keyService.getBySpecialni(specialni).stream()
+        List<KlicDto> keys = klicService.getBySpecialni(specialni).stream()
             .map(KlicDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(keys);
     }
     
 
-    @GetMapping("/key/detail")
+    @GetMapping("/klic/detail")
     public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) {
-        Klic key = keyService.getDetail(idKey);
+        Klic key = klicService.getDetail(idKey);
         if (key == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new KlicDto(key));
     }
 
-    @PostMapping("/key/toggle-aktivita")
+    @PostMapping("/klic/toggle-aktivita")
     public ResponseEntity<KlicDto> toggleAktivita(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid KlicDto klicDto) {
         klicDto.setAktivita(!klicDto.getAktivita());
         
@@ -84,7 +84,7 @@ public class KlicController extends BaseController {
             klicDto.setState("odstraněno");
         }
 
-        Klic newKlic = keyService.createKey(klicDto.toEntity());
+        Klic newKlic = klicService.createKey(klicDto.toEntity());
 
         return ResponseEntity.ok(new KlicDto(newKlic));
     }
