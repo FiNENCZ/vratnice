@@ -54,6 +54,19 @@ public class NavstevniListekService {
         return navstevniListekRepository.findByNavstevaOsoba(navstevaOsoba);
     }
 
+    public NavstevniListekTyp getNavstevniListekTyp(String idNavstevniListek){
+        NavstevniListek navstevniListek = navstevniListekRepository.getDetail(idNavstevniListek);
+        try {
+            if (navstevniListek == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            navstevniListek.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListek.getTyp().getNazevResx()));
+            return navstevniListek.getTyp();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
     public NavstevniListekTyp getNavstevniListekTypByUzivatel(String idUzivatel) {
         NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository.findNavstevniListekTypByUzivatelId(idUzivatel);
 
