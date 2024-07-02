@@ -58,31 +58,31 @@ public class KlicDto implements Serializable {
         if (key == null) {
             return;
         }
-        this.idKey = key.getIdKey();
-        this.special = key.isSpecial();
+        this.idKey = key.getIdKlic();
+        this.special = key.isSpecialni();
         this.name = key.getName();
-        this.chipCode = key.getChipCode();
-        this.location = key.getLocation();
-        this.building = key.getBuilding();
-        this.floor = key.getFloor();
-        this.room = key.getRoom();
-        this.keyType = key.getKeyType();
-        this.state = key.getState();
+        this.chipCode = key.getKodCipu();
+        this.location = key.getLokalita();
+        this.building = key.getBudova();
+        this.floor = key.getPoschodi();
+        this.room = key.getMistnost();
+        this.keyType = key.getTypKlice();
+        this.state = key.getStav();
         this.aktivita = key.getAktivita();
     }
 
     public Klic toEntity() {
         Klic key = new Klic();
-        key.setIdKey(this.idKey);
-        key.setSpecial(this.special);
+        key.setIdKlic(this.idKey);
+        key.setSpecialni(this.special);
         key.setName(this.name);
-        key.setChipCode(this.chipCode);
-        key.setLocation(this.location);
-        key.setBuilding(this.building);
-        key.setFloor(this.floor);
-        key.setRoom(this.room);
-        key.setKeyType(this.keyType);
-        key.setState(this.state);
+        key.setKodCipu(this.chipCode);
+        key.setLokalita(this.location);
+        key.setBudova(this.building);
+        key.setPoschodi(this.floor);
+        key.setMistnost(this.room);
+        key.setTypKlice(this.keyType);
+        key.setStav(this.state);
         key.setAktivita(this.aktivita);
         return key;
     }

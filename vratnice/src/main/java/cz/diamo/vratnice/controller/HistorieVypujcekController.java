@@ -66,7 +66,7 @@ public class HistorieVypujcekController extends BaseController {
         }
 
         String newState = "vrácen".equals(stav) ? "dostupný" : stav;
-        klic.setState(newState);
+        klic.setStav(newState);
         klicService.createKey(klic);
         
         // Vytvoření historie výpůjčky

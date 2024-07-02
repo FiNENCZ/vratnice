@@ -6,20 +6,31 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
+import cz.diamo.vratnice.dto.NavstevniListekTypDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
+import cz.diamo.vratnice.entity.NavstevniListekTyp;
+import cz.diamo.vratnice.repository.NavstevniListekRepository;
 import cz.diamo.vratnice.service.NavstevaOsobaService;
 import cz.diamo.vratnice.service.NavstevniListekService;
+import cz.diamo.vratnice.service.QrCodeService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +51,21 @@ public class NavstevniListekController extends BaseController {
     private NavstevaOsobaService navstevaOsobaService;
 
     @Autowired
+    private QrCodeService qrCodeService;
+
+    @Autowired
+    private NavstevniListekRepository navstevniListekRepository;
+
+    @Autowired
+	private MessageSource messageSource;
+
+    @Autowired
+    private ResourcesComponent resourcesComponent;
+
+    @Autowired
     private UzivatelServices uzivatelService;
+
+
     @PostMapping("/navstevni-listek/create")
     public ResponseEntity<NavstevniListekDto> save(@RequestBody @Valid NavstevniListekDto navstevniListekDto) {
         if (navstevniListekDto.getNavstevaOsoba() != null && !navstevniListekDto.getNavstevaOsoba().isEmpty()) {
@@ -98,5 +123,48 @@ public class NavstevniListekController extends BaseController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(navstevniListky);
     }
+
+    @GetMapping("/navstevni-listek/qrcode")
+    public ResponseEntity<byte[]> getQRCode(@RequestParam String idNavstevniListek) {
+        NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
+        if (navstevniListek == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            byte[] qrCode = qrCodeService.generateQRCodeImage(navstevniListek);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qrcode.png\"")
+                    .contentType(MediaType.IMAGE_PNG).body(qrCode);
+        } catch (Exception e) {
+            // Handle exception appropriately
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/navstevni-listek/typ")
+    public ResponseEntity<NavstevniListekTypDto> navstevniListekTyp(@RequestParam String idNavstevniListek) {
+
+        NavstevniListek navstevniListek = navstevniListekRepository.getDetail(idNavstevniListek);
+        try {
+            if (navstevniListek == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            navstevniListek.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListek.getTyp().getNazevResx()));
+            return ResponseEntity.ok(new NavstevniListekTypDto(navstevniListek.getTyp()));
+        } catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+
+    }
+
+    @GetMapping("/navstevni-listek/typ-by-uzivatel")
+    public ResponseEntity<NavstevniListekTypDto> typByUzivatele(@RequestParam String idUzivatele) {
+        NavstevniListekTyp navstevniListekTypUzivatele = navstevniListekService.getNavstevniListekTypByUzivatel(idUzivatele);
+        return ResponseEntity.ok(new NavstevniListekTypDto(navstevniListekTypUzivatele));
+    }
+
+
+    
 
 }

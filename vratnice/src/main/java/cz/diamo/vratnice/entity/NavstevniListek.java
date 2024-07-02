@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
@@ -50,6 +51,10 @@ public class NavstevniListek implements Serializable {
         inverseJoinColumns = @JoinColumn(name = "id_uzivatel")
     )
     private List<Uzivatel> uzivatel;
+
+    @ManyToOne
+    @JoinColumn(name = "id_navstevni_listek_typ")
+    private NavstevniListekTyp typ;
 
     private String stav = "vyžádáno";
 

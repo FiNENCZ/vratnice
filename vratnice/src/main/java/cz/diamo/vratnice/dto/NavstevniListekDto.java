@@ -27,6 +27,10 @@ public class NavstevniListekDto implements Serializable{
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     private List<UzivatelDto> uzivatel;
 
+    @NotBlank(message = "{navstevni_listek.typ.require}")
+    @Size(message = "{navstevni_listek.typ.max.30}")
+    private NavstevniListekTypDto typ;
+
     @NotBlank(message = "{navstevni_listek.stav.require}")
     @Size(message = "{navstevni_listek.stav.max.30}")
     private String stav = "vyžádáno";
@@ -54,6 +58,7 @@ public class NavstevniListekDto implements Serializable{
         }
         this.setUzivatel(uzivatelDtos);
 
+        this.typ = new NavstevniListekTypDto(navstevniListek.getTyp());
         this.stav = navstevniListek.getStav();
     }
 
@@ -78,6 +83,7 @@ public class NavstevniListekDto implements Serializable{
         }
         navstevniListek.setUzivatel(uzivatels);
 
+        navstevniListek.setTyp(getTyp().toEntity());
         navstevniListek.setStav(this.stav);
 
         return navstevniListek;
