@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,13 @@ public class VyjezdVozidlaController extends BaseController {
             .map(VyjezdVozidlaDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(vyjezdyVozidel);
+    }
+
+    @GetMapping("/vyjezd-vozidla/je-mozne-vyjet")
+    public ResponseEntity<Optional<VyjezdVozidlaDto>> jeMozneVyjet(@RequestParam String rzVozidla) {
+        Optional<VyjezdVozidla> vyjezdVozidel = vyjezdVozidlaService.jeMozneVyjet(rzVozidla);
+        Optional<VyjezdVozidlaDto> vyjezdyVozidlaDto = vyjezdVozidel.map(VyjezdVozidlaDto::new);
+        return ResponseEntity.ok(vyjezdyVozidlaDto);
     }
 
 }
