@@ -1,6 +1,8 @@
 package cz.diamo.vratnice.service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,28 @@ public class PovoleniVjezduVozidlaService {
 
     public List<PovoleniVjezduVozidla> getByStav(String stav) {
         return povoleniVjezduVozidlaRepository.getByStav(stav);
+    }
+
+    public List<PovoleniVjezduVozidla> getByRzVozidla(String rzVozidla) {
+        return povoleniVjezduVozidlaRepository.getByRzVozidla(rzVozidla);
+    }
+
+    public Optional<PovoleniVjezduVozidla> jeRzVozidlaPovolena(String rzVozidla) {
+        List<PovoleniVjezduVozidla> povoleniVjezduVozidlaList = getByRzVozidla(rzVozidla);
+
+        if (povoleniVjezduVozidlaList.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Date currentDate = new Date();
+        for (PovoleniVjezduVozidla povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
+            if (currentDate.compareTo(povoleniVjezduVozidla.getDatumOd()) >= 0 
+                    && currentDate.compareTo(povoleniVjezduVozidla.getDatumDo()) <= 0) {
+                return Optional.of(povoleniVjezduVozidla);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Transactional

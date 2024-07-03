@@ -16,4 +16,7 @@ public interface PovoleniVjezduVozidlaRepository extends JpaRepository<PovoleniV
     @Query(sqlSelect + "where s.stav = :stav")
     List<PovoleniVjezduVozidla> getByStav(String stav);
 
+    @Query(sqlSelect + "join s.rzVozidla rz where rz = :rzVozidla")
+    List<PovoleniVjezduVozidla> getByRzVozidla(String rzVozidla);
+
 }

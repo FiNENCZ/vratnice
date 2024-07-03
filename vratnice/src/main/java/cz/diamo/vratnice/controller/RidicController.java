@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
-import cz.diamo.vratnice.configuration.VratniceProperties;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.service.RidicService;

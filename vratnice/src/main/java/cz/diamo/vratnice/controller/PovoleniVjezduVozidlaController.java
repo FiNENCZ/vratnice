@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +73,24 @@ public class PovoleniVjezduVozidlaController extends BaseController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(povoleniVjezduVozidel);
     }
+
+    @GetMapping("/povoleni-vjezdu-vozidla/get-by-rz-vozidla")
+    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> getByRzVozidla(@RequestParam String rzVozidla) {
+        List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getByRzVozidla(rzVozidla).stream()
+            .map(PovoleniVjezduVozidlaDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(povoleniVjezduVozidel);
+    }
+    
+
+    @GetMapping("/povoleni-vjezdu-vozidla/je-rz-vozidla-povolena")
+    public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla) {
+        Optional<PovoleniVjezduVozidla> povoleniVjezduVozidla = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);
+        Optional<PovoleniVjezduVozidlaDto> optionalPovoleniVjezduVozidlaDto = povoleniVjezduVozidla.map(PovoleniVjezduVozidlaDto::new);
+        return ResponseEntity.ok(optionalPovoleniVjezduVozidlaDto);
+    }
+    
+    
     
     
 
