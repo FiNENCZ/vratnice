@@ -17,7 +17,6 @@ import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
-import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
@@ -54,22 +53,7 @@ public class NavstevniListekController extends BaseController {
 
     @PostMapping("/navstevni-listek/create")
     public ResponseEntity<NavstevniListekDto> save(@RequestBody @Valid NavstevniListekDto navstevniListekDto) {
-        if (navstevniListekDto.getNavstevaOsoba() != null && !navstevniListekDto.getNavstevaOsoba().isEmpty()) {
-    
-            List<NavstevaOsoba> navstevaOsobaEntities = navstevniListekDto.getNavstevaOsoba().stream()
-                .map(NavstevaOsobaDto::toEntity)
-                .collect(Collectors.toList());
-    
-            List<NavstevaOsoba> savedNavstevaOsoby = navstevaOsobaEntities.stream()
-                .map(navstevaOsobaService::create)
-                .collect(Collectors.toList());
-    
-            navstevniListekDto.setNavstevaOsoba(savedNavstevaOsoby.stream()
-                .map(NavstevaOsobaDto::new)
-                .collect(Collectors.toList()));
-        }
-    
-        NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto.toEntity());
+        NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto);
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
     }
     

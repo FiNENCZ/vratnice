@@ -40,7 +40,7 @@ public class NavstevaOsobaDto implements Serializable {
 
         this.idNavstevaOsoba = navstevaOsoba.getIdNavstevaOsoba();
         this.jmeno = navstevaOsoba.getJmeno();
-        this.prijmeni = navstevaOsoba.getJmeno();
+        this.prijmeni = navstevaOsoba.getPrijmeni();
         this.cisloOp = navstevaOsoba.getCisloOp();
         this.firma = navstevaOsoba.getFirma();
         this.datumPouceni = navstevaOsoba.getDatumPouceni();

@@ -27,8 +27,8 @@ public class NavstevniListekDto implements Serializable{
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     private List<UzivatelDto> uzivatel;
 
-    @NotBlank(message = "{navstevni_listek.typ.require}")
-    @Size(message = "{navstevni_listek.typ.max.30}")
+    //@NotBlank(message = "{navstevni_listek.typ.require}")
+    //@Size(message = "{navstevni_listek.typ.max.30}")
     private NavstevniListekTypDto typ;
 
     @NotBlank(message = "{navstevni_listek.stav.require}")
