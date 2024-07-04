@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -34,6 +35,8 @@ public class SluzebniVozidlo implements Serializable {
     @Column(name="id_sluzebni_vozidlo")
     private String idSluzebniVozidlo;
 
+    private String rz;
+
     private String typ;
 
     private String kategorie;
@@ -51,7 +54,15 @@ public class SluzebniVozidlo implements Serializable {
     @Column(name = "datum_od")
     private Date datumOd;
 
+    private String poznamka;
+
     private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public SluzebniVozidlo(String idSluzebniVozidlo) {
         setIdSluzebniVozidlo(idSluzebniVozidlo);

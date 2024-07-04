@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.repository.SluzebniVozidloRepository;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,8 @@ public class SluzebniVozidloService {
 
     @Transactional
     public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) {
+        sluzebniVozidlo.setCasZmn(Utils.getCasZmn());
+        sluzebniVozidlo.setZmenuProvedl(Utils.getZmenuProv());
         return sluzebniVozidloRepository.save(sluzebniVozidlo);
     }
 
