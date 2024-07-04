@@ -1,11 +1,13 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,14 +33,19 @@ public class VyjezdVozidlaController extends BaseController {
         return ResponseEntity.ok(new VyjezdVozidlaDto(vyjezdVozidla));
     }
 
-    @GetMapping("/vyjezd-vozidla/list-all")
-    public ResponseEntity<List<VyjezdVozidlaDto>> getAll() {
-        List<VyjezdVozidlaDto> vyjezdVozidel = vyjezdVozidlaService.getAll().stream()
-            .map(VyjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vyjezdVozidel);
-    }
+    @GetMapping("/vyjezd-vozidla/list")
+    public ResponseEntity<List<VyjezdVozidlaDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<VyjezdVozidlaDto> result = new ArrayList<VyjezdVozidlaDto>();
+        List<VyjezdVozidla> list = vyjezdVozidlaService.getList(aktivni);
 
+        if (list != null && list.size() > 0) {
+            for (VyjezdVozidla vyjezdVozidla : list) {
+                result.add(new VyjezdVozidlaDto(vyjezdVozidla));
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
     @GetMapping("/vyjezd-vozidla/detail")
     public ResponseEntity<VyjezdVozidlaDto> getDetail(@RequestParam String idVjezdVozidla) {
         VyjezdVozidla vyjezdVozidla = vyjezdVozidlaService.getDetail(idVjezdVozidla);

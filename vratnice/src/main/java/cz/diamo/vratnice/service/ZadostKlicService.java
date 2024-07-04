@@ -10,6 +10,9 @@ import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.repository.ZadostKlicRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -18,8 +21,29 @@ public class ZadostKlicService {
     @Autowired
     private ZadostKlicRepository zadostiKlicRepository;
 
-    public List<ZadostKlic> getAll() {
-        return zadostiKlicRepository.findAll();
+      @PersistenceContext
+    private EntityManager entityManager;
+
+
+    public List<ZadostKlic> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from ZadostKlic s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<ZadostKlic> list = vysledek.getResultList();
+        return list;
     }
 
     @Transactional

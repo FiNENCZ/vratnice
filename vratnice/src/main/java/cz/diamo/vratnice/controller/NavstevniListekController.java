@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -58,12 +60,18 @@ public class NavstevniListekController extends BaseController {
     }
     
 
-    @GetMapping("/navstevni-listek/list-all")
-    public ResponseEntity<List<NavstevniListekDto>> getAll() {
-        List<NavstevniListekDto> navstevniListky = navstevniListekService.getAll().stream()
-            .map(NavstevniListekDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(navstevniListky);
+    @GetMapping("/navstevni-listek/list")
+    public ResponseEntity<List<NavstevniListekDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<NavstevniListekDto> result = new ArrayList<NavstevniListekDto>();
+        List<NavstevniListek> list = navstevniListekService.getList(aktivni);
+
+        if (list != null && list.size() > 0) {
+            for (NavstevniListek navstevniListek : list) {
+                result.add(new NavstevniListekDto(navstevniListek));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/navstevni-listek/detail")

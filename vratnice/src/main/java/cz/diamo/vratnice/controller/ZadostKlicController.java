@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -77,12 +79,18 @@ public class ZadostKlicController extends BaseController{
     }
     
 
-    @GetMapping("/zadosti-klic/list-all")
-    public ResponseEntity<List<ZadostKlicDto>> getAll() {
-        List<ZadostKlicDto> zadostiKlic = zadostKlicService.getAll().stream()
-            .map(ZadostKlicDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(zadostiKlic);
+    @GetMapping("/zadosti-klic/list")
+    public ResponseEntity<List<ZadostKlicDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<ZadostKlicDto> result = new ArrayList<ZadostKlicDto>();
+        List<ZadostKlic> list = zadostKlicService.getList(aktivni);
+
+        if (list != null && list.size() > 0) {
+            for (ZadostKlic zadostKlic : list) {
+                result.add(new ZadostKlicDto(zadostKlic));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/zadosti-klic/detail")

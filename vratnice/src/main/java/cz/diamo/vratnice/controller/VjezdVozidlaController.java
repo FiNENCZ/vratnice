@@ -1,11 +1,13 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -44,12 +46,18 @@ public class VjezdVozidlaController extends BaseController{
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
-    @GetMapping("/vjezd-vozidla/list-all")
-    public ResponseEntity<List<VjezdVozidlaDto>> getAll() {
-        List<VjezdVozidlaDto> vjezdVozidel = vjezdVozidlaService.getAll().stream()
-            .map(VjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vjezdVozidel);
+    @GetMapping("/vjezd-vozidla/list")
+    public ResponseEntity<List<VjezdVozidlaDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<VjezdVozidlaDto> result = new ArrayList<VjezdVozidlaDto>();
+        List<VjezdVozidla> list = vjezdVozidlaService.getList(aktivni);
+
+        if (list != null && list.size() > 0) {
+            for (VjezdVozidla vjezdVozidla : list) {
+                result.add(new VjezdVozidlaDto(vjezdVozidla));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
     
 

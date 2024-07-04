@@ -24,6 +24,9 @@ import cz.diamo.vratnice.enums.NavstevniListekTypEnum;
 import cz.diamo.vratnice.repository.NavstevaOsobaRepository;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
 import cz.diamo.vratnice.repository.UzivatelNavstevniListekTypRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -43,6 +46,9 @@ public class NavstevniListekService {
 
     @Autowired
     private NavstevaOsobaRepository navstevaOsobaRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
 
@@ -83,8 +89,25 @@ public class NavstevniListekService {
         return navstevniListekRepository.save(navstevniListek);
     }
 
-    public List<NavstevniListek> getAll() {
-        return navstevniListekRepository.findAll();
+    public List<NavstevniListek> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from NavstevniListek s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<NavstevniListek> list = vysledek.getResultList();
+        return list;
     }
 
     public NavstevniListek getDetail(String idNavstevniListek) {

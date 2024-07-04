@@ -2,6 +2,7 @@ package cz.diamo.vratnice.controller;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -75,20 +77,18 @@ public class SluzebniVozidloController extends BaseController {
         return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
     }
     
-    @GetMapping("/sluzebni-vozidlo/list-all")
-    public ResponseEntity<List<SluzebniVozidloDto>> listAll() {
-        List<SluzebniVozidloDto> sluzebniVozidla = sluzebniVozidloService.getAll().stream()
-            .map(SluzebniVozidloDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(sluzebniVozidla);
-    }
+    @GetMapping("/sluzebni-vozidlo/list")
+    public ResponseEntity<List<SluzebniVozidloDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<SluzebniVozidloDto> result = new ArrayList<SluzebniVozidloDto>();
+        List<SluzebniVozidlo> list = sluzebniVozidloService.getList(aktivni);
 
-    @GetMapping("/sluzebni-vozidlo/list-by-aktivita")
-    public ResponseEntity<List<SluzebniVozidloDto>> listByAktivita(@RequestParam Boolean aktivita) {
-        List<SluzebniVozidloDto> sluzebniVozidla = sluzebniVozidloService.getSluzebniVozidloByAktivita(aktivita).stream()
-            .map(SluzebniVozidloDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(sluzebniVozidla);
+        if (list != null && list.size() > 0) {
+            for (SluzebniVozidlo sluzebniVozidlo : list) {
+                result.add(new SluzebniVozidloDto(sluzebniVozidlo));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
     
 

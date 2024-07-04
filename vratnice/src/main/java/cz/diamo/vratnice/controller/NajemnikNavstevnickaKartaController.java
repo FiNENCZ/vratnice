@@ -1,12 +1,13 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,11 +35,17 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
     }
 
     @GetMapping("/najemnik-navstevnicka-karta/list")
-    public ResponseEntity<List<NajemnikNavstevnickaKartaDto>> list() {
-        List<NajemnikNavstevnickaKartaDto> najemnikNavstevnickaKartaDtos = najemnikNavstevnickaKartaService.list().stream()
-            .map(NajemnikNavstevnickaKartaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(najemnikNavstevnickaKartaDtos);
+    public ResponseEntity<List<NajemnikNavstevnickaKartaDto>> list(@RequestParam @Nullable Boolean aktivni) {
+        List<NajemnikNavstevnickaKartaDto> result = new ArrayList<NajemnikNavstevnickaKartaDto>();
+        List<NajemnikNavstevnickaKarta> list = najemnikNavstevnickaKartaService.getList(aktivni);
+
+        if (list != null && list.size() > 0) {
+            for (NajemnikNavstevnickaKarta najemnikNavstevnickaKarta : list) {
+                result.add(new NajemnikNavstevnickaKartaDto(najemnikNavstevnickaKarta));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/najemnik-navstevnicka-karta/detail")

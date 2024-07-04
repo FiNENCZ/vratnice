@@ -5,24 +5,42 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.repository.SluzebniVozidloRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
 public class SluzebniVozidloService {
 
-    final static Logger logger = LogManager.getLogger(SluzebniVozidloService.class);
-
     @Autowired
     private SluzebniVozidloRepository sluzebniVozidloRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public List<SluzebniVozidlo> getAll() {
-        return sluzebniVozidloRepository.findAll();
+    public List<SluzebniVozidlo> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from SluzebniVozidlo s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<SluzebniVozidlo> list = vysledek.getResultList();
+        return list;
     }
 
     @Transactional

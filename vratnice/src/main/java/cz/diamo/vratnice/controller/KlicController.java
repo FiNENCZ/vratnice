@@ -1,12 +1,13 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,30 +39,20 @@ public class KlicController extends BaseController {
         return ResponseEntity.ok(new KlicDto(newKey));
     }
 
-    @GetMapping("/klic/list-all")
-    public ResponseEntity<List<KlicDto>> listAll() {
-        List<KlicDto> keys = klicService.getAllKeys().stream()
-            .map(KlicDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(keys);
+    @GetMapping("/klic/list")
+    public ResponseEntity<List<KlicDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean specialni) {
+        List<KlicDto> result = new ArrayList<KlicDto>();
+        List<Klic> list = klicService.getList(aktivni, specialni);
+
+        if (list != null && list.size() > 0) {
+            for (Klic klic : list) {
+                result.add(new KlicDto(klic));
+            }
+        }
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/klic/list-by-aktivita")
-    public ResponseEntity<List<KlicDto>> listByAktivita(@RequestParam Boolean aktivita) {
-        List<KlicDto> klice = klicService.getKlicByAktivita(aktivita).stream()
-            .map(KlicDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(klice);
-    }
-
-    @GetMapping("klic/list-by-specialni")
-    public ResponseEntity<List<KlicDto>> listBySpecialni(@RequestParam Boolean specialni) {
-        List<KlicDto> keys = klicService.getBySpecialni(specialni).stream()
-            .map(KlicDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(keys);
-    }
-    
 
     @GetMapping("/klic/detail")
     public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) {

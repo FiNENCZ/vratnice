@@ -11,6 +11,9 @@ import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import cz.diamo.vratnice.repository.VyjezdVozidlaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -22,10 +25,29 @@ public class VyjezdVozidlaService {
     @Autowired
     private VjezdVozidlaRepository vjezdVozidlaRepository;
 
-    public List<VyjezdVozidla> getAll() {
-        return vyjezdVozidlaRepository.findAll();
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
+    public List<VyjezdVozidla> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from VyjezdVozidla s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<VyjezdVozidla> list = vysledek.getResultList();
+        return list;
+    }
     public VyjezdVozidla getDetail(String idVyjezdVozidla) {
         return vyjezdVozidlaRepository.getDetail(idVyjezdVozidla);
     }

@@ -10,6 +10,9 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
 import cz.diamo.vratnice.exceptions.DuplicateCisloOpException;
 import cz.diamo.vratnice.repository.NajemnikNavstevnickaKartaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -17,6 +20,9 @@ public class NajemnikNavstevnickaKartaService {
 
     @Autowired
     private NajemnikNavstevnickaKartaRepository najemnikNavstevnickaKartaRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public NajemnikNavstevnickaKarta create(NajemnikNavstevnickaKarta najemnikNavstevnickaKarta) {
@@ -30,8 +36,25 @@ public class NajemnikNavstevnickaKartaService {
         return najemnikNavstevnickaKartaRepository.save(najemnikNavstevnickaKarta);
     }
 
-    public List<NajemnikNavstevnickaKarta> list() {
-        return najemnikNavstevnickaKartaRepository.findAll();
+    public List<NajemnikNavstevnickaKarta> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from NajemnikNavstevnickaKarta s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<NajemnikNavstevnickaKarta> list = vysledek.getResultList();
+        return list;
     }
 
     public NajemnikNavstevnickaKarta getDetail(String idNajemnikNavstevnickaKarta) {

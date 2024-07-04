@@ -9,6 +9,9 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -17,8 +20,28 @@ public class VjezdVozidlaService {
     @Autowired
     private VjezdVozidlaRepository vjezdVozidlaRepository;
 
-    public List<VjezdVozidla> getAll() {
-        return vjezdVozidlaRepository.findAll();
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<VjezdVozidla> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from VjezdVozidla s");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        
+        @SuppressWarnings("unchecked")
+        List<VjezdVozidla> list = vysledek.getResultList();
+        return list;
     }
 
     public VjezdVozidla getDetail(String idVjezdVozidla) {
