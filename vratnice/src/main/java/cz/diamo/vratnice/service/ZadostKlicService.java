@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
@@ -23,6 +24,8 @@ public class ZadostKlicService {
 
     @Transactional
     public ZadostKlic create(ZadostKlic zadostKlic) {
+        zadostKlic.setCasZmn(Utils.getCasZmn());
+        zadostKlic.setZmenuProvedl(Utils.getZmenuProv());
         return zadostiKlicRepository.save(zadostKlic);
     }
 

@@ -32,6 +32,9 @@ public class VjezdVozidlaDto implements Serializable {
     @NotNull(message = "{vjezd_vozidla.cas_prijezdu.require}")
     private ZonedDateTime casPrijezdu;
 
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
+
     public VjezdVozidlaDto(VjezdVozidla vjezdVozidla) {
         if (vjezdVozidla == null){
             return;
@@ -43,6 +46,7 @@ public class VjezdVozidlaDto implements Serializable {
         this.typVozidla = vjezdVozidla.getTypVozidla();
         this.opakovanyVjezd = vjezdVozidla.getOpakovanyVjezd();
         this.casPrijezdu = vjezdVozidla.getCasPrijezdu();
+        this.aktivita = vjezdVozidla.getAktivita();
     }
 
     public VjezdVozidla toEntity() {
@@ -54,6 +58,7 @@ public class VjezdVozidlaDto implements Serializable {
         vjezdVozidla.setTypVozidla(this.typVozidla);
         vjezdVozidla.setOpakovanyVjezd(this.opakovanyVjezd);
         vjezdVozidla.setCasPrijezdu(this.casPrijezdu);
+        vjezdVozidla.setAktivita(this.aktivita);
 
         return vjezdVozidla;
     }

@@ -46,7 +46,7 @@ public class SluzebniVozidloDto implements Serializable {
 
     private Date datumOd;
 
-    @NotNull(message = "{sluzebni_vozidlo.aktivita.require}")
+    @NotNull(message = "{aktivita.require}")
     private Boolean aktivita = true;
 
     public SluzebniVozidloDto(SluzebniVozidlo sluzebniVozidlo) {

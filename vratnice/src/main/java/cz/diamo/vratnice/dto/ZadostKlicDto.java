@@ -9,6 +9,7 @@ import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,9 @@ public class ZadostKlicDto implements Serializable{
 
     private String duvod;
 
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
+
     public ZadostKlicDto(ZadostKlic zadostKlic) {
         if (zadostKlic == null) {
             return;
@@ -49,6 +53,7 @@ public class ZadostKlicDto implements Serializable{
         this.datumOd = zadostKlic.getDatumOd();
         this.datumDo = zadostKlic.getDatumDo();
         this.duvod = zadostKlic.getDuvod();
+        this.aktivita = zadostKlic.getAktivita();
     }
 
     public ZadostKlic toEntity() {
@@ -62,6 +67,8 @@ public class ZadostKlicDto implements Serializable{
         zadostKlic.setDatumOd(this.datumOd);
         zadostKlic.setDatumDo(this.datumDo);
         zadostKlic.setDuvod(this.duvod);
+        zadostKlic.setAktivita(this.aktivita);
+
         return zadostKlic;
     }
 

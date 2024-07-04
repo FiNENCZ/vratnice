@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
@@ -34,6 +35,8 @@ public class VjezdVozidlaService {
 
     @Transactional
     public VjezdVozidla create(VjezdVozidla vjezdVozidla) {
+        vjezdVozidla.setCasZmn(Utils.getCasZmn());
+        vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
         return vjezdVozidlaRepository.save(vjezdVozidla);
     }
 

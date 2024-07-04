@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -53,6 +54,16 @@ public class NajemnikNavstevnickaKarta implements Serializable {
 
     @Column(name = "vydano_do")
     private Date vydanoDo;
+
+    private String poznamka;
+
+    private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public NajemnikNavstevnickaKarta(String idNajemnikNavstevnickaKarta) {
         setIdNajemnikNavstevnickaKarta(idNajemnikNavstevnickaKarta);

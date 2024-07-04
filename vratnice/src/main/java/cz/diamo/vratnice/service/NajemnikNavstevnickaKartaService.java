@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
 import cz.diamo.vratnice.exceptions.DuplicateCisloOpException;
 import cz.diamo.vratnice.repository.NajemnikNavstevnickaKartaRepository;
@@ -24,6 +25,8 @@ public class NajemnikNavstevnickaKartaService {
                 throw new DuplicateCisloOpException("Číslo OP musí být unikátní. V databázi již existuje nájemník se stejným OP.");
             }
         }
+        najemnikNavstevnickaKarta.setCasZmn(Utils.getCasZmn());
+        najemnikNavstevnickaKarta.setZmenuProvedl(Utils.getZmenuProv());
         return najemnikNavstevnickaKartaRepository.save(najemnikNavstevnickaKarta);
     }
 

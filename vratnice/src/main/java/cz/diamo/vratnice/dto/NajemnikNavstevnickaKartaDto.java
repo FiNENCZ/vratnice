@@ -5,6 +5,7 @@ import java.util.Date;
 
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,6 +45,9 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
 
     private Date vydanoDo;
 
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
+
     public NajemnikNavstevnickaKartaDto(NajemnikNavstevnickaKarta najemnikNavstevnickaKarta) {
         if(najemnikNavstevnickaKarta == null) {
             return;
@@ -59,6 +63,7 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
         this.duvodVydani = najemnikNavstevnickaKarta.getDuvodVydani();
         this.vydanoOd = najemnikNavstevnickaKarta.getVydanoOd();
         this.vydanoDo = najemnikNavstevnickaKarta.getVydanoDo();
+        this.aktivita = najemnikNavstevnickaKarta.getAktivita();
     }
 
     public NajemnikNavstevnickaKarta toEntity() {
@@ -74,6 +79,7 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
         najemnikNavstevnickaKarta.setDuvodVydani(this.duvodVydani);
         najemnikNavstevnickaKarta.setVydanoOd(this.vydanoOd);
         najemnikNavstevnickaKarta.setVydanoDo(this.vydanoDo);
+        najemnikNavstevnickaKarta.setAktivita(this.aktivita);
 
         return najemnikNavstevnickaKarta;
     }

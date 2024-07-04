@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -55,7 +56,15 @@ public class Klic implements Serializable {
     @Column(name = "status")
     private String stav = "dostupný";
 
+    private String poznamka;
+
     private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public Klic(String idKlic) {
         setIdKlic(idKlic);

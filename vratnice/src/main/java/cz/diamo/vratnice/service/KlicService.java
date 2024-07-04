@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.repository.KlicRepository;
 import jakarta.transaction.Transactional;
@@ -20,6 +21,8 @@ public class KlicService {
 
     @Transactional
     public Klic createKey(Klic klic) {
+        klic.setCasZmn(Utils.getCasZmn());
+        klic.setZmenuProvedl(Utils.getZmenuProv());
         return klicRepository.save(klic);
     }
 

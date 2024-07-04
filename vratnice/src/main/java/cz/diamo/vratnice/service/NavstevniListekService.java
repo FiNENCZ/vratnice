@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
@@ -77,6 +78,8 @@ public class NavstevniListekService {
         navstevniListekDto.setTyp(new NavstevniListekTypDto(new NavstevniListekTyp(currentNavstevniListekTypEnum)));
 
         NavstevniListek navstevniListek = navstevniListekDto.toEntity();
+        navstevniListek.setCasZmn(Utils.getCasZmn());
+        navstevniListek.setZmenuProvedl(Utils.getZmenuProv());
         return navstevniListekRepository.save(navstevniListek);
     }
 
