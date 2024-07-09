@@ -10,6 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -50,8 +52,9 @@ public class Klic implements Serializable {
     @Column(name = "mistnost")
     private String mistnost;
 
-    @Column(name = "typ_klice")
-    private String typKlice;
+    @ManyToOne
+    @JoinColumn(name = "id_klic_typ")
+    private KlicTyp typ;
 
     @Column(name = "status")
     private String stav = "dostupný";

@@ -43,9 +43,9 @@ public class KlicDto implements Serializable {
     @Size(max = 50, message = "{klic.mistnost.max.50}")
     private String mistnost;
 
-    @NotBlank(message = "{klic.typ_klice.require}")
-    @Size(max = 50, message = "{klic.typ_klice.max.50}")
-    private String typKlice;
+    //@NotBlank(message = "{klic.typ_klice.require}")
+    //@Size(max = 50, message = "{klic.typ_klice.max.50}")
+    private KlicTypDto typ;
 
     @NotBlank(message = "{klic.stav.require}")
     @Size(max = 20, message = "{klic.stav.max.20}")
@@ -66,7 +66,7 @@ public class KlicDto implements Serializable {
         this.budova = key.getBudova();
         this.poschodi = key.getPoschodi();
         this.mistnost = key.getMistnost();
-        this.typKlice = key.getTypKlice();
+        this.typ = new KlicTypDto(key.getTyp());
         this.state = key.getStav();
         this.aktivita = key.getAktivita();
     }
@@ -81,7 +81,7 @@ public class KlicDto implements Serializable {
         key.setBudova(this.budova);
         key.setPoschodi(this.poschodi);
         key.setMistnost(this.mistnost);
-        key.setTypKlice(this.typKlice);
+        key.setTyp(getTyp().toEntity());
         key.setStav(this.state);
         key.setAktivita(this.aktivita);
         return key;

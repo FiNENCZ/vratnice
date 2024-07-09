@@ -2,10 +2,16 @@ package cz.diamo.vratnice.service;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
+import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.vratnice.entity.Klic;
+import cz.diamo.vratnice.entity.KlicTyp;
 import cz.diamo.vratnice.repository.KlicRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -20,6 +26,12 @@ public class KlicService {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+	private MessageSource messageSource;
+
+    @Autowired
+    private ResourcesComponent resourcesComponent;
 
     public List<Klic> getAllKeys() {
         return klicRepository.findAll();
@@ -73,6 +85,19 @@ public class KlicService {
 
     public List<Klic> getKlicByAktivita(Boolean aktivita) {
         return klicRepository.findByAktivita(aktivita);
+    }
+
+    public KlicTyp getKlicTyp(String idKlic) {
+        Klic klic = klicRepository.getDetail(idKlic);
+        try {
+            if (klic == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            klic.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), klic.getTyp().getNazevResx()));
+            return klic.getTyp();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
     }
 
 }
