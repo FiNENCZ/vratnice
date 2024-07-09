@@ -21,4 +21,6 @@ public class VratniceKonfiguraceDto implements Serializable {
 
     private String barvaPovoleneSpz;
 
+    private String barvaSluzebnihoVozidla;
+
 }

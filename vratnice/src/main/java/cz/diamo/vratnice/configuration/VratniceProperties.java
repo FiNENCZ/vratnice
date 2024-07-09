@@ -21,6 +21,8 @@ public class VratniceProperties {
     private String barvaNepovoleneSpz;
 
     private String barvaPovoleneSpz;
+
+    private String barvaSluzebnihoVozidla;
     
 
 }

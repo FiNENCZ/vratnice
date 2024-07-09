@@ -14,11 +14,12 @@ import org.w3c.dom.NodeList;
 
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.vratnice.dto.RzDetectedMessageDto;
+import cz.diamo.vratnice.enums.RzDetectedMessageStatusEnum;
 import cz.diamo.vratnice.service.WebSocketService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -50,16 +51,14 @@ public class RzVozidlaDetektorController extends BaseController {
             Element rootElement = doc.getDocumentElement();
 
             // Získání elementu <licensePlate>
-            logger.info("TEST");
             NodeList licensePlateNodeList = rootElement.getElementsByTagName("licensePlate");
             if (licensePlateNodeList.getLength() > 0) {
                 Node licensePlateNode = licensePlateNodeList.item(0);
                 String licensePlateValue = licensePlateNode.getTextContent();
                 
-                // Výpis hodnoty licensePlate
+
                 logger.info("License Plate: " + licensePlateValue);
 
-                // Pro odpověď můžete vrátit hodnotu nebo potvrzovací zprávu
                 return "License Plate: " + licensePlateValue;
             } else {
                 return "License Plate not found in XML.";
@@ -71,14 +70,20 @@ public class RzVozidlaDetektorController extends BaseController {
     }
 
     @PostMapping(value = "/rz-vozidla-detektor/test")
-        public void test(@RequestParam String message) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("name", message);
+    public void test(@RequestParam String message) throws JSONException {
+        RzDetectedMessageDto dto = new RzDetectedMessageDto();
+        dto.setRzVozidla(message);
+        dto.setStatus(RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO);
 
-        // Převod JSON objektu na řetězec
-        String jsonMessage = jsonObject.toString();
-
-        // Odeslání zprávy pomocí webSocketService
-        webSocketService.sendMessage(jsonMessage);
+        webSocketService.sendMessage(dto);
     }
+
+    public void sendWebSocketMessage(String message, String status) throws JSONException {
+        RzDetectedMessageDto dto = new RzDetectedMessageDto();
+        dto.setRzVozidla(message);
+        dto.setStatus(RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO);
+
+        webSocketService.sendMessage(dto);
+    }
+
 }

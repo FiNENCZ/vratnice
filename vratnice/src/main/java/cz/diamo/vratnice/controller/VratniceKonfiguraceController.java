@@ -30,6 +30,7 @@ public class VratniceKonfiguraceController extends BaseController {
         vratniceKonfiguraceDto.setBarvaVyprseniPouceni(vratniceProperties.getBarvaVyprseniPouceni());
         vratniceKonfiguraceDto.setBarvaPovoleneSpz(vratniceProperties.getBarvaPovoleneSpz());
         vratniceKonfiguraceDto.setBarvaNepovoleneSpz(vratniceProperties.getBarvaNepovoleneSpz());
+        vratniceKonfiguraceDto.setBarvaSluzebnihoVozidla(vratniceProperties.getBarvaSluzebnihoVozidla());
 
         return vratniceKonfiguraceDto;
     }

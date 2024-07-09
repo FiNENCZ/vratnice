@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.vratnice.dto.RzDetectedMessageDto;
+
 @Service
 public class WebSocketService {
 
@@ -14,7 +16,7 @@ public class WebSocketService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendMessage(String message) {
+    public void sendMessage(RzDetectedMessageDto message) {
         messagingTemplate.convertAndSend("/topic/greetings", message);
     }
 
