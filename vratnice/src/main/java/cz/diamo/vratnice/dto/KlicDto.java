@@ -2,7 +2,12 @@ package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import cz.diamo.vratnice.entity.Budova;
 import cz.diamo.vratnice.entity.Klic;
+import cz.diamo.vratnice.entity.Lokalita;
+import cz.diamo.vratnice.entity.Poschodi;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -28,16 +33,16 @@ public class KlicDto implements Serializable {
     @Size(max = 50, message = "{klic.rfid.max.50}")
     private String kodCipu;
 
-    @NotBlank(message = "{klic.lokace.require}")
-    @Size(max = 50, message = "{klic.lokace.max.50}")
-    private String lokace;
+    //@NotBlank(message = "{klic.lokace.require}")
+    //@Size(max = 50, message = "{klic.lokace.max.50}")
+    private LokalitaDto lokalita;
 
-    @NotBlank(message = "{klic.budova.require}")
-    @Size(max = 50, message = "{klic.budova.max.50}")
-    private String budova;
+    //@NotBlank(message = "{klic.budova.require}")
+    //@Size(max = 50, message = "{klic.budova.max.50}")
+    private BudovaDto budova;
 
-    @NotNull(message = "{klic.podlazi.require}")
-    private Integer poschodi;
+    //@NotNull(message = "{klic.podlazi.require}")
+    private PoschodiDto poschodi;
 
     @NotBlank(message = "{klic.mistnost.require}")
     @Size(max = 50, message = "{klic.mistnost.max.50}")
@@ -46,10 +51,6 @@ public class KlicDto implements Serializable {
     //@NotBlank(message = "{klic.typ_klice.require}")
     //@Size(max = 50, message = "{klic.typ_klice.max.50}")
     private KlicTypDto typ;
-
-    @NotBlank(message = "{klic.stav.require}")
-    @Size(max = 20, message = "{klic.stav.max.20}")
-    private String state = "dostupný";
 
     @NotNull(message = "{aktivita.require}")
     private Boolean aktivita = true;
@@ -62,27 +63,26 @@ public class KlicDto implements Serializable {
         this.specialni = key.isSpecialni();
         this.nazev = key.getNazev();
         this.kodCipu = key.getKodCipu();
-        this.lokace = key.getLokalita();
-        this.budova = key.getBudova();
-        this.poschodi = key.getPoschodi();
+        this.lokalita = new LokalitaDto(key.getLokalita());
+        this.budova = new BudovaDto(key.getBudova());
+        this.poschodi = new PoschodiDto(key.getPoschodi());
         this.mistnost = key.getMistnost();
         this.typ = new KlicTypDto(key.getTyp());
-        this.state = key.getStav();
         this.aktivita = key.getAktivita();
     }
 
+    @JsonIgnore
     public Klic toEntity() {
         Klic key = new Klic();
         key.setIdKlic(this.idKlic);
         key.setSpecialni(this.specialni);
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
-        key.setLokalita(this.lokace);
-        key.setBudova(this.budova);
-        key.setPoschodi(this.poschodi);
+        key.setLokalita(new Lokalita(getLokalita().getId()));
+        key.setBudova(new Budova(getBudova().getId()));
+        key.setPoschodi(new Poschodi(getPoschodi().getId()));
         key.setMistnost(this.mistnost);
         key.setTyp(getTyp().toEntity());
-        key.setStav(this.state);
         key.setAktivita(this.aktivita);
         return key;
     }

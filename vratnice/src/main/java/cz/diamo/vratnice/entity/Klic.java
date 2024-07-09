@@ -40,14 +40,17 @@ public class Klic implements Serializable {
     @Column(name = "kod_cipu")
     private String kodCipu;
 
-    @Column(name = "lokalita")
-    private String lokalita;
+    @ManyToOne
+    @JoinColumn(name = "id_lokalita")
+    private Lokalita lokalita;
 
-    @Column(name = "budova")
-    private String budova;
+    @ManyToOne
+    @JoinColumn(name = "id_budova")
+    private Budova budova;
 
-    @Column(name = "poschodi")
-    private Integer poschodi;
+    @ManyToOne
+    @JoinColumn(name = "id_poschodi")
+    private Poschodi poschodi;
 
     @Column(name = "mistnost")
     private String mistnost;
@@ -55,9 +58,6 @@ public class Klic implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_klic_typ")
     private KlicTyp typ;
-
-    @Column(name = "status")
-    private String stav = "dostupný";
 
     private String poznamka;
 

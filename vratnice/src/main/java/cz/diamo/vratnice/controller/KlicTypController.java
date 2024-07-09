@@ -51,7 +51,6 @@ public class KlicTypController extends BaseController {
 		}
 
         return result;
-
     }
     
 

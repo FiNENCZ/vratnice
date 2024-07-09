@@ -64,10 +64,6 @@ public class HistorieVypujcekController extends BaseController {
         if (klic == null) {
             return ResponseEntity.notFound().build();
         }
-
-        String newState = "vrácen".equals(stav) ? "dostupný" : stav;
-        klic.setStav(newState);
-        klicService.createKey(klic);
         
         // Vytvoření historie výpůjčky
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();

@@ -24,5 +24,5 @@ ALTER TABLE vratnice.klic
 ALTER TABLE vratnice.klic
     ADD COLUMN id_klic_typ INTEGER;
 
- ALTER TABLE vratnice.klic ADD CONSTRAINT fk_klic_id_klic_typ
+ALTER TABLE vratnice.klic ADD CONSTRAINT fk_klic_id_klic_typ
 	FOREIGN KEY (id_klic_typ) REFERENCES vratnice.klic_typ (id_klic_typ) ON DELETE No Action ON UPDATE No Action
