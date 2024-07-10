@@ -60,10 +60,13 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "rz_vozidla")
     private List<String> rzVozidla;
 
-    @ElementCollection
-    @CollectionTable(name = "povoleni_vjezdu_vozidla_typ_vozidla", joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"))
-    @Column(name = "typ_vozidla")
-    private List<String> typVozidla;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "povoleni_vjezdu_vozidla_typ_vozidla",
+        joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"),
+        inverseJoinColumns = @JoinColumn(name = "id_vozidlo_typ")
+    )
+    private List<VozidloTyp> typVozidla;
 
     @Column(name = "zeme_registrace_vozidla")
     private String zemeRegistraceVozidla;

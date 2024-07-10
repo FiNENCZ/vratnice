@@ -23,9 +23,8 @@ public class VjezdVozidlaDto implements Serializable {
     @Size(max = 30, message = "{vjezd_vozidla.tz_vozidla.max.30}")
     private String rzVozidla;
 
-    @NotBlank(message = "{vjezd_vozidla.typ_vozidla.require}")
-    @Size(max = 30, message = "{vjezd_vozidla.typ_vozidla.max.30}")
-    private String typVozidla;
+    @NotNull(message = "{vjezd_vozidla.typ_vozidla.require}")
+    private VozidloTypDto typVozidla;
 
     private Integer opakovanyVjezd;
 
@@ -43,7 +42,7 @@ public class VjezdVozidlaDto implements Serializable {
         this.idVjezdVozidla = vjezdVozidla.getIdVjezdVozidla();
         this.ridic = new RidicDto(vjezdVozidla.getRidic());
         this.rzVozidla = vjezdVozidla.getRzVozidla();
-        this.typVozidla = vjezdVozidla.getTypVozidla();
+        this.typVozidla =  new VozidloTypDto(vjezdVozidla.getTypVozidla());
         this.opakovanyVjezd = vjezdVozidla.getOpakovanyVjezd();
         this.casPrijezdu = vjezdVozidla.getCasPrijezdu();
         this.aktivita = vjezdVozidla.getAktivita();
@@ -55,7 +54,7 @@ public class VjezdVozidlaDto implements Serializable {
         vjezdVozidla.setIdVjezdVozidla(this.idVjezdVozidla);
         vjezdVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null);
         vjezdVozidla.setRzVozidla(this.rzVozidla);
-        vjezdVozidla.setTypVozidla(this.typVozidla);
+        vjezdVozidla.setTypVozidla(getTypVozidla().toEntity());
         vjezdVozidla.setOpakovanyVjezd(this.opakovanyVjezd);
         vjezdVozidla.setCasPrijezdu(this.casPrijezdu);
         vjezdVozidla.setAktivita(this.aktivita);

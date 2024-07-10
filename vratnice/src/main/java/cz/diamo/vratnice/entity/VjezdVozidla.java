@@ -41,8 +41,9 @@ public class VjezdVozidla implements Serializable {
     @Column(name = "rz_vozidla")
     private String rzVozidla;
 
-    @Column(name = "typ_vozidla")
-    private String typVozidla;
+    @ManyToOne
+    @JoinColumn(name = "id_vozidlo_typ")
+    private VozidloTyp typVozidla;
 
     @Column(name = "opakovany_vjezd")
     private Integer opakovanyVjezd;

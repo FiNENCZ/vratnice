@@ -3,10 +3,16 @@ package cz.diamo.vratnice.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
+import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.SluzebniVozidloRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,6 +27,13 @@ public class SluzebniVozidloService {
     
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+	private MessageSource messageSource;
+
+    @Autowired
+    private ResourcesComponent resourcesComponent;
+
 
     public List<SluzebniVozidlo> getList(Boolean aktivita) {
         StringBuilder queryString = new StringBuilder();
@@ -60,6 +73,19 @@ public class SluzebniVozidloService {
 
     public List<SluzebniVozidlo> getSluzebniVozidloByAktivita(Boolean aktivita) {
         return sluzebniVozidloRepository.findByAktivita(aktivita);
+    }
+
+    public VozidloTyp getVozidloTyp(String idVozidlo) {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
+        try {
+            if (sluzebniVozidlo == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getTyp().getNazevResx()));
+            return sluzebniVozidlo.getTyp();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
     }
 
 }

@@ -24,7 +24,9 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
+import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.service.HistorieSluzebniVozidloService;
 import cz.diamo.vratnice.service.SluzebniVozidloService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -142,5 +144,11 @@ public class SluzebniVozidloController extends BaseController {
         historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());
 
         return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
+    }
+
+    @GetMapping("/sluzebni-vozidlo/typ")
+    public ResponseEntity<VozidloTypDto> typ(@RequestParam String idSluzebniVozidlo) {
+        VozidloTyp vozidloTyp = sluzebniVozidloService.getVozidloTyp(idSluzebniVozidlo);
+        return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
     }
 }

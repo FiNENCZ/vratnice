@@ -25,9 +25,8 @@ public class SluzebniVozidloDto implements Serializable {
     @Size(max = 30, message = "{sluzebni_vozidlo.rz.max.30}")
     private String rz;
 
-    @NotBlank(message = "{sluzebni_vozidlo.typ.require}")
-    @Size(max = 50, message = "{sluzebni_vozidlo.typ.max.50}")
-    private String typ;
+    @NotNull(message = "{sluzebni_vozidlo.typ.require}")
+    private VozidloTypDto typ;
 
     @NotBlank(message = "{sluzebni_vozidlo.kategorie.require}")
     @Size(max = 50, message = "{sluzebni_vozidlo.kategorie.max.50}")
@@ -56,7 +55,7 @@ public class SluzebniVozidloDto implements Serializable {
 
         this.idSluzebniVozidlo = sluzebniVozidlo.getIdSluzebniVozidlo();
         this.rz = sluzebniVozidlo.getRz();
-        this.typ = sluzebniVozidlo.getTyp();
+        this.typ = new VozidloTypDto(sluzebniVozidlo.getTyp());
         this.kategorie = sluzebniVozidlo.getKategorie();
         this.funkce = sluzebniVozidlo.getFunkce();
         this.zavod = new ZavodDto(sluzebniVozidlo.getZavod());
@@ -71,7 +70,7 @@ public class SluzebniVozidloDto implements Serializable {
         
         sluzebniVozidlo.setIdSluzebniVozidlo(this.idSluzebniVozidlo);
         sluzebniVozidlo.setRz(this.rz);
-        sluzebniVozidlo.setTyp(this.typ);
+        sluzebniVozidlo.setTyp(getTyp().toEntity());
         sluzebniVozidlo.setKategorie(this.kategorie);
         sluzebniVozidlo.setFunkce(this.funkce);
         sluzebniVozidlo.setZavod(new Zavod(getZavod().getId()));

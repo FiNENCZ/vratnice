@@ -3,6 +3,7 @@ package cz.diamo.vratnice.dto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -41,7 +42,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     private List<String> rzVozidla;
 
     @NotNull(message = "{povoleni.vjezdu.vozidla.typ_vozidla.require}")
-    private List<String> typVozidla;
+    private List<VozidloTypDto> typVozidla;
 
     @NotBlank(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
     private String zemeRegistraceVozidla;
@@ -83,14 +84,13 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         }
         this.setRzVozidla(rzVozidla);
 
-        List<String> typVozidla = new ArrayList<>();
+        List<VozidloTypDto> vozidloTypDtos = new ArrayList<>();
         if (povoleniVjezduVozidla.getTypVozidla() != null) {
-            for (String vozidloTyp : povoleniVjezduVozidla.getTypVozidla()) {
-                typVozidla.add(new String(vozidloTyp));
+            for(VozidloTyp vozidloTyp : povoleniVjezduVozidla.getTypVozidla()){
+                vozidloTypDtos.add(new VozidloTypDto(vozidloTyp));
             }
         }
-        this.setTypVozidla(typVozidla);
-
+        this.setTypVozidla(vozidloTypDtos);
      
         this.zemeRegistraceVozidla = povoleniVjezduVozidla.getZemeRegistraceVozidla();
         this.ridic = new RidicDto(povoleniVjezduVozidla.getRidic());
@@ -127,15 +127,16 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
             }
         }
         povoleniVjezduVozidla.setRzVozidla(rzVozidla);
-    
-        List<String> typVozidla = new ArrayList<>();
-        if (this.getTypVozidla() != null) {
-            for (String vozidloTyp : this.getTypVozidla()) {
-                typVozidla.add(new String(vozidloTyp));
+
+        List<VozidloTyp> vozidlaTypy = new ArrayList<>();
+        if (getTypVozidla() != null) {
+            for (VozidloTypDto vozidloTypDto : this.getTypVozidla()) {
+                vozidlaTypy.add(new VozidloTyp(vozidloTypDto.getTypEnum()));
             }
         }
-        povoleniVjezduVozidla.setTypVozidla(typVozidla);
+        povoleniVjezduVozidla.setTypVozidla(vozidlaTypy);
     
+
         povoleniVjezduVozidla.setZemeRegistraceVozidla(this.zemeRegistraceVozidla);
         povoleniVjezduVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null); // Pokud je ridic null, nastavíme null
         povoleniVjezduVozidla.setSpolecnostVozidla(this.spolecnostVozidla);

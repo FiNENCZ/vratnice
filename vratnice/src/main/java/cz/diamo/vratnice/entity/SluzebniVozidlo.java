@@ -37,7 +37,9 @@ public class SluzebniVozidlo implements Serializable {
 
     private String rz;
 
-    private String typ;
+    @ManyToOne
+    @JoinColumn(name = "id_vozidlo_typ")
+    private VozidloTyp typ;
 
     private String kategorie;
 

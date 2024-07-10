@@ -14,8 +14,10 @@ import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.VjezdVozidlaDto;
+import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.service.RidicService;
 import cz.diamo.vratnice.service.VjezdVozidlaService;
 import jakarta.validation.Valid;
@@ -90,5 +92,11 @@ public class VjezdVozidlaController extends BaseController{
             .map(VjezdVozidlaDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(vjezdVozidel);
+    }
+
+    @GetMapping("/vjezd-vozidla/typ")
+    public ResponseEntity<VozidloTypDto> typ(@RequestParam String idVozidlo) {
+        VozidloTyp vozidloTyp = vjezdVozidlaService.getVozidloTyp(idVozidlo);
+        return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
     }
 }
