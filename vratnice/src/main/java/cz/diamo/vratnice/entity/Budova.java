@@ -1,14 +1,12 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,10 +37,6 @@ public class Budova implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_lokalita")
     private Lokalita lokalita;
-    
-    /* 
-    @OneToMany(mappedBy = "budova")
-    private List<Poschodi> poschodi;*/
 
     public Budova(String idBudova) {
         setIdBudova(idBudova);

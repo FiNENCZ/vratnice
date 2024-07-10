@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.vratnice.dto.BudovaDto;
-import cz.diamo.vratnice.dto.KlicDto;
 import cz.diamo.vratnice.entity.Budova;
-import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.service.BudovaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +39,12 @@ public class BudovaController extends BaseController {
         }
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/budova/detail")
+    public ResponseEntity<BudovaDto> detail(@RequestParam String idBudova) {
+        Budova budova = budovaService.detail(idBudova);
+        return ResponseEntity.ok(new BudovaDto(budova));
     }
     
 

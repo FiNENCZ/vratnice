@@ -5,6 +5,7 @@ import java.io.Serializable;
 import cz.diamo.vratnice.entity.Budova;
 import cz.diamo.vratnice.entity.Poschodi;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,11 @@ public class PoschodiDto implements Serializable {
 
     private String id;
 
-    @NotBlank(message = "{poschodi.typ.require}")
+    @NotBlank(message = "{poschodi.nazev.require}")
     @Size(message = "{poschodi.nazev.max.80}")
     private String nazev;
     
+    @NotNull(message = "{poschodi.budova.require}")
     private BudovaDto budova;
 
     public PoschodiDto(Poschodi poschodi) {

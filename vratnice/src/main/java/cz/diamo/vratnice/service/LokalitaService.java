@@ -1,5 +1,7 @@
 package cz.diamo.vratnice.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,11 @@ public class LokalitaService {
     @Autowired
     private LokalitaRepository lokalitaRepository;
 
-    public Lokalita getDetail(String idLokalita) {
+    public List<Lokalita> list() {
+        return lokalitaRepository.findAll();
+    }
+
+    public Lokalita detail(String idLokalita) {
         return lokalitaRepository.getDetail(idLokalita);
     }
 
