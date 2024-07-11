@@ -33,8 +33,7 @@ public class SluzebniVozidloDto implements Serializable {
     @NotNull(message = "{sluzebni_vozidlo.typ.require}")
     private VozidloTypDto typ;
 
-    //@NotNull(message = "{sluzebni_vozidlo.kategorie.require}")
-    //@Size(max = 50, message = "{sluzebni_vozidlo.kategorie.max.50}")
+    @NotNull(message = "{sluzebni_vozidlo.kategorie.require}")
     private SluzebniVozidloKategorieDto kategorie;
 
     private SluzebniVozidloFunkceDto funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
@@ -43,7 +42,7 @@ public class SluzebniVozidloDto implements Serializable {
 
     private List<LokalitaDto> lokality;
     
-    //@NotNull(message = "{sluzebni_vozidlo.stav.require}")
+    @NotNull(message = "{sluzebni_vozidlo.stav.require}")
     private SluzebniVozidloStavDto stav;
 
     private Date datumOd;
@@ -64,7 +63,9 @@ public class SluzebniVozidloDto implements Serializable {
         if (sluzebniVozidlo.getFunkce() != null)
             this.funkce = new SluzebniVozidloFunkceDto(sluzebniVozidlo.getFunkce());
 
-        this.zavod = new ZavodDto(sluzebniVozidlo.getZavod());
+        if (sluzebniVozidlo.getZavod() != null)
+            this.zavod = new ZavodDto(sluzebniVozidlo.getZavod());
+
         this.stav = new SluzebniVozidloStavDto(sluzebniVozidlo.getStav());
 
 
@@ -88,9 +89,12 @@ public class SluzebniVozidloDto implements Serializable {
         sluzebniVozidlo.setRz(this.rz);
         sluzebniVozidlo.setTyp(getTyp().toEntity());
         sluzebniVozidlo.setKategorie(getKategorie().toEntity());
-        sluzebniVozidlo.setFunkce(getFunkce().toEntity());
+        
+        if (getFunkce() != null) 
+            sluzebniVozidlo.setFunkce(getFunkce().toEntity());
 
-        if (getZavod().getId() != null)
+
+        if (getZavod()!= null)
             sluzebniVozidlo.setZavod(new Zavod(getZavod().getId()));
 
         List<Lokalita> lokality = new ArrayList<>();
@@ -107,14 +111,36 @@ public class SluzebniVozidloDto implements Serializable {
         return sluzebniVozidlo;
     }
 
-    @AssertTrue(message = "Funkce is required if kategorie is 'manažerské'")
+    @AssertTrue(message = "{sluzebni_vozidlo.funkce.require}")
     public boolean isFunkceValid() {
+        if (kategorie == null) {
+            return false; // nebo true podle vašich požadavků
+        }
         return !(kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE) && (funkce == null));
     }
 
-    @AssertTrue(message = "DatumOd is required if stav is 'blokované'")
+    @AssertTrue(message = "{sluzebni_vozidlo.datum_od.require}")
     public boolean isDatumOdValid() {
+        if (stav == null) {
+            return false; // nebo true podle vašich požadavků
+        }
         return !(stav.getSluzebniVozidloStavEnum().equals(SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE) && datumOd == null);
+    }
+
+    @AssertTrue(message = "{sluzebni_vozidlo.zavod.require}")
+    public boolean isZavodValid() {
+        if (kategorie == null) {
+            return false; // nebo true podle vašich požadavků
+        }
+        return !(!kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE) && (zavod == null));
+    }
+
+    @AssertTrue(message = "{sluzebni_vozidlo.lokality.require}")
+    public boolean isLokalityValid() {
+        if (kategorie == null) {
+            return false; // nebo true podle vašich požadavků
+        }
+        return !(!kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE) && (lokality == null));
     }
     
 }

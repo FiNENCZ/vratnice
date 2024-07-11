@@ -12,6 +12,9 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.entity.SluzebniVozidloFunkce;
+import cz.diamo.vratnice.entity.SluzebniVozidloKategorie;
+import cz.diamo.vratnice.entity.SluzebniVozidloStav;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.SluzebniVozidloRepository;
 import jakarta.persistence.EntityManager;
@@ -83,6 +86,45 @@ public class SluzebniVozidloService {
         
             sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getTyp().getNazevResx()));
             return sluzebniVozidlo.getTyp();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
+    public SluzebniVozidloKategorie getKategorie(String idVozidlo) {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
+        try {
+            if (sluzebniVozidlo == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getKategorie().getNazevResx()));
+            return sluzebniVozidlo.getKategorie();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
+    public SluzebniVozidloFunkce getFunkce(String idVozidlo) {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
+        try {
+            if (sluzebniVozidlo == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getFunkce().getNazevResx()));
+            return sluzebniVozidlo.getFunkce();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
+    public SluzebniVozidloStav getVozidloStav(String idVozidlo) {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
+        try {
+            if (sluzebniVozidlo == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getStav().getNazevResx()));
+            return sluzebniVozidlo.getStav();
         } catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 		}

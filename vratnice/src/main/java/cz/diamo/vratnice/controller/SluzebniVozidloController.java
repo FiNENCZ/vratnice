@@ -24,8 +24,14 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
+import cz.diamo.vratnice.dto.SluzebniVozidloFunkceDto;
+import cz.diamo.vratnice.dto.SluzebniVozidloKategorieDto;
+import cz.diamo.vratnice.dto.SluzebniVozidloStavDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.entity.SluzebniVozidloFunkce;
+import cz.diamo.vratnice.entity.SluzebniVozidloKategorie;
+import cz.diamo.vratnice.entity.SluzebniVozidloStav;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.service.HistorieSluzebniVozidloService;
 import cz.diamo.vratnice.service.SluzebniVozidloService;
@@ -116,4 +122,25 @@ public class SluzebniVozidloController extends BaseController {
         VozidloTyp vozidloTyp = sluzebniVozidloService.getVozidloTyp(idSluzebniVozidlo);
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
     }
+
+    @GetMapping("/sluzebni-vozidlo/kategorie")
+    public ResponseEntity<SluzebniVozidloKategorieDto> kategorie(@RequestParam String idSluzebniVozidlo) {
+        SluzebniVozidloKategorie kategorie = sluzebniVozidloService.getKategorie(idSluzebniVozidlo);
+        return ResponseEntity.ok(new SluzebniVozidloKategorieDto(kategorie));
+    }
+
+    @GetMapping("/sluzebni-vozidlo/funkce")
+    public ResponseEntity<SluzebniVozidloFunkceDto> funkce(@RequestParam String idSluzebniVozidlo) {
+        SluzebniVozidloFunkce funkce = sluzebniVozidloService.getFunkce(idSluzebniVozidlo);
+        return ResponseEntity.ok(new SluzebniVozidloFunkceDto(funkce));
+    }
+
+    @GetMapping("/sluzebni-vozidlo/stav")
+    public ResponseEntity<SluzebniVozidloStavDto> stav(@RequestParam String idSluzebniVozidlo) {
+        SluzebniVozidloStav stav = sluzebniVozidloService.getVozidloStav(idSluzebniVozidlo);
+        return ResponseEntity.ok(new SluzebniVozidloStavDto(stav));
+    }
+
+
+
 }
