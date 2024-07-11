@@ -4,7 +4,9 @@ import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -42,10 +44,11 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     private List<String> rzVozidla;
 
     @NotNull(message = "{povoleni.vjezdu.vozidla.typ_vozidla.require}")
+    @NotEmpty(message = "{povoleni.vjezdu.vozidla.typ_vozidla.require}")
     private List<VozidloTypDto> typVozidla;
 
-    @NotBlank(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
-    private String zemeRegistraceVozidla;
+    @NotNull(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
+    private StatDto zemeRegistraceVozidla;
 
     private RidicDto ridic;
 
@@ -92,7 +95,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         }
         this.setTypVozidla(vozidloTypDtos);
      
-        this.zemeRegistraceVozidla = povoleniVjezduVozidla.getZemeRegistraceVozidla();
+        this.zemeRegistraceVozidla = new StatDto(povoleniVjezduVozidla.getZemeRegistraceVozidla());
         this.ridic = new RidicDto(povoleniVjezduVozidla.getRidic());
         this.spolecnostVozidla = povoleniVjezduVozidla.getSpolecnostVozidla();
         this.datumOd = povoleniVjezduVozidla.getDatumOd();
@@ -137,7 +140,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         povoleniVjezduVozidla.setTypVozidla(vozidlaTypy);
     
 
-        povoleniVjezduVozidla.setZemeRegistraceVozidla(this.zemeRegistraceVozidla);
+        povoleniVjezduVozidla.setZemeRegistraceVozidla(getZemeRegistraceVozidla().toEntity());
         povoleniVjezduVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null); // Pokud je ridic null, nastavíme null
         povoleniVjezduVozidla.setSpolecnostVozidla(this.spolecnostVozidla);
         povoleniVjezduVozidla.setDatumOd(this.datumOd);
@@ -155,6 +158,14 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         povoleniVjezduVozidla.setStav(this.stav);
     
         return povoleniVjezduVozidla;
+    }
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.rz_typ_vozidla.require}")
+    private boolean isRzVozidlaTypVozidlaCountEqual() {
+        if (rzVozidla == null || typVozidla == null) {
+            return false;
+        }
+        return rzVozidla.size() == typVozidla.size();
     }
     
 }

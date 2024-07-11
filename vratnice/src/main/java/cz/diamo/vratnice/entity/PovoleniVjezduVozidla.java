@@ -68,8 +68,9 @@ public class PovoleniVjezduVozidla implements Serializable{
     )
     private List<VozidloTyp> typVozidla;
 
-    @Column(name = "zeme_registrace_vozidla")
-    private String zemeRegistraceVozidla;
+    @ManyToOne
+    @JoinColumn(name = "id_stat")
+    private Stat zemeRegistraceVozidla;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ridic")
