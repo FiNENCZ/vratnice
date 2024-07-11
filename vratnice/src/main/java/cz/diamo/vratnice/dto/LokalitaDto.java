@@ -2,8 +2,11 @@ package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
 
+import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.Lokalita;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +21,9 @@ public class LokalitaDto implements Serializable {
     @NotBlank(message = "{lokalita.nazev.require}")
     @Size(message = "{lokalita.nazev.max.80}")
     private String nazev;
+
+    @NotNull(message = "{lokalita.zavod.require}")
+    private ZavodDto zavod;
     
 
     public LokalitaDto(Lokalita lokalita) {
@@ -27,6 +33,7 @@ public class LokalitaDto implements Serializable {
 
         this.id = lokalita.getIdLokalita();
         this.nazev = lokalita.getNazev();
+        this.zavod = new ZavodDto(lokalita.getZavod());
     }
 
     public Lokalita toEntity() {
@@ -34,6 +41,7 @@ public class LokalitaDto implements Serializable {
 
         lokalita.setIdLokalita(this.id);
         lokalita.setNazev(this.nazev);
+        lokalita.setZavod(new Zavod(getZavod().getId()));
 
         return lokalita;
     }

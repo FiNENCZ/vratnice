@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,9 +22,9 @@ public class LokalitaController extends BaseController{
     private LokalitaService lokalitaService;
 
     @GetMapping("/lokalita/list")
-    public ResponseEntity<List<LokalitaDto>> list() {
+    public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
         List<LokalitaDto> result = new ArrayList<LokalitaDto>();
-        List<Lokalita> list = lokalitaService.list();
+        List<Lokalita> list = lokalitaService.getList(idZavod);
 
         if (list != null && list.size() > 0) {
             for (Lokalita lokalita : list) {
