@@ -3,6 +3,7 @@ package cz.diamo.vratnice.entity;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -14,6 +15,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -41,17 +44,29 @@ public class SluzebniVozidlo implements Serializable {
     @JoinColumn(name = "id_vozidlo_typ")
     private VozidloTyp typ;
 
-    private String kategorie;
+    @ManyToOne
+    @JoinColumn(name = "id_sluzebni_vozidlo_kategorie")
+    private SluzebniVozidloKategorie kategorie;
 
-    private String funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
+    @ManyToOne
+    @JoinColumn(name = "id_sluzebni_vozidlo_funkce")
+    private SluzebniVozidloFunkce funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_zavod")
     private Zavod zavod; // výběr z číselníku (i vícenásobný), kam může vozidlo jet, manažerské může kamkoliv, ostatní jen závod, jinak se žádá sekretariát
 
-    private String lokalita;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "sluzebni_vozidlo_lokalita",
+        joinColumns = @JoinColumn(name = "id_sluzebni_vozidlo"),
+        inverseJoinColumns = @JoinColumn(name = "id_lokalita")
+    )
+    private List<Lokalita> lokality;
     
-    private String stav;
+    @ManyToOne
+    @JoinColumn(name = "id_sluzebni_vozidlo_stav")
+    private SluzebniVozidloStav stav;
 
     @Column(name = "datum_od")
     private Date datumOd;

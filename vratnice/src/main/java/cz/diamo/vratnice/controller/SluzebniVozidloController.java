@@ -111,41 +111,6 @@ public class SluzebniVozidloController extends BaseController {
         return ResponseEntity.ok(sluzebniVozidla);
     }
 
-    @PostMapping("/sluzebni-vozidlo/toggle-aktivita")
-    public ResponseEntity<SluzebniVozidloDto> toggleAktivita(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException {
-        //změna aktivity
-        sluzebniVozidloDto.setAktivita(!sluzebniVozidloDto.getAktivita());
-
-        Boolean aktualniAktivita = sluzebniVozidloDto.getAktivita();
-        if (aktualniAktivita == true) {
-            sluzebniVozidloDto.setStav("aktivní");
-        } else {
-            sluzebniVozidloDto.setStav("odstraněno");
-        }
-
-        SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
-
-        // Vytvoření historie odstraněno/obnoveno služebního auta
-        Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-
-        HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
-        historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
-
-        
-        if (aktualniAktivita == true) {
-            historieSluzebniVozidloDto.setAkce("obnoveno");
-        } else {
-            historieSluzebniVozidloDto.setAkce("odstraněno");
-        }
-
-        historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
-
-        historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());
-
-        return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
-    }
-
     @GetMapping("/sluzebni-vozidlo/typ")
     public ResponseEntity<VozidloTypDto> typ(@RequestParam String idSluzebniVozidlo) {
         VozidloTyp vozidloTyp = sluzebniVozidloService.getVozidloTyp(idSluzebniVozidlo);

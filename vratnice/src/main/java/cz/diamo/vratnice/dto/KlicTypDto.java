@@ -36,7 +36,7 @@ public class KlicTypDto implements Serializable {
     }
 
     public KlicTypEnum getTypEnum() {
-        return KlicTypEnum.getKlicStateEnum(getId());
+        return KlicTypEnum.getKlicTypEnum(getId());
     }
 
 }

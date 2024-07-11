@@ -15,11 +15,11 @@ public enum KlicTypEnum {
         return value;
     }
 
-    public static KlicTypEnum getKlicStateEnum(KlicTyp klicTyp) {
-        return getKlicStateEnum(klicTyp.getIdKlicTyp());
+    public static KlicTypEnum getKlicTypEnum(KlicTyp klicTyp) {
+        return getKlicTypEnum(klicTyp.getIdKlicTyp());
     }
 
-    public static KlicTypEnum getKlicStateEnum(int value) {
+    public static KlicTypEnum getKlicTypEnum(int value) {
         switch (value) {
             case 1:
                 return KLIC_PRIDELENY;

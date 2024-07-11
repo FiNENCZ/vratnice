@@ -1,11 +1,16 @@
 package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.enums.SluzebniVozidloKategorieEnum;
+import cz.diamo.vratnice.enums.SluzebniVozidloStavEnum;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,20 +33,18 @@ public class SluzebniVozidloDto implements Serializable {
     @NotNull(message = "{sluzebni_vozidlo.typ.require}")
     private VozidloTypDto typ;
 
-    @NotBlank(message = "{sluzebni_vozidlo.kategorie.require}")
-    @Size(max = 50, message = "{sluzebni_vozidlo.kategorie.max.50}")
-    private String kategorie;
+    //@NotNull(message = "{sluzebni_vozidlo.kategorie.require}")
+    //@Size(max = 50, message = "{sluzebni_vozidlo.kategorie.max.50}")
+    private SluzebniVozidloKategorieDto kategorie;
 
-    @Size(max = 50, message = "{sluzebni_vozidlo.funkce.max.50}")
-    private String funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
+    private SluzebniVozidloFunkceDto funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
 
     private ZavodDto zavod; // výběr z číselníku (i vícenásobný), kam může vozidlo jet, manažerské může kamkoliv, ostatní jen závod, jinak se žádá sekretariát
 
-    private String lokalita;
+    private List<LokalitaDto> lokality;
     
-    @NotBlank(message = "{sluzebni_vozidlo.stav.require}")
-    @Size(max = 50, message = "{sluzebni_vozidlo.stav.max.50}")
-    private String stav;
+    //@NotNull(message = "{sluzebni_vozidlo.stav.require}")
+    private SluzebniVozidloStavDto stav;
 
     private Date datumOd;
 
@@ -56,11 +59,24 @@ public class SluzebniVozidloDto implements Serializable {
         this.idSluzebniVozidlo = sluzebniVozidlo.getIdSluzebniVozidlo();
         this.rz = sluzebniVozidlo.getRz();
         this.typ = new VozidloTypDto(sluzebniVozidlo.getTyp());
-        this.kategorie = sluzebniVozidlo.getKategorie();
-        this.funkce = sluzebniVozidlo.getFunkce();
+        this.kategorie = new SluzebniVozidloKategorieDto(sluzebniVozidlo.getKategorie());
+
+        if (sluzebniVozidlo.getFunkce() != null)
+            this.funkce = new SluzebniVozidloFunkceDto(sluzebniVozidlo.getFunkce());
+
         this.zavod = new ZavodDto(sluzebniVozidlo.getZavod());
-        this.stav = sluzebniVozidlo.getStav();
-        this.lokalita = sluzebniVozidlo.getLokalita();
+        this.stav = new SluzebniVozidloStavDto(sluzebniVozidlo.getStav());
+
+
+        List<LokalitaDto> lokalitaDtos = new ArrayList<>();
+        if (sluzebniVozidlo.getLokality() != null) {
+            for (Lokalita lokalita : sluzebniVozidlo.getLokality()) {
+                lokalitaDtos.add(new LokalitaDto(lokalita));
+            }
+        }
+        this.setLokality(lokalitaDtos);
+
+
         this.datumOd = sluzebniVozidlo.getDatumOd();
         this.aktivita = sluzebniVozidlo.getAktivita();
     }
@@ -71,11 +87,21 @@ public class SluzebniVozidloDto implements Serializable {
         sluzebniVozidlo.setIdSluzebniVozidlo(this.idSluzebniVozidlo);
         sluzebniVozidlo.setRz(this.rz);
         sluzebniVozidlo.setTyp(getTyp().toEntity());
-        sluzebniVozidlo.setKategorie(this.kategorie);
-        sluzebniVozidlo.setFunkce(this.funkce);
-        sluzebniVozidlo.setZavod(new Zavod(getZavod().getId()));
-        sluzebniVozidlo.setLokalita(this.lokalita);
-        sluzebniVozidlo.setStav(this.stav);
+        sluzebniVozidlo.setKategorie(getKategorie().toEntity());
+        sluzebniVozidlo.setFunkce(getFunkce().toEntity());
+
+        if (getZavod().getId() != null)
+            sluzebniVozidlo.setZavod(new Zavod(getZavod().getId()));
+
+        List<Lokalita> lokality = new ArrayList<>();
+        if (getLokality() != null) {
+            for (LokalitaDto lokalitaDto : this.getLokality()) {
+                lokality.add(new Lokalita(lokalitaDto.getId()));
+            }
+        }
+        sluzebniVozidlo.setLokality(lokality);
+        
+        sluzebniVozidlo.setStav(getStav().toEntity());
         sluzebniVozidlo.setDatumOd(this.datumOd);
         sluzebniVozidlo.setAktivita(this.aktivita);
         return sluzebniVozidlo;
@@ -83,13 +109,12 @@ public class SluzebniVozidloDto implements Serializable {
 
     @AssertTrue(message = "Funkce is required if kategorie is 'manažerské'")
     public boolean isFunkceValid() {
-        return !(kategorie.equals("manažerské") && (funkce == null || funkce.trim().isEmpty()));
+        return !(kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE) && (funkce == null));
     }
 
     @AssertTrue(message = "DatumOd is required if stav is 'blokované'")
     public boolean isDatumOdValid() {
-        return !(stav.equals("blokované") && datumOd == null);
+        return !(stav.getSluzebniVozidloStavEnum().equals(SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE) && datumOd == null);
     }
-
     
 }
