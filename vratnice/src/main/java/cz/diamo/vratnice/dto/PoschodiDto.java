@@ -18,7 +18,7 @@ public class PoschodiDto implements Serializable {
     private String id;
 
     @NotBlank(message = "{poschodi.nazev.require}")
-    @Size(message = "{poschodi.nazev.max.80}")
+    @Size(max = 80, message = "{poschodi.nazev.max.80}")
     private String nazev;
     
     @NotNull(message = "{poschodi.budova.require}")

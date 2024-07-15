@@ -27,12 +27,11 @@ public class NavstevniListekDto implements Serializable{
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     private List<UzivatelDto> uzivatel;
 
-    //@NotBlank(message = "{navstevni_listek.typ.require}")
-    //@Size(message = "{navstevni_listek.typ.max.30}")
+    @NotNull(message = "{navstevni_listek.typ.require}")
     private NavstevniListekTypDto typ;
 
     @NotBlank(message = "{navstevni_listek.stav.require}")
-    @Size(message = "{navstevni_listek.stav.max.30}")
+    @Size(max = 30, message = "{navstevni_listek.stav.max.30}")
     private String stav = "vyžádáno";
 
     @NotNull(message = "{aktivita.require}")

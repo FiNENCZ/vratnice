@@ -18,7 +18,7 @@ public class BudovaDto implements Serializable {
     private String id;
 
     @NotBlank(message = "{budova.nazev.require}")
-    @Size(message = "{budova.nazev.max.80}")
+    @Size(max = 80, message = "{budova.nazev.max.80}")
     private String nazev;
     
     @NotNull(message = "{budova.lokalita.require}")
