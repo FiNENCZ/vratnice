@@ -70,13 +70,13 @@ public class RzVozidlaDetektorController extends BaseController {
         try {
             String licensePlateValue = getLicensePlateFromXml(xmlFile);
             if (licensePlateValue != null) {
-                
-                if (vjezd) {
-                    checkIfRzVozidlaIsAllowedAndSendWS(licensePlateValue, vjezd);
-                } else {
-                    checkIfRzVozidlaCanLeaveAndSendWs(licensePlateValue, vjezd);
+                if (licensePlateValue != "unknown") {
+                    if (vjezd) {
+                        checkIfRzVozidlaIsAllowedAndSendWS(licensePlateValue, vjezd);
+                    } else {
+                        checkIfRzVozidlaCanLeaveAndSendWs(licensePlateValue, vjezd);
+                    }
                 }
-                
 
                 logger.info("License Plate: " + licensePlateValue);
                 return "License Plate: " + licensePlateValue;
