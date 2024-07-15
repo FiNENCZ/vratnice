@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -82,5 +83,13 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
         najemnikNavstevnickaKarta.setAktivita(this.aktivita);
 
         return najemnikNavstevnickaKarta;
+    }
+
+    @AssertTrue(message = "{najemnik_navstevnicka_karta.vydano_od_vydano_do}")
+    private boolean isDatumOdBeforeDatumDo() {
+        if (vydanoOd == null || vydanoDo == null) {
+            return true; // pokud jsou data null, nechceme aby validace selhala zde
+        }
+        return !vydanoDo.before(vydanoOd);
     }
 }

@@ -168,4 +168,11 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         return rzVozidla.size() == typVozidla.size();
     }
     
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.datum_od_datum_do}")
+    private boolean isDatumOdBeforeDatumDo() {
+        if (datumOd == null || datumDo == null) {
+            return true; // pokud jsou data null, nechceme aby validace selhala zde
+        }
+        return !datumDo.before(datumOd);
+    }
 }
