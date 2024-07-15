@@ -15,7 +15,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -174,5 +176,14 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
             return true; // pokud jsou data null, nechceme aby validace selhala zde
         }
         return !datumDo.before(datumOd);
+    }
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.rz_vozidla.unique}")
+    private boolean isRzVozidlaUnique() {
+        if (rzVozidla == null) {
+            return true; // pokud je seznam null, nechceme aby validace selhala zde
+        }
+        Set<String> uniqueRzVozidla = new HashSet<>(rzVozidla);
+        return uniqueRzVozidla.size() == rzVozidla.size();
     }
 }
