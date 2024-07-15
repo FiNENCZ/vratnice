@@ -49,4 +49,8 @@ public class VozidloTypService {
         return vozidloTypRepository.getDetail(idVozidloTyp);
     }
 
+    public VozidloTyp getDetailBVozidloTyp(String vozidloTypEnumString) {
+        return vozidloTypRepository.getDetailByNazevResx(vozidloTypEnumString);
+    }
+
 }

@@ -18,6 +18,7 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.enums.VozidloTypEnum;
 import cz.diamo.vratnice.service.VozidloTypService;
 import io.micrometer.common.lang.Nullable;
 
@@ -54,8 +55,22 @@ public class VozidloTypController extends BaseController {
     }
 
     @GetMapping("/vozidlo-typ/get-typ-with-nazev")
-    public ResponseEntity<VozidloTypDto> getTypWithNazev(@RequestParam Integer idVozidloTyp) {
-        VozidloTyp vozidloTyp = vozidloTypService.detail(idVozidloTyp);
+    public ResponseEntity<VozidloTypDto> getTypWithNazev(@RequestParam(required = false) Integer idVozidloTyp, 
+                                                        @RequestParam(required = false) VozidloTypEnum vozidloTypEnum) {
+
+        VozidloTyp vozidloTyp;
+        // Validace: musí být poskytnut alespoň jeden z parametrů
+        if (idVozidloTyp == null && vozidloTypEnum == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Alespoň jeden parametr musí být vyplněn");
+        }
+
+        // Zpracování požadavku
+        if (idVozidloTyp != null) {
+            vozidloTyp = vozidloTypService.detail(idVozidloTyp);
+        } else {
+            vozidloTyp = vozidloTypService.getDetailBVozidloTyp(vozidloTypEnum.toString());
+        }
+            
 
         try {
             vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),vozidloTyp.getNazevResx()));

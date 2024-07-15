@@ -11,15 +11,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
@@ -60,29 +63,40 @@ public class SluzebniVozidloController extends BaseController {
 
     @PostMapping("/sluzebni-vozidlo/save")
     public ResponseEntity<SluzebniVozidloDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException {
-        SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
-
-        // Vytvoření historie úprav/vytvoření služebního auta
-        Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-        HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
-        historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
         
-        String idSluzebniVozidloKey = sluzebniVozidloDto.getIdSluzebniVozidlo();
+        try {
+            SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
 
-        if (idSluzebniVozidloKey != null && !idSluzebniVozidloKey.isEmpty()) {
-            historieSluzebniVozidloDto.setAkce("upraveno");
+            // Vytvoření historie úprav/vytvoření služebního auta
+            Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
+            HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
+            historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
+            
+            String idSluzebniVozidloKey = sluzebniVozidloDto.getIdSluzebniVozidlo();
+
+            if (idSluzebniVozidloKey != null && !idSluzebniVozidloKey.isEmpty()) {
+                historieSluzebniVozidloDto.setAkce("upraveno");
+            }
+            else {
+                historieSluzebniVozidloDto.setAkce("vytvořeno");
+            }
+
+            historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
+
+            historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());
+
+
+            return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
         }
-        else {
-            historieSluzebniVozidloDto.setAkce("vytvořeno");
-        }
-
-        historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
-
-        historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());
-
-
-        return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
+        catch (BaseException e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+        
     }
     
     @GetMapping("/sluzebni-vozidlo/list")
@@ -139,6 +153,12 @@ public class SluzebniVozidloController extends BaseController {
     public ResponseEntity<SluzebniVozidloStavDto> stav(@RequestParam String idSluzebniVozidlo) {
         SluzebniVozidloStav stav = sluzebniVozidloService.getVozidloStav(idSluzebniVozidlo);
         return ResponseEntity.ok(new SluzebniVozidloStavDto(stav));
+    }
+
+    @GetMapping("/sluzebni-vozidlo/get-by-rz")
+    public ResponseEntity<SluzebniVozidloDto> getByRz(@RequestParam String rz) {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getByRz(rz);
+        return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));
     }
 
 

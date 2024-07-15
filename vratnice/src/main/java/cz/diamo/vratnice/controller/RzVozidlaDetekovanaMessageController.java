@@ -5,10 +5,10 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class MessageController {
+public class RzVozidlaDetekovanaMessageController {
 
     @MessageMapping("/hello") // Handle messages sent to /app/hello
-    @SendTo("/topic/greetings") // Send the response to /topic/greetings
+    @SendTo("/rz-vozidla/detekovana") 
     public String handleHello(String message) {
         return message;
     }

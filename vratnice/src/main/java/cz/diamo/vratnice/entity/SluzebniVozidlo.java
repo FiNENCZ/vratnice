@@ -20,13 +20,14 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name="sluzebni_vozidlo", schema = Constants.SCHEMA)
+@Table(name="sluzebni_vozidlo", schema = Constants.SCHEMA, uniqueConstraints = {@UniqueConstraint(columnNames = "rz")})
 @NamedQuery(name="SluzebniVozidlo.findAll", query = "SELECT s FROM SluzebniVozidlo s")
 public class SluzebniVozidlo implements Serializable {
 
@@ -38,6 +39,7 @@ public class SluzebniVozidlo implements Serializable {
     @Column(name="id_sluzebni_vozidlo")
     private String idSluzebniVozidlo;
 
+    @Column(name = "rz", unique = true)
     private String rz;
 
     @ManyToOne

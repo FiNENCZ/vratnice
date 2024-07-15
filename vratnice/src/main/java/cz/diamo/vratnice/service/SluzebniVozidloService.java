@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.entity.SluzebniVozidloFunkce;
 import cz.diamo.vratnice.entity.SluzebniVozidloKategorie;
@@ -46,7 +48,6 @@ public class SluzebniVozidloService {
 
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
-
         
         Query vysledek = entityManager.createQuery(queryString.toString());
 
@@ -60,7 +61,12 @@ public class SluzebniVozidloService {
     }
 
     @Transactional
-    public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) {
+    public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) throws UniqueValueException, NoSuchMessageException {
+        Boolean exist = sluzebniVozidloRepository.existsByRz(sluzebniVozidlo.getRz());
+        if (exist)
+            throw new UniqueValueException(
+                    messageSource.getMessage("sluzebni_vozidlo.rz.unique", null, LocaleContextHolder.getLocale()));
+
         sluzebniVozidlo.setCasZmn(Utils.getCasZmn());
         sluzebniVozidlo.setZmenuProvedl(Utils.getZmenuProv());
         return sluzebniVozidloRepository.save(sluzebniVozidlo);
@@ -68,6 +74,14 @@ public class SluzebniVozidloService {
 
     public SluzebniVozidlo getDetail(String id) {
         return sluzebniVozidloRepository.getDetail(id);
+    }
+
+    public Boolean isSluzebniVozidlo(String rz) {
+        return sluzebniVozidloRepository.existsByRz(rz);
+    }
+
+    public SluzebniVozidlo getByRz(String rz) {
+        return sluzebniVozidloRepository.getByRz(rz);
     }
 
     public List<SluzebniVozidlo> getSluzebniVozidloByStav(String stav) {

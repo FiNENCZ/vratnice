@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 public class RzDetectedMessageDto {
     private String rzVozidla;
     private RzDetectedMessageStatusEnum status;
+    private Boolean isVjezd;
 }
