@@ -68,7 +68,7 @@ public class SluzebniVozidloController extends BaseController {
             SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
 
             // Vytvoření historie úprav/vytvoření služebního auta
-            Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
+            /*Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
             HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
             historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
             
@@ -84,7 +84,7 @@ public class SluzebniVozidloController extends BaseController {
             historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
 
-            historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());
+            historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());*/
 
 
             return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));

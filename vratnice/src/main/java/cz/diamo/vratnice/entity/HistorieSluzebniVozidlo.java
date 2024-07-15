@@ -37,8 +37,9 @@ public class HistorieSluzebniVozidlo implements Serializable {
     @JoinColumn(name = "id_sluzebni_vozidlo")
     private SluzebniVozidlo sluzebniVozidlo;
 
-    @Column(name = "akce")
-    private String akce;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_historie_sluzebni_vozidlo_akce")
+    private HistorieSluzebniVozidloAkce akce;
 
     @Column(name = "datum")
     private Date datum;
