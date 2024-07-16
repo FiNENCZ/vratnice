@@ -56,19 +56,13 @@ public class HistorieVypujcekController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/historie-vypujcek/save")
-    public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) throws RecordNotFoundException {
-        //Změna stavu i klíče
-        String klicId = zadostKlicDto.getKlic().getIdKlic();
-        Klic klic = klicService.getDetail(klicId);
-
-        if (klic == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
+    public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                                @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
+                                @RequestParam String stav) throws RecordNotFoundException {  
         // Vytvoření historie výpůjčky
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-        
+        logger.info(zadostKlicDto);
         ZadostKlic zadostKlic = zadostKlicDto.toEntity();
         
         historieVypujcek.setZadostKlic(zadostKlic);

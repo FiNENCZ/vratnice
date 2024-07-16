@@ -25,6 +25,10 @@ public class PoschodiDto implements Serializable {
     private BudovaDto budova;
 
     public PoschodiDto(Poschodi poschodi) {
+        if (poschodi == null) {
+            return;
+        }
+
         this.id = poschodi.getIdPoschodi();
         this.nazev = poschodi.getNazev();
         this.budova = new BudovaDto(poschodi.getBudova());
