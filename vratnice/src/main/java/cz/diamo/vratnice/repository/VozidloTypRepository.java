@@ -14,4 +14,7 @@ public interface VozidloTypRepository extends JpaRepository<VozidloTyp, Integer>
     @Query(sqlSelect + "where s.nazevResx = :nazevResx")
     VozidloTyp getDetailByNazevResx(String nazevResx);
 
+    @Query("SELECT vt FROM VozidloTyp vt JOIN ZdrojovyText zt ON vt.nazevResx = zt.hash WHERE zt.text = :text")
+    VozidloTyp getByNazev(String text);
+
 }
