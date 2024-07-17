@@ -4,23 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
-import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
@@ -59,26 +57,23 @@ public class SluzebniVozidloController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/sluzebni-vozidlo/save")
-    public ResponseEntity<SluzebniVozidloDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException {
+    public ResponseEntity<SluzebniVozidloDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException, InterruptedException, ExecutionException {
         
-        try {
+  
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat -> newSluzebniVozidlo je vytvoře dříve než 
             //načteno oldSluzebniVozidlo z databaze
             CompletableFuture<SluzebniVozidlo> oldSluzebniVozidloFuture = CompletableFuture.supplyAsync(() -> {
                 if (sluzebniVozidloDto.getIdSluzebniVozidlo() != null) {
                     return sluzebniVozidloService.getDetail(sluzebniVozidloDto.getIdSluzebniVozidlo());
                 } else {
-                    return null;
+                    return new SluzebniVozidlo();
                 }
             });
     
             CompletableFuture<SluzebniVozidlo> newSluzebniVozidloFuture = oldSluzebniVozidloFuture.thenApplyAsync(oldSluzebniVozidlo -> {
                 try {
-                    if (oldSluzebniVozidlo != null) {
-                        return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
-                    } else {
-                        return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
-                    }
+                    return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
+                    
                 } catch (Exception e) {
                     throw new CompletionException(e);
                 }
@@ -94,14 +89,8 @@ public class SluzebniVozidloController extends BaseController {
 
 
             return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
-        }
-        catch (BaseException e) {
-			logger.error(e);
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
-		} catch (Exception e) {
-			logger.error(e);
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
+        
+   
         
     }
     

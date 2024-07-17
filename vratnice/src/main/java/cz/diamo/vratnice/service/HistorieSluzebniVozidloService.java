@@ -45,19 +45,6 @@ public class HistorieSluzebniVozidloService {
         HistorieSluzebniVozidlo historieSluzebniVozidlo = new HistorieSluzebniVozidlo();
         historieSluzebniVozidlo.setSluzebniVozidlo(newSluzebniVozidlo);
 
-        //String idSluzebniVozidloKey = sluzebniVozidlo.getIdSluzebniVozidlo();
-        logger.info(newSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum());
-        logger.info(oldSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum());
-        logger.info(newSluzebniVozidlo);
-        logger.info("-------------");
-        logger.info(oldSluzebniVozidlo);
-        logger.info(newSluzebniVozidlo.getStav());
-        logger.info(oldSluzebniVozidlo.getStav());
-        logger.info(newSluzebniVozidlo.getStav().getNazevResx());
-        logger.info(oldSluzebniVozidlo.getStav().getNazevResx());
-
-        logger.info(oldSluzebniVozidlo.getIdSluzebniVozidlo());
-
         if (oldSluzebniVozidlo.getIdSluzebniVozidlo() != null) {
 
 
