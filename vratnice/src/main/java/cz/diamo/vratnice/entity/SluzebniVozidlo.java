@@ -54,11 +54,11 @@ public class SluzebniVozidlo implements Serializable {
     @JoinColumn(name = "id_sluzebni_vozidlo_funkce")
     private SluzebniVozidloFunkce funkce; // pouze u kategorie vozidla manažerské – např. ředitel, náměstek
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_zavod")
     private Zavod zavod; // výběr z číselníku (i vícenásobný), kam může vozidlo jet, manažerské může kamkoliv, ostatní jen závod, jinak se žádá sekretariát
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "sluzebni_vozidlo_lokalita",
         joinColumns = @JoinColumn(name = "id_sluzebni_vozidlo"),

@@ -1,10 +1,9 @@
 package cz.diamo.vratnice.controller;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,12 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
-import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
 import cz.diamo.vratnice.dto.SluzebniVozidloFunkceDto;
 import cz.diamo.vratnice.dto.SluzebniVozidloKategorieDto;
@@ -65,26 +62,35 @@ public class SluzebniVozidloController extends BaseController {
     public ResponseEntity<SluzebniVozidloDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException {
         
         try {
-            SluzebniVozidlo newSluzebniVozidlo = sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
+            // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat -> newSluzebniVozidlo je vytvoře dříve než 
+            //načteno oldSluzebniVozidlo z databaze
+            CompletableFuture<SluzebniVozidlo> oldSluzebniVozidloFuture = CompletableFuture.supplyAsync(() -> {
+                if (sluzebniVozidloDto.getIdSluzebniVozidlo() != null) {
+                    return sluzebniVozidloService.getDetail(sluzebniVozidloDto.getIdSluzebniVozidlo());
+                } else {
+                    return null;
+                }
+            });
+    
+            CompletableFuture<SluzebniVozidlo> newSluzebniVozidloFuture = oldSluzebniVozidloFuture.thenApplyAsync(oldSluzebniVozidlo -> {
+                try {
+                    if (oldSluzebniVozidlo != null) {
+                        return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
+                    } else {
+                        return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
+                    }
+                } catch (Exception e) {
+                    throw new CompletionException(e);
+                }
+            });
+    
+            SluzebniVozidlo oldSluzebniVozidlo = oldSluzebniVozidloFuture.get();
+            SluzebniVozidlo newSluzebniVozidlo = newSluzebniVozidloFuture.get();
+    
 
-            // Vytvoření historie úprav/vytvoření služebního auta
-            /*Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-            HistorieSluzebniVozidloDto historieSluzebniVozidloDto = new HistorieSluzebniVozidloDto();
-            historieSluzebniVozidloDto.setSluzebniVozidlo(new SluzebniVozidloDto(newSluzebniVozidlo));
-            
-            String idSluzebniVozidloKey = sluzebniVozidloDto.getIdSluzebniVozidlo();
+            Uzivatel uzivatelAkce = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
 
-            if (idSluzebniVozidloKey != null && !idSluzebniVozidloKey.isEmpty()) {
-                historieSluzebniVozidloDto.setAkce("upraveno");
-            }
-            else {
-                historieSluzebniVozidloDto.setAkce("vytvořeno");
-            }
-
-            historieSluzebniVozidloDto.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            historieSluzebniVozidloDto.setUzivatel(new UzivatelDto(uzivatelAkce));
-
-            historieSluzebniVozidloService.create(historieSluzebniVozidloDto.toEntity());*/
+            historieSluzebniVozidloService.create(newSluzebniVozidlo, oldSluzebniVozidlo, uzivatelAkce);
 
 
             return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
