@@ -7,7 +7,7 @@ public enum ShareTableEnum {
     Klic("KL"), Lokalita("LK"), Budova("BK"), Poschodi("PK"), ZadostKlic("ZD"), HistorieVypujcek("HV"),
     SluzebniVozidlo("SV"), HistorieSluzebniVozidlo("HS"), Ridic("RD"), 
     PovoleniVjezduVozidla("PV"), VjezdVozidla("VI"), VyjezdVozidla("VO"), 
-    NavstevaOsoba("NO"), NavstevniListek("NL"), NajemnikNavstevnickaKarta("NK");
+    NavstevaOsoba("NO"), NavstevniListek("NL"), NajemnikNavstevnickaKarta("NK"), JmenoKorektura("JK");
 
     private String prefix;
 
