@@ -4,6 +4,7 @@ import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -52,6 +53,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     @NotNull(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
     private StatDto zemeRegistraceVozidla;
 
+    @Valid
     private RidicDto ridic;
 
     private String spolecnostVozidla;

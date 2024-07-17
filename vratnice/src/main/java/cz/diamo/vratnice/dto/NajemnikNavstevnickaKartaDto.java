@@ -7,6 +7,7 @@ import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,26 +19,27 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
 
     private String idNajemnikNavstevnickaKarta;
 
-    @NotBlank(message = "{ridic.jmeno.require}")
-    @Size(max = 50, message = "{ridic.jmeno.max.50}")
+    @NotBlank(message = "{najemnik_navstevnicka_karta.jmeno.require}")
+    @Size(max = 50, message = "{najemnik_navstevnicka_karta.jmeno.max.50}")
     private String jmeno;
 
-    @NotBlank(message = "{ridic.prijmeni.require}")
-    @Size(max = 50, message = "{ridic.prijmeni.max.50}")
+    @NotBlank(message = "{najemnik_navstevnicka_karta.prijmeni.require}")
+    @Size(max = 50, message = "{najemnik_navstevnicka_karta.prijmeni.max.50}")
     private String prijmeni;
 
-    @NotBlank(message = "{ridic.cisloOp.require}")
-    @Size(max = 30, message = "{ridic.cisloOp.max.30}")
+    @NotBlank(message = "{najemnik_navstevnicka_karta.cislo_op.require}")
+    @Size(max = 9, message = "{najemnik_navstevnicka_karta.cislo_op.max.9}")
+    @Pattern(regexp = "\\d+", message = "{najemnik_navstevnicka_karta.cislo_op.pattern}")
     private String cisloOp;
 
-    @Size(max = 120, message = "{ridic.firma.max.120}")
+    @Size(max = 120, message = "{najemnik_navstevnicka_karta.spolecnost.max.10}")
     private String spolecnost;
 
-    @Size(max = 30, message = "{ridic.cisloOp.max.30}")
+    @Size(max = 30, message = "{najemnik_navstevnicka_karta.cislo_najemni_smlouvy.max.30}")
     private String cisloNajemniSmlouvy;
 
-    @NotBlank(message = "{ridic.cisloOp.require}")
-    @Size(max = 30, message = "{ridic.cisloOp.max.30}")
+    @NotBlank(message = "{najemnik_navstevnicka_karta.cislo_karty.require}")
+    @Size(max = 30, message = "{najemnik_navstevnicka_karta.cislo_karty.max.30}")
     private String cisloKarty;
 
     private String duvodVydani;

@@ -8,6 +8,7 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,12 +23,13 @@ public class NavstevniListekDto implements Serializable{
     private String idNavstevniListek;
 
     @NotNull(message = "{navstevni_listek.navsteva_osoba.require}")
+    @Valid
     private List<NavstevaOsobaDto> navstevaOsoba;
 
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     private List<UzivatelDto> uzivatel;
 
-    @NotNull(message = "{navstevni_listek.typ.require}")
+    //@NotNull(message = "{navstevni_listek.typ.require}")
     private NavstevniListekTypDto typ;
 
     @NotBlank(message = "{navstevni_listek.stav.require}")
