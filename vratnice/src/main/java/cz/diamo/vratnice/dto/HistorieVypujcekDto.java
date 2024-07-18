@@ -7,8 +7,7 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,9 +20,8 @@ public class HistorieVypujcekDto implements Serializable {
     
     private ZadostKlicDto zadostKlic;
 
-    @NotBlank(message = "{historie_vypujcek.stav.require}")
-    @Size(max = 30, message = "{historie_vypujcek.stav.max.30}")
-    private String stav;
+    @NotNull(message = "{historie_vypujcek.stav.require}")
+    private HistorieVypujcekAkceDto akce;
 
     private Date datum;
 
@@ -36,7 +34,10 @@ public class HistorieVypujcekDto implements Serializable {
 
         this.idHistorieVypujcek = historieVypujcek.getIdHistorieVypujcek();
         this.zadostKlic = new ZadostKlicDto(historieVypujcek.getZadostKlic());
-        this.stav = historieVypujcek.getStav();
+
+        if (historieVypujcek.getAkce() != null)
+            this.akce = new HistorieVypujcekAkceDto(historieVypujcek.getAkce());
+
         this.datum = historieVypujcek.getDatum();
         this.vratny = new UzivatelDto(historieVypujcek.getVratny());
     }
@@ -46,7 +47,10 @@ public class HistorieVypujcekDto implements Serializable {
 
         historieVypujcek.setIdHistorieVypujcek(this.idHistorieVypujcek);
         historieVypujcek.setZadostKlic(new ZadostKlic(getZadostKlic().getIdZadostiKey()));
-        historieVypujcek.setStav(this.stav);
+
+        if (getAkce() != null )
+            historieVypujcek.setAkce(getAkce().toEntity());
+
         historieVypujcek.setDatum(this.datum);
         historieVypujcek.setVratny(new Uzivatel(getVratny().getId()));
 
