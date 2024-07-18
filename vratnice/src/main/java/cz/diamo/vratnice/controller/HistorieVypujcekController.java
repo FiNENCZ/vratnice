@@ -59,19 +59,22 @@ public class HistorieVypujcekController extends BaseController {
     public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                                 @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
                                 @RequestParam String stav) throws RecordNotFoundException {  
+        
+         logger.info(zadostKlicDto);
         // Vytvoření historie výpůjčky
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-        logger.info(zadostKlicDto);
-        ZadostKlic zadostKlic = zadostKlicDto.toEntity();
         
+        ZadostKlic zadostKlic = zadostKlicDto.toEntity();
+        logger.info(zadostKlic);
+         
         historieVypujcek.setZadostKlic(zadostKlic);
         historieVypujcek.setStav(stav);
         historieVypujcek.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         historieVypujcek.setVratny(vratny);
         
-        HistorieVypujcek newHistorieVypujcek = historieVypujcekService.create(historieVypujcek);
-        return ResponseEntity.ok(new HistorieVypujcekDto(newHistorieVypujcek));
+        //HistorieVypujcek newHistorieVypujcek = historieVypujcekService.create(historieVypujcek);
+        return ResponseEntity.ok(new HistorieVypujcekDto(historieVypujcek));
     }
 
 

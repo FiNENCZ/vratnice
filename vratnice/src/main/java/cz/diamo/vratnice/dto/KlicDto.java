@@ -64,7 +64,10 @@ public class KlicDto implements Serializable {
         this.budova = new BudovaDto(key.getBudova());
         this.poschodi = new PoschodiDto(key.getPoschodi());
         this.mistnost = key.getMistnost();
-        this.typ = new KlicTypDto(key.getTyp());
+
+        if (key.getTyp() != null)
+            this.typ = new KlicTypDto(key.getTyp());
+
         this.aktivita = key.getAktivita();
     }
 
@@ -79,7 +82,10 @@ public class KlicDto implements Serializable {
         key.setBudova(new Budova(getBudova().getId()));
         key.setPoschodi(new Poschodi(getPoschodi().getId()));
         key.setMistnost(this.mistnost);
-        key.setTyp(getTyp().toEntity());
+
+        if (getTyp() != null)
+            key.setTyp(getTyp().toEntity());
+            
         key.setAktivita(this.aktivita);
         return key;
     }
