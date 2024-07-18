@@ -147,11 +147,19 @@ public class OznameniServices {
                                                 messageSource.getMessage("url.avizace.null", null,
                                                                 LocaleContextHolder.getLocale()));
 
+                        String url = "/avizace/save";
+                        HttpHeaders httpHeaders = getAvizaceHttpHeaders(httpRequest);
+                        if (httpHeaders == null) {
+                                httpHeaders = getAvizaceHttpHeadersExterniUzivatel(httpRequest);
+                                if (httpHeaders != null)
+                                        url = "/rest/save";
+                        }
+
                         HttpEntity<AvizaceRequestDto> requestEntity = new HttpEntity<AvizaceRequestDto>(request,
-                                        getAvizaceHttpHeaders(httpRequest));
+                                        httpHeaders);
 
                         ResponseEntity<Void> result = restAvizace
-                                        .exchange("/avizace/save", HttpMethod.POST,
+                                        .exchange(url, HttpMethod.POST,
                                                         requestEntity, Void.class,
                                                         new HashMap<>());
 
@@ -162,7 +170,7 @@ public class OznameniServices {
                                                                                 LocaleContextHolder.getLocale()),
                                                                 result.getStatusCode()));
                 } catch (Exception ex) {
-                        Sentry.captureException(ex);                               
+                        Sentry.captureException(ex);
                         throw ex;
                 }
         }
@@ -194,5 +202,15 @@ public class OznameniServices {
                         }
                 }
                 return null;
+        }
+
+        public HttpHeaders getAvizaceHttpHeadersExterniUzivatel(HttpServletRequest request) {
+
+                if (StringUtils.isBlank(request.getHeader("Authorization")))
+                        return null;
+
+                HttpHeaders requestHeaders = new HttpHeaders();
+                requestHeaders.set("Authorization", request.getHeader("Authorization"));
+                return requestHeaders;
         }
 }

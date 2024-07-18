@@ -202,7 +202,9 @@ public class PovoleniVjezduVozidlaService {
                 if (csvLine.getZavod_nazvy() != null && csvLine.getZavod_nazvy().length > 0) {
                     List<ZavodDto> zavodyList = new ArrayList<>();
                     for (String zavod : csvLine.getZavod_nazvy()) {
-                        zavodyList.add(new ZavodDto(zavodServices.getByNazev(zavod)));
+                        /*/
+                        TODO nahradit načítání dle názvu - neupravovat SHARE*/
+                        // zavodyList.add(new ZavodDto(zavodServices.getByNazev(zavod)));
                     }
                     povoleniVjezduVozidlaDto.setZavod(zavodyList);
                 }

@@ -70,6 +70,10 @@ public class UzivatelDto implements Serializable {
 
     private Boolean pruznaPracDoba;
 
+    private String rfid1;
+
+    private String rfid2;
+
     private List<RoleDto> role;
 
     private List<OpravneniDto> opravneni;
@@ -110,6 +114,8 @@ public class UzivatelDto implements Serializable {
         setCasAktualizace(uzivatel.getCasAktualizace());
         setUkonceno(uzivatel.getUkonceno());
         setPruznaPracDoba(uzivatel.getPruznaPracDoba());
+        setRfid1(uzivatel.getCip1());
+        setRfid2(uzivatel.getCip2());
         setAktivita(uzivatel.getAktivita());
 
         if (uzivatel.getZakazka() != null)

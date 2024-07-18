@@ -7,6 +7,7 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
@@ -40,8 +41,12 @@ public class Utils {
 
 	private static String algorithm = "DES";
 	private static byte[] keyValue = new byte[] { '0', '2', '3', '1', '5', '7', '9', '3' };// your
+	public final static String fixPassword = "********";
 	public final static String sapIdPracovniPoziceNull = "99999999";
 	public final static String sapIdPracovniPoziceNull2 = "00000000";
+
+	private static final String[] svatky = { "1.1.", "1.5.", "8.5.", "5.7.", "6.7.", "28.9.", "28.10.", "17.11.",
+			"24.12.", "25.12.", "26.12.", }; // Státní svátky a volné dny
 
 	public static String camelToSnake(String str) {
 
@@ -268,6 +273,27 @@ public class Utils {
 		return date;
 	}
 
+	public static Date addDayPracovni(Date date, int pocet) {
+
+		Integer pridano = 0;
+		Date datum = date;
+		boolean odecitat = false;
+		if (pocet < 0) {
+			odecitat = true;
+			pocet = Math.abs(pocet);
+		}
+		while (pridano < pocet) {
+			if (odecitat)
+				datum = addDay(datum, -1);
+			else
+				datum = addDay(datum);
+			if (!isSvatek(datum) && !isVikend(datum))
+				pridano++;
+		}
+
+		return datum;
+	}
+
 	/**
 	 * Získání minimálního data a času
 	 * 
@@ -336,7 +362,8 @@ public class Utils {
 		Calendar calendarMax = Calendar.getInstance();
 		calendarMax.setTime(maxDate);
 
-		return calendar.get(Calendar.YEAR) == calendarMax.get(Calendar.YEAR) && calendar.get(Calendar.MONTH) == calendarMax.get(Calendar.MONTH)
+		return calendar.get(Calendar.YEAR) == calendarMax.get(Calendar.YEAR)
+				&& calendar.get(Calendar.MONTH) == calendarMax.get(Calendar.MONTH)
 				&& calendar.get(Calendar.DAY_OF_MONTH) == calendarMax.get(Calendar.DAY_OF_MONTH);
 	}
 
@@ -382,7 +409,8 @@ public class Utils {
 		Calendar calendar2 = Calendar.getInstance();
 		calendar2.setTime(datum2);
 
-		return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) && calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)
+		return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR)
+				&& calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)
 				&& calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
 
 	}
@@ -424,13 +452,13 @@ public class Utils {
 	}
 
 	public static Date odstranitVteriny(Date date) {
-        if (date != null) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            date = calendar.getTime();
-        }
+		if (date != null) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			date = calendar.getTime();
+		}
 
 		return date;
 	}
@@ -569,5 +597,96 @@ public class Utils {
 		calendar.set(Calendar.MILLISECOND, 0);
 		date = calendar.getTime();
 		return date;
+	}
+
+	/**
+	 * Test zda je dané datum státním svátkem
+	 * 
+	 * @param datum
+	 * @return
+	 */
+	public static boolean isSvatek(Date datum) {
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(datum);
+		Date velikonocePondeli = datumVelikonoc(calendar.get(Calendar.YEAR));
+		Calendar calendarVelikonoce = Calendar.getInstance();
+		calendarVelikonoce.setTime(velikonocePondeli);
+		calendarVelikonoce.add(Calendar.DAY_OF_MONTH, -1);
+		// neděle není svátek v ČR
+		// Date velikonoceNedele = calendarVelikonoce.getTime();
+		calendarVelikonoce.add(Calendar.DAY_OF_MONTH, -2);
+		Date velikonocePatek = calendarVelikonoce.getTime();
+
+		if (Utils.stejnyDen(datum, velikonocePondeli))
+			return true;
+		// if (Utils.stejnyDen(datum, velikonoceNedele))
+		// return true;
+		if (Utils.stejnyDen(datum, velikonocePatek))
+			return true;
+		Date svatek;
+		SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+		for (String svatekTxt : svatky) {
+			try {
+				svatek = format.parse(svatekTxt + calendar.get(Calendar.YEAR));
+				if (Utils.stejnyDen(datum, svatek))
+					return true;
+			} catch (ParseException pe) {
+				logger.error(pe);
+			}
+		}
+
+		return false;
+	}
+
+	private static Date datumVelikonoc(Integer rok) {
+
+		Calendar velikonoce = Calendar.getInstance();
+		int l_nMonth, l_nDay, l_nMoon, l_nEpact, l_nSunday, l_nGold, l_nCent, l_nCorx, l_nCorz;
+		// The Golden Number of the year in the 19 year Metonic Cycle:
+		l_nGold = rok % 19 + 1;
+		// Calculate the Century
+		l_nCent = (int) (rok / 100) + 1;
+		// Number of years in which leap year was dropped in order to keep in step with
+		// the sun:
+		l_nCorx = (int) ((3 * l_nCent) / 4) - 12;
+		// Special correction to syncronize Easter with moon's orbit:
+		l_nCorz = (int) ((8 * l_nCent + 5) / 25) - 5;
+		// Find Sunday:
+		l_nSunday = (int) ((5 * rok) / 4) - l_nCorx - 10;
+		// ^ To prevent overflow at year 6554 must convert int 5 to Long
+		// Set Epact - specifies occurrence of full moon:
+		l_nEpact = (11 * l_nGold + 20 + l_nCorz - l_nCorx) % 30;
+		if (l_nEpact < 0)
+			l_nEpact = l_nEpact + 30;
+		if (((l_nEpact == 25) && (l_nGold > 11)) || (l_nEpact == 24))
+			l_nEpact = l_nEpact + 1;
+		// Find Full Moon:
+		l_nMoon = 44 - l_nEpact;
+		if (l_nMoon < 21)
+			l_nMoon = l_nMoon + 30;
+		// Advance to Sunday:
+		l_nMoon = l_nMoon + 7 - ((l_nSunday + l_nMoon) % 7);
+		if (l_nMoon > 31) {
+			l_nMonth = 4;
+			l_nDay = l_nMoon - 31;
+		} else {
+			l_nMonth = 3;
+			l_nDay = l_nMoon;
+		} // end if
+
+		// Složím výsledné datum
+		velikonoce.set(rok, l_nMonth - 1, l_nDay);
+		velikonoce.add(Calendar.DAY_OF_MONTH, 1);
+		return velikonoce.getTime();
+
+	}
+
+	public static boolean isVikend(Date date) {
+		Calendar calTmp = Calendar.getInstance();
+		calTmp.setTime(date);
+
+		return calTmp.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY
+				|| calTmp.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY;
 	}
 }

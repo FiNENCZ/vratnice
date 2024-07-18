@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class OznameniDto {
     private String id;
-    private UzivatelDto vytvoril;
+    private VytvorilDto vytvoril;
     private Date vytvoreno;
     private String nadpis;
     private String text;
