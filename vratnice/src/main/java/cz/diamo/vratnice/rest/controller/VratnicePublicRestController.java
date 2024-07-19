@@ -1,0 +1,181 @@
+package cz.diamo.vratnice.rest.controller;
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.rest.controller.BaseRestController;
+import cz.diamo.share.services.ZavodServices;
+import cz.diamo.vratnice.dto.LokalitaDto;
+import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
+import cz.diamo.vratnice.dto.RidicDto;
+import cz.diamo.vratnice.dto.RzTypVozidlaDto;
+import cz.diamo.vratnice.dto.StatDto;
+import cz.diamo.vratnice.dto.VozidloTypDto;
+import cz.diamo.vratnice.entity.Lokalita;
+import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
+import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.vratnice.entity.Stat;
+import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.repository.StatRepository;
+import cz.diamo.vratnice.service.LokalitaService;
+import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
+import cz.diamo.vratnice.service.RidicService;
+import cz.diamo.vratnice.service.VozidloTypService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+
+
+@RestController
+@RequestMapping("vratnice-public")
+public class VratnicePublicRestController extends BaseRestController{
+
+	final static Logger logger = LogManager.getLogger(VratnicePublicRestController.class);
+
+	@Autowired
+	private LokalitaService lokalitaService;
+
+    @Autowired
+    private ZavodServices zavodServices;
+
+    @Autowired
+    private VozidloTypService vozidloTypService;
+
+    @Autowired
+    private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
+
+    @Autowired
+    private StatRepository statRepository;
+
+    @Autowired
+    private RidicService ridicService;
+
+    @Autowired
+    private ResourcesComponent resourcesComponent;
+
+    @GetMapping("/lokalita/list")
+    public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
+        List<LokalitaDto> result = new ArrayList<LokalitaDto>();
+        List<Lokalita> list = lokalitaService.getList(idZavod);
+
+        if (list != null && list.size() > 0) {
+            for (Lokalita lokalita : list) {
+                result.add(new LokalitaDto(lokalita));
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/zavod/list")
+	public ResponseEntity<List<ZavodDto>> list(HttpServletRequest request, @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idZavodu) {
+
+		List<ZavodDto> result = new ArrayList<ZavodDto>();
+		List<Zavod> list = zavodServices.getList(idZavodu, aktivni);
+		
+		if (list != null && list.size() > 0) {
+			for (Zavod zavod : list) {
+				result.add(new ZavodDto(zavod));
+			}
+		}
+
+		return ResponseEntity.ok(result);
+	}
+
+    @GetMapping("/vozidlo-typ/list")
+    public ResponseEntity<List<VozidloTypDto>> list(@RequestParam @Nullable Boolean withIZS) {
+        List<VozidloTypDto> result = new ArrayList<VozidloTypDto>();
+        List<VozidloTyp> list = vozidloTypService.getList(withIZS);
+        try {
+            if (list != null && list.size() > 0) {
+                for (VozidloTyp vozidloTyp : list) {
+                    vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),vozidloTyp.getNazevResx()));
+                    result.add(new VozidloTypDto(vozidloTyp));
+                }
+            } 
+        }catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/povoleni-vjezdu-vozidla/save")
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) {
+        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
+        return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
+    }
+
+    @PostMapping(value = "/povoleni-vjezdu-vozidla/povoleni-csv", consumes = {"multipart/form-data"})
+    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
+        return ResponseEntity.ok(povoleniVjezduVozidlaService.processPovoleniCsvData(file));
+    }
+
+    @PostMapping(value = "/povoleni-vjezdu-vozidla/rz-typ-vozidla-csv", consumes = {"multipart/form-data"})
+    public ResponseEntity<RzTypVozidlaDto> rzTypVozidlaCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
+        return ResponseEntity.ok(povoleniVjezduVozidlaService.processRzTypVozidlaCsvData(file));
+    }
+
+    @GetMapping("/stat/list")
+    public List<StatDto> list(HttpServletRequest request) {
+        List<StatDto> result = new ArrayList<StatDto>();
+
+        try {
+			List<Stat> list = statRepository.findAll();
+			if (list != null && list.size() > 0) {
+				for (Stat stat : list) {
+					stat.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+							stat.getNazevResx()));
+					result.add(new StatDto(stat));
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+
+        return result;
+    }
+    
+    @GetMapping("/ridic/list-by-cislo-op")
+    public ResponseEntity<RidicDto> getRidicByCisloOp(@RequestParam String cisloOp) {
+        Ridic ridic = ridicService.getRidicByCisloOp(cisloOp);
+        if (ridic == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new RidicDto(ridic));
+    }
+
+    @PostMapping("/ridic/save")
+    public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) {
+        Ridic newRidic = ridicService.create(ridicDto.toEntity());
+        return ResponseEntity.ok(new RidicDto(newRidic));
+    }
+
+
+}

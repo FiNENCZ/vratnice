@@ -29,7 +29,7 @@ public class SwaggerConfiguration {
 			openApi.info(new Info().title(Constants.PROJECT_NAME + " - API pro NG").version("v1"));
 		};
 		String packagesToscan[] = { "cz.diamo.share.controller", "cz.diamo.share.websocket",
-				"cz.diamo." + Constants.BASE_PACKAGE + ".controller",
+				"cz.diamo." + Constants.BASE_PACKAGE + "rest.controller",
 				"cz.diamo." + Constants.BASE_PACKAGE + ".websocket" };
 		return GroupedOpenApi.builder().group(Constants.SCHEMA + "-ng").packagesToScan(packagesToscan)
 				.addOpenApiCustomizer(customizer)
@@ -67,7 +67,7 @@ public class SwaggerConfiguration {
 					new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic"));
 			openApi.info(new Info().title("REST API").version("v1"));
 		};
-		String packagesToscan[] = { "cz.diamo.share.rest.controller" };
+		String packagesToscan[] = { "cz.diamo.share.rest.controller", "cz.diamo.vratnice.rest.controller"  };
 		return GroupedOpenApi.builder().group("rest-api").packagesToScan(packagesToscan)
 				.addOpenApiCustomizer(customizer).addOperationCustomizer(globalOperationCustomizer).build();
 	}
