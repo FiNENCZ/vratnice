@@ -165,12 +165,6 @@ public class PovoleniVjezduVozidlaService {
                 povoleniVjezduVozidlaDto.setIcoZadatele(csvLine.getIcoZadatele());
                 povoleniVjezduVozidlaDto.setDuvodZadosti(csvLine.getDuvodZadosti());
                 povoleniVjezduVozidlaDto.setZemeRegistraceVozidla(new StatDto(statService.getByNazev(csvLine.getZemeRegistraceVozidla())));
-                
-                logger.info(csvLine.getJmenoZadatele());
-                logger.info(csvLine.getPrijmeniZadatele());
-                logger.info(csvLine.getSpolecnostZadatele());
-                logger.info(csvLine.getIcoZadatele());
-                logger.info(csvLine.getDuvodZadosti());
 
                 // Handle multiple values separated by '|'
                 if (csvLine.getRzVozidla() != null && csvLine.getRzVozidla().length > 0) {
