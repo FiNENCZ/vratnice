@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.6_10-jdk-alpine
+FROM eclipse-temurin:17.0.6_10-jre-alpine
 WORKDIR /vratnice
 ARG ver=0.0.1
 ARG branch
