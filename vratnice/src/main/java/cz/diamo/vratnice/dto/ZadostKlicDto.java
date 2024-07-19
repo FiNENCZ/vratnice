@@ -60,7 +60,7 @@ public class ZadostKlicDto implements Serializable{
         ZadostKlic zadostKlic = new ZadostKlic();
         
         zadostKlic.setIdZadostKlic(this.idZadostiKey);
-        zadostKlic.setKlic(new Klic(getKlic().getIdKlic()));
+        zadostKlic.setKlic(new Klic(getKlic().getId()));
         zadostKlic.setUzivatel(new Uzivatel(getUzivatel().getId()));
         zadostKlic.setStav(this.stav);
         zadostKlic.setTrvala(this.trvala);

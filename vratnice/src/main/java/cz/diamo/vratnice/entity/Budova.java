@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -37,6 +38,14 @@ public class Budova implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_lokalita")
     private Lokalita lokalita;
+
+    private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public Budova(String idBudova) {
         setIdBudova(idBudova);

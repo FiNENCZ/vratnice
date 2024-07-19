@@ -20,7 +20,7 @@ public class KlicDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String idKlic;
+    private String id;
 
     @NotNull(message = "{klic.specialni.require}")
     private Boolean specialni = false;
@@ -59,31 +59,42 @@ public class KlicDto implements Serializable {
         if (key == null) {
             return;
         }
-        this.idKlic = key.getIdKlic();
-        this.specialni = key.isSpecialni();
-        this.nazev = key.getNazev();
-        this.kodCipu = key.getKodCipu();
-        this.lokalita = new LokalitaDto(key.getLokalita());
-        this.budova = new BudovaDto(key.getBudova());
-        this.poschodi = new PoschodiDto(key.getPoschodi());
-        this.mistnost = key.getMistnost();
-        this.typ = new KlicTypDto(key.getTyp());
-        this.aktivita = key.getAktivita();
+
+        setId(key.getIdKlic());
+        setSpecialni(key.isSpecialni());
+        setNazev(key.getNazev());
+        setKodCipu(key.getKodCipu());
+        setMistnost(key.getMistnost());
+        setLokalita(new LokalitaDto(key.getLokalita()));
+        setTyp(new KlicTypDto(key.getTyp()));
+        setAktivita(key.getAktivita());
+
+        if (key.getBudova() != null)
+            setBudova(new BudovaDto(key.getBudova()));
+
+        if (key.getPoschodi() != null)    
+            setPoschodi(new PoschodiDto(key.getPoschodi()));
     }
 
     @JsonIgnore
     public Klic toEntity() {
         Klic key = new Klic();
-        key.setIdKlic(this.idKlic);
+        key.setIdKlic(this.id);
         key.setSpecialni(this.specialni);
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
-        key.setLokalita(new Lokalita(getLokalita().getId()));
-        key.setBudova(new Budova(getBudova().getId()));
-        key.setPoschodi(new Poschodi(getPoschodi().getId()));
         key.setMistnost(this.mistnost);
         key.setTyp(getTyp().toEntity());
         key.setAktivita(this.aktivita);
+
+        key.setLokalita(new Lokalita(getLokalita().getId()));
+
+        if (getBudova() != null)
+            key.setBudova(new Budova(getBudova().getId()));
+
+        if (getPoschodi() != null)
+            key.setPoschodi(new Poschodi(getPoschodi().getId()));
+
         return key;
     }
 }

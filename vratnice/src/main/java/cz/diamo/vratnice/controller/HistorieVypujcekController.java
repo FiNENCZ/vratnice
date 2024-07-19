@@ -58,7 +58,7 @@ public class HistorieVypujcekController extends BaseController {
     @PostMapping("/historie-vypujcek/save")
     public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) throws RecordNotFoundException {
         //Změna stavu i klíče
-        String klicId = zadostKlicDto.getKlic().getIdKlic();
+        String klicId = zadostKlicDto.getKlic().getId();
         Klic klic = klicService.getDetail(klicId);
 
         if (klic == null) {

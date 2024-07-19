@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -38,6 +39,14 @@ public class Lokalita implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_zavod")
     private Zavod zavod;
+
+    private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public Lokalita(String idLokalita) {
         setIdLokalita(idLokalita);
