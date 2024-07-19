@@ -19,7 +19,7 @@ public class LokalitaDto implements Serializable {
     private String id;
 
     @NotBlank(message = "{lokalita.nazev.require}")
-    @Size(message = "{lokalita.nazev.max.80}")
+    @Size(max = 80, message = "{lokalita.nazev.max.80}")
     private String nazev;
 
     @NotNull(message = "{lokalita.zavod.require}")

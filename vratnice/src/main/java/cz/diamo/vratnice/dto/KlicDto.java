@@ -33,23 +33,20 @@ public class KlicDto implements Serializable {
     @Size(max = 50, message = "{klic.rfid.max.50}")
     private String kodCipu;
 
-    //@NotBlank(message = "{klic.lokace.require}")
-    //@Size(max = 50, message = "{klic.lokace.max.50}")
+    @NotNull(message = "{klic.lokace.require}")
     private LokalitaDto lokalita;
 
-    //@NotBlank(message = "{klic.budova.require}")
-    //@Size(max = 50, message = "{klic.budova.max.50}")
+    @NotNull(message = "{klic.budova.require}")
     private BudovaDto budova;
 
-    //@NotNull(message = "{klic.podlazi.require}")
+    @NotNull(message = "{klic.podlazi.require}")
     private PoschodiDto poschodi;
 
     @NotBlank(message = "{klic.mistnost.require}")
     @Size(max = 50, message = "{klic.mistnost.max.50}")
     private String mistnost;
 
-    //@NotBlank(message = "{klic.typ_klice.require}")
-    //@Size(max = 50, message = "{klic.typ_klice.max.50}")
+    @NotNull(message = "{klic.typ_klice.require}")
     private KlicTypDto typ;
 
     @NotNull(message = "{aktivita.require}")
@@ -84,7 +81,10 @@ public class KlicDto implements Serializable {
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
         key.setMistnost(this.mistnost);
-        key.setTyp(getTyp().toEntity());
+
+        if (getTyp() != null)
+            key.setTyp(getTyp().toEntity());
+            
         key.setAktivita(this.aktivita);
 
         key.setLokalita(new Lokalita(getLokalita().getId()));

@@ -75,17 +75,6 @@ public class ZavodController extends BaseController {
 		return result;
 	}
 
-	@GetMapping("/zavod/get-by-nazev")
-	public ZavodDto getByNazev(@RequestParam String nazev) {
-		Zavod zavodEntity = zavodServices.getByNazev(nazev);
-		if (zavodEntity == null)
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-		ZavodDto zavodDto = new ZavodDto(zavodEntity);
-		return zavodDto;
-	}
-	
-
 	@PostMapping("/zavod/save")
 	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_ZAVODU')")
 	public ZavodDto save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,

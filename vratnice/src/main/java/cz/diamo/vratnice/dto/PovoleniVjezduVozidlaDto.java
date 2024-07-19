@@ -4,6 +4,7 @@ import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,7 +16,9 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -50,6 +53,7 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     @NotNull(message = "{povoleni.vjezdu.vozidla.zeme_registrace_vozidla.require}")
     private StatDto zemeRegistraceVozidla;
 
+    @Valid
     private RidicDto ridic;
 
     private String spolecnostVozidla;
@@ -168,4 +172,20 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         return rzVozidla.size() == typVozidla.size();
     }
     
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.datum_od_datum_do}")
+    private boolean isDatumOdBeforeDatumDo() {
+        if (datumOd == null || datumDo == null) {
+            return true; // pokud jsou data null, nechceme aby validace selhala zde
+        }
+        return !datumDo.before(datumOd);
+    }
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.rz_vozidla.unique}")
+    private boolean isRzVozidlaUnique() {
+        if (rzVozidla == null) {
+            return true; // pokud je seznam null, nechceme aby validace selhala zde
+        }
+        Set<String> uniqueRzVozidla = new HashSet<>(rzVozidla);
+        return uniqueRzVozidla.size() == rzVozidla.size();
+    }
 }

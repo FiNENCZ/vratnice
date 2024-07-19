@@ -18,13 +18,17 @@ public class PoschodiDto implements Serializable {
     private String id;
 
     @NotBlank(message = "{poschodi.nazev.require}")
-    @Size(message = "{poschodi.nazev.max.80}")
+    @Size(max = 80, message = "{poschodi.nazev.max.80}")
     private String nazev;
     
     @NotNull(message = "{poschodi.budova.require}")
     private BudovaDto budova;
 
     public PoschodiDto(Poschodi poschodi) {
+        if (poschodi == null) {
+            return;
+        }
+
         this.id = poschodi.getIdPoschodi();
         this.nazev = poschodi.getNazev();
         this.budova = new BudovaDto(poschodi.getBudova());

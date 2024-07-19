@@ -12,19 +12,12 @@ public enum RoleEnum {
     ROLE_TESTER, ROLE_KALENDAR_RIDICU,
     ROLE_RPD_ZADOST, ROLE_TPC_ZASTUP, ROLE_VOZIDLO_ZASTUP, ROLE_RPD_ZASTUP, ROLE_ORGANIZACNI_STRUKTURA,
     ROLE_SERVIS_ORG_STR, ROLE_RPD_REDITEL_ZADOST,
-    ROLE_HDD_SPRAVCE, ROLE_HDD_ZAMESTNANEC, ROLE_SPRAVA_CISELNIKU, 
-    ROLE_SPRAVA_KLICU, ROLE_SPRAVA_ZADOSTI_KLICU, ROLE_SPRAVA_VYPUJCEK_KLICU, ROLE_ZADATEL_KLICE;
+    ROLE_HDD_SPRAVCE, ROLE_HDD_ZAMESTNANEC, ROLE_SPRAVA_CISELNIKU, ROLE_SPRAVA_JIDELNY, ROLE_SPRAVA_CISELNIKY,
+    ROLE_SPRAVA_JIDLA, ROLE_SPRAVA_SABLON_JIDELNICKU, ROLE_SPRAVA_OBJEDNAVKY, ROLE_SPRAVA_KLICU,
+    ROLE_SPRAVA_ZADOSTI_KLICU, ROLE_SPRAVA_VYPUJCEK_KLICU, ROLE_ZADATEL_KLICE;
 
     public static RoleEnum getRoleEnum(String value) {
         switch (value) {
-            case "ROLE_SPRAVA_KLICU":
-                return RoleEnum.ROLE_SPRAVA_KLICU;
-            case "ROLE_SPRAVA_ZADOSTI_KLICU":
-                return RoleEnum.ROLE_SPRAVA_ZADOSTI_KLICU;
-            case "ROLE_SPRAVA_VYPUJCEK_KLICU":
-                return RoleEnum.ROLE_SPRAVA_VYPUJCEK_KLICU;
-            case "ROLE_ZADATEL_KLICE":
-                return RoleEnum.ROLE_ZADATEL_KLICE;
             case "ROLE_ZAMESTNANEC":
                 return RoleEnum.ROLE_ZAMESTNANEC;
             case "ROLE_SPRAVA_VOZIDLA":
@@ -93,6 +86,24 @@ public enum RoleEnum {
                 return RoleEnum.ROLE_HDD_ZAMESTNANEC;
             case "ROLE_SPRAVA_CISELNIKU":
                 return RoleEnum.ROLE_SPRAVA_CISELNIKU;
+            case "ROLE_SPRAVA_JIDELNY":
+                return RoleEnum.ROLE_SPRAVA_JIDELNY;
+            case "ROLE_SPRAVA_CISELNIKY":
+                return RoleEnum.ROLE_SPRAVA_CISELNIKY;
+            case "ROLE_SPRAVA_JIDLA":
+                return RoleEnum.ROLE_SPRAVA_JIDLA;
+            case "ROLE_SPRAVA_SABLON_JIDELNICKU":
+                return RoleEnum.ROLE_SPRAVA_SABLON_JIDELNICKU;
+            case "ROLE_SPRAVA_OBJEDNAVKY":
+                return RoleEnum.ROLE_SPRAVA_OBJEDNAVKY;
+            case "ROLE_SPRAVA_KLICU":
+                return RoleEnum.ROLE_SPRAVA_KLICU;
+            case "ROLE_SPRAVA_ZADOSTI_KLICU":
+                return RoleEnum.ROLE_SPRAVA_ZADOSTI_KLICU;
+            case "ROLE_SPRAVA_VYPUJCEK_KLICU":
+                return RoleEnum.ROLE_SPRAVA_VYPUJCEK_KLICU;
+            case "ROLE_ZADATEL_KLICE":
+                return RoleEnum.ROLE_ZADATEL_KLICE;
             default:
                 return ROLE_ZAMESTNANEC;
         }

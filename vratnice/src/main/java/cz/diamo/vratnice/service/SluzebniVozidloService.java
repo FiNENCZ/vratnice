@@ -62,11 +62,11 @@ public class SluzebniVozidloService {
 
     @Transactional
     public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) throws UniqueValueException, NoSuchMessageException {
-        Boolean exist = sluzebniVozidloRepository.existsByRz(sluzebniVozidlo.getRz());
-        if (exist)
-            throw new UniqueValueException(
-                    messageSource.getMessage("sluzebni_vozidlo.rz.unique", null, LocaleContextHolder.getLocale()));
-
+        if (sluzebniVozidlo.getIdSluzebniVozidlo() == null || sluzebniVozidlo.getIdSluzebniVozidlo().isEmpty()){
+            if (sluzebniVozidloRepository.existsByRz(sluzebniVozidlo.getRz()))
+                throw new UniqueValueException(
+                        messageSource.getMessage("sluzebni_vozidlo.rz.unique", null, LocaleContextHolder.getLocale()));
+        }
         sluzebniVozidlo.setCasZmn(Utils.getCasZmn());
         sluzebniVozidlo.setZmenuProvedl(Utils.getZmenuProv());
         return sluzebniVozidloRepository.save(sluzebniVozidlo);

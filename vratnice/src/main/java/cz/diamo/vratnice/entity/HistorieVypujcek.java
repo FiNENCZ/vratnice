@@ -37,8 +37,9 @@ public class HistorieVypujcek  implements Serializable{
     @JoinColumn(name = "id_zadost_klic")
     private ZadostKlic zadostKlic;
     
-    @Column(name = "stav")
-    private String stav;
+    @ManyToOne
+    @JoinColumn(name = "id_historie_vypujcek_akce")
+    private HistorieVypujcekAkce akce;
 
     @Column(name = "datum")
     private Date datum;

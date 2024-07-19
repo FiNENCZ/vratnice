@@ -1,7 +1,10 @@
 package cz.diamo.vratnice.enums;
 
 public enum TableEnum {
-    Vratnice("SU");
+    Vratnice("SU"), Klic("KL"), Lokalita("LK"), Budova("BK"), Poschodi("PK"), ZadostKlic("ZD"), HistorieVypujcek("HV"),
+    SluzebniVozidlo("SV"), HistorieSluzebniVozidlo("HS"), Ridic("RD"), 
+    PovoleniVjezduVozidla("PV"), VjezdVozidla("VI"), VyjezdVozidla("VO"), 
+    NavstevaOsoba("NO"), NavstevniListek("NL"), NajemnikNavstevnickaKarta("NK"), JmenoKorektura("JK");
 
     private String prefix;
 

@@ -15,11 +15,14 @@ import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
+import cz.diamo.vratnice.dto.HistorieVypujcekAkceDto;
 import cz.diamo.vratnice.dto.HistorieVypujcekDto;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
+import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.service.HistorieVypujcekService;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
@@ -56,23 +59,20 @@ public class HistorieVypujcekController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/historie-vypujcek/save")
-    public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) throws RecordNotFoundException {
-        //Změna stavu i klíče
-        String klicId = zadostKlicDto.getKlic().getId();
-        Klic klic = klicService.getDetail(klicId);
-
-        if (klic == null) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                                @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
+                                @RequestParam HistorieVypujcekAkceEnum akce) throws RecordNotFoundException {  
         
+         logger.info(zadostKlicDto);
         // Vytvoření historie výpůjčky
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
         
         ZadostKlic zadostKlic = zadostKlicDto.toEntity();
-        
+        logger.info(zadostKlic);
+         
         historieVypujcek.setZadostKlic(zadostKlic);
-        historieVypujcek.setStav(stav);
+        historieVypujcek.setAkce(new HistorieVypujcekAkce(akce));
         historieVypujcek.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         historieVypujcek.setVratny(vratny);
         

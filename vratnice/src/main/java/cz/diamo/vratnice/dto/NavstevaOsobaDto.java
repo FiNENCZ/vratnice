@@ -5,6 +5,7 @@ import java.util.Date;
 
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,8 @@ public class NavstevaOsobaDto implements Serializable {
     private String prijmeni;
 
     @NotBlank(message = "{navsteva_osoba.cislo_op.require}")
-    @Size(max = 30, message = "{navsteva_osoba.cislo_op.max.30}")
+    @Size(max = 9, message = "{navsteva_osoba.cislo_op.max.9}")
+    @Pattern(regexp = "\\d+", message = "{navsteva_osoba.cislo_op.pattern}")
     private String cisloOp;
 
     @Size(max = 120, message = "{navsteva_osoba.firma.max.120}")

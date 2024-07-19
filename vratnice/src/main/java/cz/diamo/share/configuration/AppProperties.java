@@ -44,4 +44,14 @@ public class AppProperties {
     private String jasperServerJmeno;
 
     private String jasperServerHeslo;
+
+    private String s3StorageUrl;
+
+    private String s3AccessKeyId;
+
+    private String s3SecretAccessKey;
+
+    private String s3Region;
+    
+    private String s3Bucket;
 }

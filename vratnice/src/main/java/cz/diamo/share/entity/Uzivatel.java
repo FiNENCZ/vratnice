@@ -118,6 +118,12 @@ public class Uzivatel implements Serializable {
     @Column(name = "pruzna_prac_doba")
     private Boolean pruznaPracDoba;
 
+    @Column(name = "cip_1")
+    private String cip1;
+
+    @Column(name = "cip_2")
+    private String cip2;
+
     @Transient
     private Uzivatel zastup;
 

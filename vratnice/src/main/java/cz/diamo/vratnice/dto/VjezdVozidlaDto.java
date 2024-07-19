@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ public class VjezdVozidlaDto implements Serializable {
 
     private String idVjezdVozidla;
 
+    @Valid
     private RidicDto ridic;
 
     @NotBlank(message = "{vjezd_vozidla.rz_vozidla.require}")

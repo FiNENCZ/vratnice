@@ -7,8 +7,7 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.HistorieSluzebniVozidlo;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,9 +20,8 @@ public class HistorieSluzebniVozidloDto implements Serializable {
 
     private SluzebniVozidloDto sluzebniVozidlo;
 
-    @NotBlank(message = "{historie_sluzebni_vozidlo.akce.require}")
-    @Size(max = 30, message = "{historie_sluzebni_vozidlo.akce.max.30}")
-    private String akce;
+    @NotNull(message = "{historie_sluzebni_vozidlo.akce.require}")
+    private HistorieSluzebniVozidloAkceDto akce;
 
     private Date datum;
 
@@ -36,7 +34,7 @@ public class HistorieSluzebniVozidloDto implements Serializable {
 
         this.idHistorieSluzebniAuto = historieSluzebniVozidlo.getIdHistorieSluzebniAuto();
         this.sluzebniVozidlo = new SluzebniVozidloDto(historieSluzebniVozidlo.getSluzebniVozidlo());
-        this.akce = historieSluzebniVozidlo.getAkce();
+        this.akce = new HistorieSluzebniVozidloAkceDto(historieSluzebniVozidlo.getAkce());
         this.datum = historieSluzebniVozidlo.getDatum();
         this.uzivatel = new UzivatelDto(historieSluzebniVozidlo.getUzivatel());
     }
@@ -46,7 +44,7 @@ public class HistorieSluzebniVozidloDto implements Serializable {
 
         historieSluzebniVozidlo.setIdHistorieSluzebniAuto(this.idHistorieSluzebniAuto);
         historieSluzebniVozidlo.setSluzebniVozidlo(new SluzebniVozidlo(getSluzebniVozidlo().getIdSluzebniVozidlo()));
-        historieSluzebniVozidlo.setAkce(this.akce);
+        historieSluzebniVozidlo.setAkce(getAkce().toEntity());
         historieSluzebniVozidlo.setDatum(this.datum);
         historieSluzebniVozidlo.setUzivatel(new Uzivatel(getUzivatel().getId()));
 

@@ -3,8 +3,11 @@ package cz.diamo.vratnice.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.enums.VozidloTypEnum;
@@ -21,6 +24,9 @@ public class VozidloTypService {
 
     @Autowired
     private VozidloTypRepository vozidloTypRepository;
+
+    @Autowired
+    private MessageSource messageSource;
 
    public List<VozidloTyp> getList(Boolean withIZS) {
 
@@ -51,6 +57,18 @@ public class VozidloTypService {
 
     public VozidloTyp getDetailBVozidloTyp(String vozidloTypEnumString) {
         return vozidloTypRepository.getDetailByNazevResx(vozidloTypEnumString);
+    }
+
+    public VozidloTyp getByNazev(String nazev) {
+        VozidloTyp vozidloTyp = vozidloTypRepository.getByNazev(nazev);
+        try {
+            if (vozidloTyp == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("vozidlo_typ.nazev.not_found", null, LocaleContextHolder.getLocale()));
+        
+            return vozidloTyp;
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
     }
 
 }

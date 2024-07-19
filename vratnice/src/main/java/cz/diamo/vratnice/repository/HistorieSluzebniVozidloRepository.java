@@ -14,4 +14,7 @@ public interface HistorieSluzebniVozidloRepository extends JpaRepository <Histor
 
     @Query(sqlSelect + "where s.sluzebniVozidlo = :sluzebniVozidlo")
     List<HistorieSluzebniVozidlo> findBySluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo);
+
+    @Query(sqlSelect + "where s.idHistorieSluzebniAuto = :idHistorieSluzebniAuto")
+    HistorieSluzebniVozidlo getDetail(String idHistorieSluzebniAuto);
 }
