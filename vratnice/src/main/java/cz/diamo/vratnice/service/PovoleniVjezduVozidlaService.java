@@ -29,6 +29,7 @@ import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.services.ZavodServices;
 import cz.diamo.vratnice.csvRepresentation.PovoleniVjezduVozidlaCsvRepresentation;
 import cz.diamo.vratnice.csvRepresentation.RzTypVozidlaCsvRepresentation;
@@ -180,25 +181,42 @@ public class PovoleniVjezduVozidlaService {
                 }
 
                 if(csvLine.getRidic_jmeno() != null && csvLine.getRidic_prijmeni() != null && csvLine.getRidic_cisloOp() != null ) {
-                    RidicDto ridic = new RidicDto();
-                    ridic.setJmeno(csvLine.getRidic_jmeno());
-                    ridic.setPrijmeni(csvLine.getRidic_prijmeni());
-                    ridic.setCisloOp(csvLine.getRidic_cisloOp());
-                    ridic.setFirma(csvLine.getRidic_firma());
+                    RidicDto ridicDto = new RidicDto();
 
-                    povoleniVjezduVozidlaDto.setRidic(ridic);
+                    Ridic ridic = ridicService.getRidicByCisloOp(csvLine.getRidic_cisloOp());
+                    if (ridic == null) {
+                        ridicDto.setJmeno(csvLine.getRidic_jmeno());
+                        ridicDto.setPrijmeni(csvLine.getRidic_prijmeni());
+                        ridicDto.setCisloOp(csvLine.getRidic_cisloOp());
+                        ridicDto.setFirma(csvLine.getRidic_firma());
+                    } else {
+                        ridicDto = new RidicDto(ridic);
+                    }
+
+                    povoleniVjezduVozidlaDto.setRidic(ridicDto);
                 }
 
                 povoleniVjezduVozidlaDto.setSpolecnostVozidla(csvLine.getSpolecnostVozidla());
                 povoleniVjezduVozidlaDto.setDatumOd(parseDate(csvLine.getDatumOd()));
                 povoleniVjezduVozidlaDto.setDatumDo(parseDate(csvLine.getDatumDo()));
 
+                List<ZavodDto> zavodDtos = new ArrayList<ZavodDto>();
+                List<Zavod> list = zavodServices.getList(null, null);
+                
+                if (list != null && list.size() > 0) {
+                    for (Zavod zavod : list) {
+                        zavodDtos.add(new ZavodDto(zavod));
+                    }
+                }
+
                 if (csvLine.getZavod_nazvy() != null && csvLine.getZavod_nazvy().length > 0) {
                     List<ZavodDto> zavodyList = new ArrayList<>();
                     for (String zavod : csvLine.getZavod_nazvy()) {
-                        /*/
-                        TODO nahradit načítání dle názvu - neupravovat SHARE*/
-                        // zavodyList.add(new ZavodDto(zavodServices.getByNazev(zavod)));
+                        for (ZavodDto zavodDto: zavodDtos) {
+                            if (zavodDto.getNazev() == zavod) {
+                                zavodyList.add(zavodDto);
+                            }
+                        }
                     }
                     povoleniVjezduVozidlaDto.setZavod(zavodyList);
                 }
