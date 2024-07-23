@@ -24,6 +24,7 @@ import cz.diamo.vratnice.repository.StatRepository;
 import cz.diamo.vratnice.service.LokalitaService;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import cz.diamo.vratnice.service.RidicService;
+import cz.diamo.vratnice.service.StatService;
 import cz.diamo.vratnice.service.VozidloTypService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -64,6 +65,9 @@ public class VratnicePublicRestController extends BaseRestController{
 
     @Autowired
     private VozidloTypService vozidloTypService;
+
+    @Autowired
+    private StatService statService;
 
     @Autowired
     private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
@@ -125,6 +129,14 @@ public class VratnicePublicRestController extends BaseRestController{
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/vozidlo-typ/get-by-nazev")
+    public ResponseEntity<VozidloTypDto> getVozidloTypByNazev(@RequestParam String nazev) {
+        logger.info("-------" + nazev);
+        VozidloTyp vozidloTyp = vozidloTypService.getByNazev(nazev);
+
+        return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
+    }
+
     @PostMapping("/povoleni-vjezdu-vozidla/save")
     public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
@@ -161,8 +173,15 @@ public class VratnicePublicRestController extends BaseRestController{
 
         return result;
     }
-    
-    @GetMapping("/ridic/list-by-cislo-op")
+
+    @GetMapping("/stat/get-by-nazev")
+    public ResponseEntity<StatDto> getStatByNazev(@RequestParam String nazev) {
+        Stat stat = statService.getByNazev(nazev);
+
+        return ResponseEntity.ok(new StatDto(stat));
+    }
+
+    @GetMapping("/ridic/get-by-cislo-op")
     public ResponseEntity<RidicDto> getRidicByCisloOp(@RequestParam String cisloOp) {
         Ridic ridic = ridicService.getRidicByCisloOp(cisloOp);
         if (ridic == null) {

@@ -29,7 +29,7 @@ public class SwaggerConfiguration {
 			openApi.info(new Info().title(Constants.PROJECT_NAME + " - API pro NG").version("v1"));
 		};
 		String packagesToscan[] = { "cz.diamo.share.controller", "cz.diamo.share.websocket",
-				"cz.diamo." + Constants.BASE_PACKAGE + "rest.controller",
+				"cz.diamo." + Constants.BASE_PACKAGE + ".controller",
 				"cz.diamo." + Constants.BASE_PACKAGE + ".websocket" };
 		return GroupedOpenApi.builder().group(Constants.SCHEMA + "-ng").packagesToScan(packagesToscan)
 				.addOpenApiCustomizer(customizer)

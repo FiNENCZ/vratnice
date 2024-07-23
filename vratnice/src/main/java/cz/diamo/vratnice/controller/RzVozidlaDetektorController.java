@@ -43,6 +43,7 @@ public class RzVozidlaDetektorController extends BaseController {
 
     @Autowired
     private VyjezdVozidlaService vyjezdVozidlaService;
+    
     @Autowired
     WebSocketService webSocketService;
 

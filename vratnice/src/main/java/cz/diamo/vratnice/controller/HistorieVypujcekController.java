@@ -15,7 +15,6 @@ import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
-import cz.diamo.vratnice.dto.HistorieVypujcekAkceDto;
 import cz.diamo.vratnice.dto.HistorieVypujcekDto;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
