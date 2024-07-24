@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.enums.SluzebniVozidloKategorieEnum;
 import cz.diamo.vratnice.enums.SluzebniVozidloStavEnum;

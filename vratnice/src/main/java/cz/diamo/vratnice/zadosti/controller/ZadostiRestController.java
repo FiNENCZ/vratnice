@@ -25,9 +25,7 @@ import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.share.security.UserAuthentication;
 import cz.diamo.share.services.AuthServices;
-import cz.diamo.vratnice.dto.BudovaDto;
 import cz.diamo.vratnice.dto.KlicDto;
-import cz.diamo.vratnice.dto.LokalitaDto;
 import cz.diamo.vratnice.dto.PoschodiDto;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,47 +49,6 @@ public class ZadostiRestController extends BaseRestController {
 
 	@Autowired
     private AuthServices authServices;
-
-
-    /**
-	 * Seznam lokalit
-	 * @param appUserDto
-	 * @param idZavod
-	 * @return
-	 */
-	@GetMapping("/lokalita/list")
-	@PreAuthorize("isFullyAuthenticated()")
-	public List<LokalitaDto> listLokalita(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String sapIdZavod) {
-        try {
-            return zadostiServices.seznamLokalit(sapIdZavod, appUserDto);
-        } catch (BaseException be) {
-            logger.error(be);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, be.toString());
-        } catch (Exception e) {
-            logger.error(e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-        }
-	}
-
-    /**
-	 * Seznam budov
-	 * @param appUserDto
-	 * @param idLokalita
-	 * @return
-	 */
-	@GetMapping("/budova/list")
-	@PreAuthorize("isFullyAuthenticated()")
-	public List<BudovaDto> listBudova(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String idLokalita) {
-        try {
-            return zadostiServices.seznamBudov(idLokalita, appUserDto);
-        } catch (BaseException be) {
-            logger.error(be);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, be.toString());
-        } catch (Exception e) {
-            logger.error(e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-        }
-	}
 
     /**
 	 * Seznam poschodi

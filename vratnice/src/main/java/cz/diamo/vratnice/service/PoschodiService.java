@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import cz.diamo.vratnice.entity.Budova;
+import cz.diamo.share.entity.Budova;
+import cz.diamo.share.repository.BudovaRepository;
 import cz.diamo.vratnice.entity.Poschodi;
-import cz.diamo.vratnice.repository.BudovaRepository;
 import cz.diamo.vratnice.repository.PoschodiRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

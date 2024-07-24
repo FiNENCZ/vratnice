@@ -1,4 +1,4 @@
-package cz.diamo.vratnice.entity;
+package cz.diamo.share.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -32,6 +32,9 @@ public class Budova implements Serializable {
     @GeneratedValue(generator = "id")
     @Column(name = "id_budova")
     private String idBudova;
+
+    @Column(name = "id_externi")
+    private String idExterni;
 
     private String nazev;
     

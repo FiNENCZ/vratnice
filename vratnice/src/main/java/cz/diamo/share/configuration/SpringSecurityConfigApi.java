@@ -97,9 +97,7 @@ public class SpringSecurityConfigApi {
 							"/api/public/**", "/api/test/**",
 							"/*/konfigurace", "/*/main/zadost-reset-hesla",
 							"/*/main/reset-hesla", "/v3/api-docs", "/v3/api-docs/*", "/v3/swagger-ui.html",
-							"/v3/swagger-ui/*", "/api/wsapi/*", "/api/wsapi/**", 
-							"/api/ws-vratnice/**", "/api/ws-vratnice/*",
-							"/api/rz-vozidla-detektor/**").permitAll()
+							"/v3/swagger-ui/*", "/api/wsapi/*", "/api/wsapi/**").permitAll()
 							.anyRequest().authenticated();
 				})
 				.exceptionHandling(

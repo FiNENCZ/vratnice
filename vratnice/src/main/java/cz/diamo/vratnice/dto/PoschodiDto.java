@@ -2,7 +2,8 @@ package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
 
-import cz.diamo.vratnice.entity.Budova;
+import cz.diamo.share.dto.BudovaDto;
+import cz.diamo.share.entity.Budova;
 import cz.diamo.vratnice.entity.Poschodi;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

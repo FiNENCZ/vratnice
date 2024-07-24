@@ -14,7 +14,8 @@ public enum RoleEnum {
     ROLE_SERVIS_ORG_STR, ROLE_RPD_REDITEL_ZADOST,
     ROLE_HDD_SPRAVCE, ROLE_HDD_ZAMESTNANEC, ROLE_SPRAVA_CISELNIKU, ROLE_SPRAVA_JIDELNY, ROLE_SPRAVA_CISELNIKY,
     ROLE_SPRAVA_JIDLA, ROLE_SPRAVA_SABLON_JIDELNICKU, ROLE_SPRAVA_OBJEDNAVKY, ROLE_SPRAVA_KLICU,
-    ROLE_SPRAVA_ZADOSTI_KLICU, ROLE_SPRAVA_VYPUJCEK_KLICU, ROLE_ZADATEL_KLICE;
+    ROLE_SPRAVA_ZADOSTI_KLICU, ROLE_SPRAVA_VYPUJCEK_KLICU, ROLE_ZADATEL_KLICE,
+    ROLE_SPRAVA_LOKALIT, ROLE_SPRAVA_BUDOV;
 
     public static RoleEnum getRoleEnum(String value) {
         switch (value) {
@@ -104,6 +105,10 @@ public enum RoleEnum {
                 return RoleEnum.ROLE_SPRAVA_VYPUJCEK_KLICU;
             case "ROLE_ZADATEL_KLICE":
                 return RoleEnum.ROLE_ZADATEL_KLICE;
+            case "ROLE_SPRAVA_LOKALIT":
+                return RoleEnum.ROLE_SPRAVA_LOKALIT;
+            case "ROLE_SPRAVA_BUDOV":
+                return RoleEnum.ROLE_SPRAVA_BUDOV;
             default:
                 return ROLE_ZAMESTNANEC;
         }

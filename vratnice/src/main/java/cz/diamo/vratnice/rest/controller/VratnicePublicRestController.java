@@ -5,23 +5,23 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.rest.controller.BaseRestController;
+import cz.diamo.share.services.LokalitaServices;
 import cz.diamo.share.services.ZavodServices;
-import cz.diamo.vratnice.dto.LokalitaDto;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.RzTypVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.StatRepository;
-import cz.diamo.vratnice.service.LokalitaService;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import cz.diamo.vratnice.service.RidicService;
 import cz.diamo.vratnice.service.StatService;
@@ -58,7 +58,7 @@ public class VratnicePublicRestController extends BaseRestController{
 	final static Logger logger = LogManager.getLogger(VratnicePublicRestController.class);
 
 	@Autowired
-	private LokalitaService lokalitaService;
+	private LokalitaServices lokalitaService;
 
     @Autowired
     private ZavodServices zavodServices;
@@ -84,7 +84,7 @@ public class VratnicePublicRestController extends BaseRestController{
     @GetMapping("/lokalita/list")
     public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
         List<LokalitaDto> result = new ArrayList<LokalitaDto>();
-        List<Lokalita> list = lokalitaService.getList(idZavod);
+        List<Lokalita> list = lokalitaService.getList(idZavod, true);
 
         if (list != null && list.size() > 0) {
             for (Lokalita lokalita : list) {

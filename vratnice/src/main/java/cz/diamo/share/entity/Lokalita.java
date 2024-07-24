@@ -1,4 +1,4 @@
-package cz.diamo.vratnice.entity;
+package cz.diamo.share.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
-import cz.diamo.share.entity.Zavod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,6 +33,9 @@ public class Lokalita implements Serializable {
     @Column(name = "id_lokalita")
     private String idLokalita;
     
+    @Column(name = "id_externi")
+    private String idExterni;
+
     private String nazev;
 
     @ManyToOne(fetch = FetchType.LAZY)

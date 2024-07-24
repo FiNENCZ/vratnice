@@ -4,9 +4,11 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import cz.diamo.vratnice.entity.Budova;
+import cz.diamo.share.dto.BudovaDto;
+import cz.diamo.share.dto.LokalitaDto;
+import cz.diamo.share.entity.Budova;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.vratnice.entity.Klic;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.Poschodi;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
