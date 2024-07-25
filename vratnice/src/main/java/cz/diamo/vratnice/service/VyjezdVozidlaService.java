@@ -56,6 +56,10 @@ public class VyjezdVozidlaService {
         return vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
+    public List<VyjezdVozidla> getNevyporadaneVyjezdy(Boolean aktivita) {
+        return vyjezdVozidlaRepository.getNevyporadaneVyjezdy(aktivita);
+    }
+
     public Optional<VyjezdVozidla> jeMozneVyjet(String rzVozidla) {
         List<VjezdVozidla> vjezdVozidel = vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
         List<VyjezdVozidla> vyjezdVozidel = vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
@@ -86,8 +90,10 @@ public class VyjezdVozidlaService {
 
     @Transactional
     public VyjezdVozidla create(VyjezdVozidla vyjezdVozidla) {
-        vyjezdVozidla.setCasZmn(Utils.getCasZmn());
-        vyjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+        if (vyjezdVozidla.getZmenuProvedl() == null ) {        
+            vyjezdVozidla.setCasZmn(Utils.getCasZmn());
+            vyjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+        }
         return vyjezdVozidlaRepository.save(vyjezdVozidla);
     }
 

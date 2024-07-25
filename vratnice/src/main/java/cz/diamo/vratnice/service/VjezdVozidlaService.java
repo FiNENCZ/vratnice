@@ -68,10 +68,16 @@ public class VjezdVozidlaService {
         return vjezdVozidlaRepository.getByRidic(ridic);
     }
 
+    public List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita) {
+        return vjezdVozidlaRepository.getNevyporadaneVjezdy(aktivita);
+    }
+
     @Transactional
     public VjezdVozidla create(VjezdVozidla vjezdVozidla) {
-        vjezdVozidla.setCasZmn(Utils.getCasZmn());
-        vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+        if (vjezdVozidla.getZmenuProvedl() == null ) {        
+            vjezdVozidla.setCasZmn(Utils.getCasZmn());
+            vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+        }
         return vjezdVozidlaRepository.save(vjezdVozidla);
     }
 

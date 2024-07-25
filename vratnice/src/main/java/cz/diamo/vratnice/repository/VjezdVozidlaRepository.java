@@ -20,4 +20,7 @@ public interface VjezdVozidlaRepository extends JpaRepository<VjezdVozidla, Stri
     @Query(sqlSelect + "where s.ridic = :ridic")
     List<VjezdVozidla> getByRidic(Ridic ridic);
 
+    @Query(sqlSelect+ "WHERE s.aktivita = :aktivita AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)")
+    List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita);
+
 }

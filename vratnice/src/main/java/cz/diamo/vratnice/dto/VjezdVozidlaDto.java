@@ -44,7 +44,10 @@ public class VjezdVozidlaDto implements Serializable {
         this.idVjezdVozidla = vjezdVozidla.getIdVjezdVozidla();
         this.ridic = new RidicDto(vjezdVozidla.getRidic());
         this.rzVozidla = vjezdVozidla.getRzVozidla();
-        this.typVozidla =  new VozidloTypDto(vjezdVozidla.getTypVozidla());
+
+        if (vjezdVozidla.getTypVozidla() != null)
+            this.typVozidla =  new VozidloTypDto(vjezdVozidla.getTypVozidla());
+
         this.opakovanyVjezd = vjezdVozidla.getOpakovanyVjezd();
         this.casPrijezdu = vjezdVozidla.getCasPrijezdu();
         this.aktivita = vjezdVozidla.getAktivita();
@@ -56,7 +59,10 @@ public class VjezdVozidlaDto implements Serializable {
         vjezdVozidla.setIdVjezdVozidla(this.idVjezdVozidla);
         vjezdVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null);
         vjezdVozidla.setRzVozidla(this.rzVozidla);
-        vjezdVozidla.setTypVozidla(getTypVozidla().toEntity());
+
+        if (getTypVozidla() != null)
+            vjezdVozidla.setTypVozidla(getTypVozidla().toEntity());
+            
         vjezdVozidla.setOpakovanyVjezd(this.opakovanyVjezd);
         vjezdVozidla.setCasPrijezdu(this.casPrijezdu);
         vjezdVozidla.setAktivita(this.aktivita);

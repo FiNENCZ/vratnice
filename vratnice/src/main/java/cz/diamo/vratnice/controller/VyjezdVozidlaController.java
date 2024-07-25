@@ -63,6 +63,14 @@ public class VyjezdVozidlaController extends BaseController {
         return ResponseEntity.ok(vyjezdyVozidel);
     }
 
+    @GetMapping("/vyjezd-vozidla/list-nevyporadane-vyjezdy")
+    public ResponseEntity<List<VyjezdVozidlaDto>> listNevyporadaneVyjezdy(@RequestParam @Nullable Boolean aktivita) {
+        List<VyjezdVozidlaDto> vyjezdyVozidel = vyjezdVozidlaService.getNevyporadaneVyjezdy(aktivita).stream()
+            .map(VyjezdVozidlaDto::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(vyjezdyVozidel);
+    }
+
     @GetMapping("/vyjezd-vozidla/je-mozne-vyjet")
     public ResponseEntity<Optional<VyjezdVozidlaDto>> jeMozneVyjet(@RequestParam String rzVozidla) {
         Optional<VyjezdVozidla> vyjezdVozidel = vyjezdVozidlaService.jeMozneVyjet(rzVozidla);

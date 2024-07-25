@@ -1,20 +1,26 @@
 package cz.diamo.vratnice.rest.controller;
 
-
-import java.sql.Timestamp;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.vratnice.dto.RzDetectedMessageDto;
+import cz.diamo.vratnice.rest.dto.StatusMessageVjezdVyjezdDto;
+import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
+import cz.diamo.vratnice.rest.service.VratniceKameryService;
 import cz.diamo.vratnice.service.RzVozidlaDetektorService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @RestController
@@ -26,6 +32,9 @@ public class VratniceKameryRestController extends BaseRestController {
     @Autowired
     private RzVozidlaDetektorService rzVozidlaDetektorService;
 
+    @Autowired
+    private VratniceKameryService vratniceKameryService;
+
     @PostMapping("/rz-vozidla-detektor/detekce")
     private RzDetectedMessageDto processRzVozidla(@RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException {
         if (vjezd) {
@@ -34,5 +43,19 @@ public class VratniceKameryRestController extends BaseRestController {
             return rzVozidlaDetektorService.checkIfRzVozidlaCanLeaveAndSendWs(rzVozidla, vjezd);
         }
     }
+
+    @PostMapping("/rz-vozidla-detektor/nevyporadane-zaznamy")
+    public ResponseEntity<StatusMessageVjezdVyjezdDto> nevyporadaneZaznamy(@RequestBody List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException{
+        try {
+            vratniceKameryService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList);
+            return ResponseEntity.ok(new StatusMessageVjezdVyjezdDto("Záznamy byly úspěšně zpracovány.", null));
+        } catch (Exception ex) {
+            logger.error("Nastala chyba při zpracování záznamů", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(new StatusMessageVjezdVyjezdDto("Záznamy byly úspěšně zpracovány.", ex.getMessage()));
+        }
+    }
+    
+
 
 }
