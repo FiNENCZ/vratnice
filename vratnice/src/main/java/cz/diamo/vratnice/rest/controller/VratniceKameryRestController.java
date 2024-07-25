@@ -11,12 +11,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.rest.controller.BaseRestController;
+import cz.diamo.vratnice.dto.InicializaceVratniceKameryDto;
 import cz.diamo.vratnice.dto.RzDetectedMessageDto;
+import cz.diamo.vratnice.entity.InicializaceVratniceKamery;
 import cz.diamo.vratnice.rest.dto.StatusMessageVjezdVyjezdDto;
 import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
 import cz.diamo.vratnice.rest.service.VratniceKameryService;
+import cz.diamo.vratnice.service.InicializaceVratniceKameryService;
 import cz.diamo.vratnice.service.RzVozidlaDetektorService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("vratnice-public")
+@RequestMapping("vratnice-kamery")
 public class VratniceKameryRestController extends BaseRestController {
 
     final static Logger logger = LogManager.getLogger(VratniceKameryRestController.class);
@@ -34,6 +38,10 @@ public class VratniceKameryRestController extends BaseRestController {
 
     @Autowired
     private VratniceKameryService vratniceKameryService;
+
+    @Autowired
+    private InicializaceVratniceKameryService inicializaceVratniceKameryService;
+
 
     @PostMapping("/rz-vozidla-detektor/detekce")
     private RzDetectedMessageDto processRzVozidla(@RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException {
@@ -55,6 +63,17 @@ public class VratniceKameryRestController extends BaseRestController {
                                  .body(new StatusMessageVjezdVyjezdDto("Záznamy byly úspěšně zpracovány.", ex.getMessage()));
         }
     }
+
+    @PostMapping("/vratnice-kamery-konfigurace/inicializace")
+    public ResponseEntity<InicializaceVratniceKameryDto> inicializace(@RequestBody InicializaceVratniceKameryDto inicializaceVratniceKameryDto) throws JSONException{
+        try {
+            InicializaceVratniceKamery savedInicializaceVratniceKamery = inicializaceVratniceKameryService.save(inicializaceVratniceKameryDto.toEntity());
+            return ResponseEntity.ok(new InicializaceVratniceKameryDto(savedInicializaceVratniceKamery));
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.toString());
+        }
+    }
+    
     
 
 

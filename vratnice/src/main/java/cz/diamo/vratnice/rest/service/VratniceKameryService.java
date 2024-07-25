@@ -3,7 +3,6 @@ package cz.diamo.vratnice.rest.service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
