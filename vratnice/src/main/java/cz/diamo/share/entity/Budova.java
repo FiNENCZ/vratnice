@@ -42,6 +42,8 @@ public class Budova implements Serializable {
     @JoinColumn(name = "id_lokalita")
     private Lokalita lokalita;
 
+    private String poznamka;
+
     private Boolean aktivita = true;
 
     @Column(name = "cas_zmn")

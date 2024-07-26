@@ -486,8 +486,9 @@ $$;
 CREATE TABLE vratnice.budova (
     id_budova character varying(14) NOT NULL,
 	id_externi varchar(14),
-    nazev character varying(80) NOT NULL,
     id_lokalita character varying(14) NOT NULL,
+    nazev character varying(80) NOT NULL,
+    poznamka character varying(4000),
     aktivita boolean DEFAULT true NOT NULL,
     cas_zmn timestamp(6) without time zone NOT NULL,
     zmenu_provedl character varying(100)
@@ -653,8 +654,9 @@ CREATE TABLE vratnice.kmenova_data (
 CREATE TABLE vratnice.lokalita (
     id_lokalita character varying(14) NOT NULL,
 	id_externi varchar(14),
-    nazev character varying(80) NOT NULL,
     id_zavod character varying(14),
+    nazev character varying(80) NOT NULL,
+    poznamka character varying(4000),
     aktivita boolean DEFAULT true NOT NULL,
     cas_zmn timestamp(6) without time zone NOT NULL,
     zmenu_provedl character varying(100)
@@ -1959,6 +1961,14 @@ ALTER TABLE vratnice.zastup
 
 ALTER TABLE vratnice.uzivatelske_nastaveni
     ADD CONSTRAINT uzivatelske_nastaveni_id_uzivatel_fkey FOREIGN KEY (id_uzivatel) REFERENCES vratnice.uzivatel(id_uzivatel);
+
+-- Nová role pro správu lokalit
+insert into zadosti.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_LOKALIT','Správce - lokalit');
+insert into zadosti.role (authority, nazev_resx) values ('ROLE_SPRAVA_LOKALIT', 'ROLE_SPRAVA_LOKALIT');
+
+-- Nová role pro správu budov
+insert into zadosti.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_BUDOV','Správce - budov');
+insert into zadosti.role (authority, nazev_resx) values ('ROLE_SPRAVA_BUDOV', 'ROLE_SPRAVA_BUDOV');
 
 -- Verze DB
 update vratnice.databaze set verze_db = 0, sub_verze_db = 1, cas_zmn = now(), zmenu_provedl = 'pgadmin';

@@ -33,7 +33,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Žádost REST
+ * Žádost REST - voláno ze žádostí
  */
 @RestController
 @RequestMapping("zadosti")

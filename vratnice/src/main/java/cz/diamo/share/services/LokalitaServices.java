@@ -75,4 +75,26 @@ public class LokalitaServices {
 
         return lokalita;
     }
+
+    /**
+     * Odstranění zázmamu
+     * 
+     * @param idLokalita
+     * @throws EpoRequiredFieldException
+     */
+    @TransactionalWrite
+    public void odstranit(String idLokalita) {
+        lokalitaRepository.zmenaAktivity(idLokalita, false, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
+
+    /**
+     * Obnovení záznamu
+     * 
+     * @param idLokalita
+     * @throws EpoRequiredFieldException
+     */
+    @TransactionalWrite
+    public void obnovit(String idLokalita) {
+        lokalitaRepository.zmenaAktivity(idLokalita, true, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
 }

@@ -83,4 +83,26 @@ public class BudovaServices {
 
         return budova;
     }
+
+    /**
+     * Odstranění zázmamu
+     * 
+     * @param idBudova
+     * @throws EpoRequiredFieldException
+     */
+    @TransactionalWrite
+    public void odstranit(String idBudova) {
+        budovaRepository.zmenaAktivity(idBudova, false, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
+
+    /**
+     * Obnovení záznamu
+     * 
+     * @param idBudova
+     * @throws EpoRequiredFieldException
+     */
+    @TransactionalWrite
+    public void obnovit(String idBudova) {
+        budovaRepository.zmenaAktivity(idBudova, true, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
 }

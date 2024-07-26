@@ -1,10 +1,13 @@
 package cz.diamo.share.repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import cz.diamo.share.constants.Constants;
 import cz.diamo.share.entity.Lokalita;
 
 public interface LokalitaRepository extends JpaRepository<Lokalita, String> {
@@ -21,4 +24,16 @@ public interface LokalitaRepository extends JpaRepository<Lokalita, String> {
 
 	@Query(sqlSelect + "where zav.idZavod = :idZavod and s.aktivita = :aktivita order by s.nazev")
 	List<Lokalita> getList(String idZavod, Boolean aktivita);
+
+    /**
+	 * Změna aktivity
+	 * 
+	 * @param idLokalita
+	 * @param aktivita
+	 * @param casZmeny
+	 * @param zmenuProv
+	 */
+	@Modifying
+	@Query(value = "update " + Constants.SCHEMA  + ".lokalita set aktivita = :aktivita, cas_zmn = :casZmeny, zmenu_provedl = :zmenuProv where id_lokalita = :idLokalita", nativeQuery = true)
+	void zmenaAktivity(String idLokalita, Boolean aktivita, Timestamp casZmeny, String zmenuProv);
 }

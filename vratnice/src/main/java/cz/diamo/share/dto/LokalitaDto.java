@@ -25,6 +25,8 @@ public class LokalitaDto implements Serializable {
     @Size(max = 80, message = "{lokalita.nazev.max.80}")
     private String nazev;
 
+    private String poznamka;
+
     private Boolean aktivita;
 
     @NotNull(message = "{lokalita.zavod.require}")
@@ -39,6 +41,7 @@ public class LokalitaDto implements Serializable {
         setId(lokalita.getIdLokalita());
         setIdExterni(lokalita.getIdExterni());
         setNazev(lokalita.getNazev());
+        setPoznamka(lokalita.getPoznamka());
         setAktivita(lokalita.getAktivita());
         setZavod(new ZavodDto(lokalita.getZavod()));
     }
@@ -53,6 +56,7 @@ public class LokalitaDto implements Serializable {
 
         if (!pouzeId) {
             lokalita.setNazev(getNazev());
+            lokalita.setPoznamka(getPoznamka());
             lokalita.setAktivita(getAktivita());
             lokalita.setZavod(new Zavod(getZavod().getId()));
         }

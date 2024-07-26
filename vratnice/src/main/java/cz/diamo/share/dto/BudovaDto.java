@@ -25,6 +25,8 @@ public class BudovaDto implements Serializable {
     @Size(max = 80, message = "{budova.nazev.max.80}")
     private String nazev;
 
+    private String poznamka;
+
     private Boolean aktivita;
 
     @NotNull(message = "{budova.lokalita.require}")
@@ -38,6 +40,7 @@ public class BudovaDto implements Serializable {
 
         setId(budova.getIdBudova());
         setNazev(budova.getNazev());
+        setPoznamka(budova.getPoznamka());
         setAktivita(budova.getAktivita());
         setLokalita(new LokalitaDto(budova.getLokalita()));
     }
@@ -52,6 +55,7 @@ public class BudovaDto implements Serializable {
 
         if (!pouzeId) {
             budova.setNazev(getNazev());
+            budova.setPoznamka(getPoznamka());
             budova.setAktivita(getAktivita());
             budova.setLokalita(new Lokalita(getLokalita().getId()));
         }

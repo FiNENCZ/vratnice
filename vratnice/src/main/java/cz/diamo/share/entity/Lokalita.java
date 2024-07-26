@@ -42,6 +42,8 @@ public class Lokalita implements Serializable {
     @JoinColumn(name = "id_zavod")
     private Zavod zavod;
 
+    private String poznamka;
+
     private Boolean aktivita = true;
 
     @Column(name = "cas_zmn")
