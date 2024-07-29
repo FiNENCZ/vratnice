@@ -28,7 +28,7 @@ public class InicializaceVratniceKamery implements Serializable {
     @Column(name = "id_inicializace_vratnice_kamery")
     private String idInicializaceVratniceKamery;
 
-    @Column(name = "ip_adresa")
+    @Column(name = "ip_adresa", unique = true)
     private String ipAdresa;
 
     @Column(name = "cas_inicializace")

@@ -19,7 +19,7 @@ import cz.diamo.vratnice.service.VyjezdVozidlaService;
 import jakarta.transaction.Transactional;
 
 @Service
-public class VratniceKameryService {
+public class VratniceKameryRestService {
 
     @Autowired
     private VjezdVozidlaService vjezdVozidlaService;

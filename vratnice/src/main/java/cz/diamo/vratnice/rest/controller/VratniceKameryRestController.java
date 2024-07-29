@@ -19,7 +19,7 @@ import cz.diamo.vratnice.dto.RzDetectedMessageDto;
 import cz.diamo.vratnice.entity.InicializaceVratniceKamery;
 import cz.diamo.vratnice.rest.dto.StatusMessageVjezdVyjezdDto;
 import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
-import cz.diamo.vratnice.rest.service.VratniceKameryService;
+import cz.diamo.vratnice.rest.service.VratniceKameryRestService;
 import cz.diamo.vratnice.service.InicializaceVratniceKameryService;
 import cz.diamo.vratnice.service.RzVozidlaDetektorService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +37,7 @@ public class VratniceKameryRestController extends BaseRestController {
     private RzVozidlaDetektorService rzVozidlaDetektorService;
 
     @Autowired
-    private VratniceKameryService vratniceKameryService;
+    private VratniceKameryRestService vratniceKameryRestService;
 
     @Autowired
     private InicializaceVratniceKameryService inicializaceVratniceKameryService;
@@ -55,7 +55,7 @@ public class VratniceKameryRestController extends BaseRestController {
     @PostMapping("/rz-vozidla-detektor/nevyporadane-zaznamy")
     public ResponseEntity<StatusMessageVjezdVyjezdDto> nevyporadaneZaznamy(@RequestBody List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException{
         try {
-            vratniceKameryService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList);
+            vratniceKameryRestService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList);
             return ResponseEntity.ok(new StatusMessageVjezdVyjezdDto("Záznamy byly úspěšně zpracovány.", null));
         } catch (Exception ex) {
             logger.error("Nastala chyba při zpracování záznamů", ex);
