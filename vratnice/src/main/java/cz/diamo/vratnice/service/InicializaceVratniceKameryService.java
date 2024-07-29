@@ -1,5 +1,7 @@
 package cz.diamo.vratnice.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,10 @@ public class InicializaceVratniceKameryService {
 
     public InicializaceVratniceKamery getByIpAdresa(String ipAdresa) {
         return vratniceKameryRepository.getByIpAdresa(ipAdresa);
+    }
+
+    public List<InicializaceVratniceKamery> list() {
+        return vratniceKameryRepository.findAll();
     }
 
 }

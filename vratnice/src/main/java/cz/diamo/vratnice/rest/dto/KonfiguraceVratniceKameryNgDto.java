@@ -3,6 +3,8 @@ package cz.diamo.vratnice.rest.dto;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.vratnice.dto.LokalitaDto;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,16 +14,17 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class KonfiguraceVratniceKameryDto implements Serializable {
+public class KonfiguraceVratniceKameryNgDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer id;
 
-    @NotBlank(message = "{konfigurace_vratnice_kamery_ng.zavod.require}")
-    private String idZavod;
+    
+    @NotNull(message = "{konfigurace_vratnice_kamery_ng.zavod.require}")
+    private ZavodDto zavod;
 
-    @NotBlank(message = "{konfigurace_vratnice_kamery_ng.lokalita.require}")
-    private String idLokalita;
+    @NotNull(message = "{konfigurace_vratnice_kamery_ng.lokalita.require}")
+    private LokalitaDto lokalita;
 
     @NotBlank(message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.require}")
     @Size(max = 50, message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.max.50}")
@@ -41,17 +44,15 @@ public class KonfiguraceVratniceKameryDto implements Serializable {
 
     private String zmenuProvedl;
 
-    public KonfiguraceVratniceKameryDto(KonfiguraceVratniceKameryNgDto kofiguraceNg) {
-        if (kofiguraceNg == null) {
+    public KonfiguraceVratniceKameryNgDto(KonfiguraceVratniceKameryDto konfiguraceVratniceKameryDto) {
+        if (konfiguraceVratniceKameryDto == null) {
             return;
         }
 
-        this.id = 0;
-        this.idZavod = kofiguraceNg.getZavod().getId();
-        this.idLokalita = kofiguraceNg.getLokalita().getId();
-        this.vratniceApiUrl = kofiguraceNg.getVratniceApiUrl();
-        this.casOdeslaniNevyporadanychZaznamuVSekundach = kofiguraceNg.getCasOdeslaniNevyporadanychZaznamuVSekundach();
-        this.casInicializaceVSekundach = kofiguraceNg.getCasInicializaceVSekundach();
+        this.id = konfiguraceVratniceKameryDto.getId();
+        this.vratniceApiUrl = konfiguraceVratniceKameryDto.getVratniceApiUrl();
+        this.casOdeslaniNevyporadanychZaznamuVSekundach = konfiguraceVratniceKameryDto.getCasOdeslaniNevyporadanychZaznamuVSekundach();
+        this.casInicializaceVSekundach = konfiguraceVratniceKameryDto.getCasInicializaceVSekundach();
     }
 
 }
