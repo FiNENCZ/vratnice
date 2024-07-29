@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.controller.KonfiguraceController;
 import cz.diamo.vratnice.dto.InicializaceVratniceKameryDto;
-import cz.diamo.vratnice.dto.VjezdVozidlaDto;
 import cz.diamo.vratnice.dto.VratniceKameryDto;
 import cz.diamo.vratnice.entity.InicializaceVratniceKamery;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryDto;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryNgDto;
+import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
 import cz.diamo.vratnice.service.InicializaceVratniceKameryService;
 import cz.diamo.vratnice.service.VratniceKameryService;
 import jakarta.validation.Valid;
@@ -45,7 +45,7 @@ public class VratniceKameryController extends BaseController{
     }
 
     @GetMapping("/vratnice-kamery/vjezd-vyjezd-vozidla/list")
-    public ResponseEntity<List<VjezdVozidlaDto>> getVjezdVyjezdVozidlaList(@RequestParam String ipAdresa) {
+    public ResponseEntity<List<VjezdVyjezdVozidlaDto>> getVjezdVyjezdVozidlaList(@RequestParam String ipAdresa) {
         return ResponseEntity.ok(vratniceKameryService.getVjezdVyjezd(ipAdresa));
     }
 

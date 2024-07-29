@@ -22,6 +22,7 @@ import cz.diamo.vratnice.dto.VjezdVozidlaDto;
 import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryDto;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryNgDto;
+import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
 
 @Service
 @TransactionalROE
@@ -41,13 +42,13 @@ public class VratniceKameryService {
         return restVratniceKameryTemplate.getForObject(url, KonfiguraceVratniceKameryDto.class);
     }
 
-    public List<VjezdVozidlaDto> getVjezdVyjezd(String ipAdresa) {
+    public List<VjezdVyjezdVozidlaDto> getVjezdVyjezd(String ipAdresa) {
         String url = "http://" + ipAdresa + ":8080/api/vjezd-vyjezd-vozidla/list";
-        ResponseEntity<List<VjezdVozidlaDto>> response = restVratniceKameryTemplate.exchange(
+        ResponseEntity<List<VjezdVyjezdVozidlaDto>> response = restVratniceKameryTemplate.exchange(
             url, 
             HttpMethod.GET, 
             null, 
-            new ParameterizedTypeReference<List<VjezdVozidlaDto>>() {}
+            new ParameterizedTypeReference<List<VjezdVyjezdVozidlaDto>>() {}
         );
         return response.getBody();
     }
