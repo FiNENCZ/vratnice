@@ -18,7 +18,6 @@ import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.services.ZavodServices;
 import cz.diamo.vratnice.dto.LokalitaDto;
-import cz.diamo.vratnice.dto.VjezdVozidlaDto;
 import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryDto;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryNgDto;

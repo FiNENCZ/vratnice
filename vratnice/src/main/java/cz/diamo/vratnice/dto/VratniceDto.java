@@ -56,7 +56,10 @@ public class VratniceDto implements Serializable {
         this.osobni = vratnice.getOsobni();
         this.navstevni = vratnice.getNavstevni();
         this.vjezdova = vratnice.getVjezdova();
-        this.vstupniKartyTyp = new NavstevniListekTypDto(vratnice.getVstupniKartyTyp());
+
+        if (vratnice.getVstupniKartyTyp() != null)
+            this.vstupniKartyTyp = new NavstevniListekTypDto(vratnice.getVstupniKartyTyp());
+
         this.odchoziTurniket = vratnice.getOdchoziTurniket();
         this.aktivita = vratnice.getAktivita();
     }

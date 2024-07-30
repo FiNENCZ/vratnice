@@ -17,6 +17,7 @@ import cz.diamo.vratnice.repository.VratniceRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 @Service
 public class VratniceService {
 
@@ -52,6 +53,7 @@ public class VratniceService {
         return list;
     }
 
+    @Transactional
     public Vratnice save(Vratnice vratnice) {
         vratnice.setCasZmn(Utils.getCasZmn());
         vratnice.setZmenuProvedl(Utils.getZmenuProv());
