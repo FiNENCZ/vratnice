@@ -15,8 +15,10 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.entity.UzivatelVratnice;
-import cz.diamo.vratnice.enums.VozidloTypEnum;
+import cz.diamo.vratnice.entity.UzivatelVsechnyVratnice;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.UzivatelVratniceRepository;
+import cz.diamo.vratnice.repository.UzivatelVsechnyVratniceRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -33,6 +35,9 @@ public class UzivatelVratniceService {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private UzivatelVsechnyVratniceRepository uzivatelVsechnyVratniceRepository;
 
 
     @PersistenceContext
@@ -83,6 +88,12 @@ public class UzivatelVratniceService {
             }
         }
 
+        UzivatelVsechnyVratnice uzivatelVsechnyVratnice = uzivatelVsechnyVratniceRepository.getDetail(uzivatelVratnice.getUzivatel().getIdUzivatel());
+        if (uzivatelVsechnyVratnice != null) {
+            uzivatelVsechnyVratnice.setAktivniVsechnyVratnice(false);
+            uzivatelVsechnyVratniceRepository.save(uzivatelVsechnyVratnice);
+        }
+
         uzivatelVratnice.setCasZmn(Utils.getCasZmn());
         uzivatelVratnice.setZmenuProvedl(Utils.getZmenuProv());
         return uzivatelVratniceRepository.save(uzivatelVratnice);
@@ -95,6 +106,10 @@ public class UzivatelVratniceService {
     public UzivatelVratnice getByUzivatel(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelServices.getDetail(appUserDto.getIdUzivatel(), false);
         return uzivatelVratniceRepository.getByUzivatel(uzivatel);
+    }
+
+    public Vratnice getNastavenaVratniceByUzivatel(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        return getByUzivatel(appUserDto).getNastavenaVratnice();
     }
 
     public Boolean jeVjezdova(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {

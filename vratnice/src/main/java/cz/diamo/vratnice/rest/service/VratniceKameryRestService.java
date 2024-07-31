@@ -7,8 +7,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
 import cz.diamo.vratnice.enums.RzDetectedMessageStatusEnum;
@@ -31,7 +33,7 @@ public class VratniceKameryRestService {
     private RzVozidlaDetektorService rzVozidlaDetektorService;
 
     @Transactional
-    public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException  {
+    public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
         for (VjezdVyjezdVozidlaDto dto : vjezdVyjezdVozidlaDtoList) {
             if(dto.getVjezd()) {
                 VjezdVozidla vjezdVozidla = new VjezdVozidla();
@@ -41,7 +43,7 @@ public class VratniceKameryRestService {
                 vjezdVozidla.setCasZmn(Timestamp.from(Instant.now()));
                 vjezdVozidla.setZmenuProvedl("kamery");
 
-                vjezdVozidlaService.create(vjezdVozidla);
+                vjezdVozidlaService.create(vjezdVozidla, null);
             } else {
                 VyjezdVozidla vyjezdVozidla = new VyjezdVozidla();
                 vyjezdVozidla.setRzVozidla(dto.getRzVozidla());
@@ -50,7 +52,7 @@ public class VratniceKameryRestService {
                 vyjezdVozidla.setCasZmn(Timestamp.from(Instant.now()));
                 vyjezdVozidla.setZmenuProvedl("kamery");
 
-                vyjezdVozidlaService.create(vyjezdVozidla);
+                vyjezdVozidlaService.create(vyjezdVozidla, null);
             }
         }
 

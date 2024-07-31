@@ -6,8 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,9 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.VyjezdVozidlaDto;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
+import cz.diamo.vratnice.service.UzivatelVratniceService;
 import cz.diamo.vratnice.service.VyjezdVozidlaService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 @RestController
@@ -26,10 +33,16 @@ public class VyjezdVozidlaController extends BaseController {
     @Autowired
     private VyjezdVozidlaService vyjezdVozidlaService;
 
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
     @PostMapping("/vyjezd-vozidla/save")
-    public ResponseEntity<VyjezdVozidlaDto> saveVjezdVozidla(@RequestBody @Valid VyjezdVozidlaDto vyjezdVozidlaDto) {
+    public ResponseEntity<VyjezdVozidlaDto> saveVjezdVozidla(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                        @RequestBody @Valid VyjezdVozidlaDto vyjezdVozidlaDto) throws RecordNotFoundException, NoSuchMessageException {
         
-        VyjezdVozidla vyjezdVozidla = vyjezdVozidlaService.create(vyjezdVozidlaDto.toEntity());
+        Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
+        VyjezdVozidla vyjezdVozidla = vyjezdVozidlaService.create(vyjezdVozidlaDto.toEntity(), vratnice);
         return ResponseEntity.ok(new VyjezdVozidlaDto(vyjezdVozidla));
     }
 

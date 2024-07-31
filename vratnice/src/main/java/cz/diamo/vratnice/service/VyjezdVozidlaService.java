@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import cz.diamo.vratnice.repository.VyjezdVozidlaRepository;
@@ -37,7 +38,8 @@ public class VyjezdVozidlaService {
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
 
-        
+        queryString.append(" AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL)");
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
@@ -89,11 +91,15 @@ public class VyjezdVozidlaService {
     }
 
     @Transactional
-    public VyjezdVozidla create(VyjezdVozidla vyjezdVozidla) {
+    public VyjezdVozidla create(VyjezdVozidla vyjezdVozidla, Vratnice vratnice) {
         if (vyjezdVozidla.getZmenuProvedl() == null ) {        
             vyjezdVozidla.setCasZmn(Utils.getCasZmn());
             vyjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
         }
+
+        if (vratnice != null)
+            vyjezdVozidla.setVratnice(vratnice);
+
         return vyjezdVozidlaRepository.save(vyjezdVozidla);
     }
 

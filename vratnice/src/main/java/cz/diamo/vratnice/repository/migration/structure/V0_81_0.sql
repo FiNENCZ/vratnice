@@ -1,0 +1,2 @@
+insert into vratnice.zdrojovy_text (hash, text) values ('ROLE_VSECHNY_VRATNICE','Přístup ke všem vrátnicím');
+insert into vratnice.role (authority, nazev_resx) values ('ROLE_VSECHNY_VRATNICE', 'ROLE_VSECHNY_VRATNICE');

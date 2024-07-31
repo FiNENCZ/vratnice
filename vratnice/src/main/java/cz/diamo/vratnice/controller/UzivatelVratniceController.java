@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.UzivatelVratniceDto;
 import cz.diamo.vratnice.dto.VratniceDto;
 import cz.diamo.vratnice.entity.UzivatelVratnice;
-import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.service.UzivatelVratniceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -78,7 +76,6 @@ public class UzivatelVratniceController extends BaseController {
     }
 
 
-
     @GetMapping("/uzivatel-vratnice/detail")
     public ResponseEntity<UzivatelVratniceDto> getDetail(@RequestParam String idUzivatelVratnice) {
         UzivatelVratnice uzivatelVratnice = uzivatelVratniceService.getDetail(idUzivatelVratnice);
@@ -97,7 +94,6 @@ public class UzivatelVratniceController extends BaseController {
         
         return ResponseEntity.ok(new UzivatelVratniceDto(savedUzivatelVratnice));
     }
-    
 
     @GetMapping("/uzivatel-vratnice/je-nastavena-vratnice-vjezdova")
     public ResponseEntity<Boolean> jeNastavenaVratniceVjezdova(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
