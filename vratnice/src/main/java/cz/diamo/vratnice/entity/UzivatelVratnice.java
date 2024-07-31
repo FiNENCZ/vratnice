@@ -14,7 +14,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -49,6 +48,10 @@ public class UzivatelVratnice implements Serializable {
         inverseJoinColumns = @JoinColumn(name = "id_vratnice")
     )
     private List<Vratnice> vratnice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nastavena_vratnice")
+    private Vratnice nastavenaVratnice;
 
     private String poznamka;
 

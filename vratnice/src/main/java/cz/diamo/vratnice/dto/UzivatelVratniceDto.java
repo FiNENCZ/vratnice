@@ -8,6 +8,7 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.UzivatelVratnice;
 import cz.diamo.vratnice.entity.Vratnice;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,9 +20,15 @@ public class UzivatelVratniceDto implements Serializable{
 
     private String id;
 
+    @NotNull(message = "{uzivatel_vratnice.uzivatel.require}")
+    @Valid
     private UzivatelDto uzivatel;
 
+    @NotNull(message = "{uzivatel_vratnice.vratnice.require}")
+    @Valid
     private List<VratniceDto> vratnice;
+
+    private VratniceDto nastavenaVratnice;
 
     @NotNull(message = "{aktivita.require}")
     private Boolean aktivita = true;
@@ -42,6 +49,9 @@ public class UzivatelVratniceDto implements Serializable{
         }
         this.setVratnice(vratniceDtos);
 
+        if (uzivatelVratnice.getNastavenaVratnice() != null)
+            this.nastavenaVratnice = new VratniceDto(uzivatelVratnice.getNastavenaVratnice());
+
         this.aktivita = uzivatelVratnice.getAktivita();
     }
 
@@ -58,6 +68,9 @@ public class UzivatelVratniceDto implements Serializable{
             }
         }
         uzivatelVratnice.setVratnice(vratnice);
+
+        if (getNastavenaVratnice() != null )
+            uzivatelVratnice.setNastavenaVratnice(new Vratnice(getNastavenaVratnice().getId()));
 
         uzivatelVratnice.setAktivita(this.aktivita);
 
