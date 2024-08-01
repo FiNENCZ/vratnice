@@ -33,7 +33,7 @@ public class VratniceKameryRestService {
     private RzVozidlaDetektorService rzVozidlaDetektorService;
 
     @Transactional
-    public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
+    public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
         for (VjezdVyjezdVozidlaDto dto : vjezdVyjezdVozidlaDtoList) {
             if(dto.getVjezd()) {
                 VjezdVozidla vjezdVozidla = new VjezdVozidla();
@@ -57,7 +57,7 @@ public class VratniceKameryRestService {
         }
 
 
-        rzVozidlaDetektorService.sendWebSocketMessage("all", RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, null);
+        rzVozidlaDetektorService.sendWebSocketMessage(idVratnice ,"all", RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, null);
         return "";
     }
 

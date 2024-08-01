@@ -26,32 +26,33 @@ public class RzVozidlaDetektorService {
     @Autowired
     WebSocketService webSocketService;
 
-    public RzDetectedMessageDto checkIfRzVozidlaIsAllowedAndSendWS(String rzVozidla, Boolean vjezd) throws JSONException {
+    public RzDetectedMessageDto checkIfRzVozidlaIsAllowedAndSendWS(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException {
         Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);
 
         if (result.isPresent()) {
-            return sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
+            return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
         } else {
             if (sluzebniVozidloService.isSluzebniVozidlo(rzVozidla)) {
-                return sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, vjezd);
+                return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, vjezd);
             } else {
-                return sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);
+                return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);
             }
         }
     }
 
-    public RzDetectedMessageDto checkIfRzVozidlaCanLeaveAndSendWs(String rzVozidla, Boolean vjezd) throws JSONException {
+    public RzDetectedMessageDto checkIfRzVozidlaCanLeaveAndSendWs(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException {
         Optional<VyjezdVozidla> result = vyjezdVozidlaService.jeMozneVyjet(rzVozidla);
 
         if (result.isPresent()) {
-            return sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
+            return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
         } else {
-            return sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);
+            return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);
         }
     }
 
-    public RzDetectedMessageDto sendWebSocketMessage(String rzVozidla, RzDetectedMessageStatusEnum status, Boolean vjezd) throws JSONException {
+    public RzDetectedMessageDto sendWebSocketMessage(String idVratnice, String rzVozidla, RzDetectedMessageStatusEnum status, Boolean vjezd) throws JSONException {
         RzDetectedMessageDto dto = new RzDetectedMessageDto();
+        dto.setIdVratnice(idVratnice);
         dto.setRzVozidla(rzVozidla);
         dto.setStatus(status);
         dto.setIsVjezd(vjezd);

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RzDetectedMessageDto {
+    private String idVratnice;
     private String rzVozidla;
     private RzDetectedMessageStatusEnum status;
     private Boolean isVjezd;

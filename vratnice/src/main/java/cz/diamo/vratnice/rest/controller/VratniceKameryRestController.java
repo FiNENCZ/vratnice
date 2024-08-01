@@ -44,18 +44,18 @@ public class VratniceKameryRestController extends BaseRestController {
 
 
     @PostMapping("/rz-vozidla-detektor/detekce")
-    private RzDetectedMessageDto processRzVozidla(@RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException {
+    private RzDetectedMessageDto processRzVozidla(@RequestParam String idVratnice, @RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException {
         if (vjezd) {
-            return rzVozidlaDetektorService.checkIfRzVozidlaIsAllowedAndSendWS(rzVozidla, vjezd);
+            return rzVozidlaDetektorService.checkIfRzVozidlaIsAllowedAndSendWS(idVratnice, rzVozidla, vjezd);
         } else {
-            return rzVozidlaDetektorService.checkIfRzVozidlaCanLeaveAndSendWs(rzVozidla, vjezd);
+            return rzVozidlaDetektorService.checkIfRzVozidlaCanLeaveAndSendWs(idVratnice, rzVozidla, vjezd);
         }
     }
 
     @PostMapping("/rz-vozidla-detektor/nevyporadane-zaznamy")
-    public ResponseEntity<StatusMessageVjezdVyjezdDto> nevyporadaneZaznamy(@RequestBody List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList) throws JSONException{
+    public ResponseEntity<StatusMessageVjezdVyjezdDto> nevyporadaneZaznamy(@RequestBody List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, @RequestParam String idVratnice) throws JSONException{
         try {
-            vratniceKameryRestService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList);
+            vratniceKameryRestService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList, idVratnice);
             return ResponseEntity.ok(new StatusMessageVjezdVyjezdDto("Záznamy byly úspěšně zpracovány.", null));
         } catch (Exception ex) {
             logger.error("Nastala chyba při zpracování záznamů", ex);
