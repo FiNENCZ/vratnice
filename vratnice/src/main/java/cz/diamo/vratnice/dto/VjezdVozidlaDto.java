@@ -18,6 +18,8 @@ public class VjezdVozidlaDto implements Serializable {
 
     private String idVjezdVozidla;
 
+    private VratniceDto vratnice;
+
     @Valid
     private RidicDto ridic;
 
@@ -42,6 +44,11 @@ public class VjezdVozidlaDto implements Serializable {
         }
 
         this.idVjezdVozidla = vjezdVozidla.getIdVjezdVozidla();
+
+        if (vjezdVozidla.getVratnice() != null) {
+            this.vratnice = new VratniceDto(vjezdVozidla.getVratnice());
+        }
+
         this.ridic = new RidicDto(vjezdVozidla.getRidic());
         this.rzVozidla = vjezdVozidla.getRzVozidla();
 
@@ -57,6 +64,11 @@ public class VjezdVozidlaDto implements Serializable {
         VjezdVozidla vjezdVozidla = new VjezdVozidla();
 
         vjezdVozidla.setIdVjezdVozidla(this.idVjezdVozidla);
+
+        if (getVratnice() != null) {
+            vjezdVozidla.setVratnice(this.vratnice.toEntity());
+        }
+
         vjezdVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null);
         vjezdVozidla.setRzVozidla(this.rzVozidla);
 

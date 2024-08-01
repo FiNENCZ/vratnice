@@ -47,9 +47,10 @@ public class VyjezdVozidlaController extends BaseController {
     }
 
     @GetMapping("/vyjezd-vozidla/list")
-    public ResponseEntity<List<VyjezdVozidlaDto>> list(@RequestParam @Nullable Boolean aktivni) {
+    public ResponseEntity<List<VyjezdVozidlaDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+            @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean nevyporadaneVyjezdy) throws RecordNotFoundException, NoSuchMessageException {
         List<VyjezdVozidlaDto> result = new ArrayList<VyjezdVozidlaDto>();
-        List<VyjezdVozidla> list = vyjezdVozidlaService.getList(aktivni);
+        List<VyjezdVozidla> list = vyjezdVozidlaService.getList(aktivni, nevyporadaneVyjezdy,appUserDto);
 
         if (list != null && list.size() > 0) {
             for (VyjezdVozidla vyjezdVozidla : list) {

@@ -45,7 +45,7 @@ public class VjezdVozidlaService {
     @Autowired
     private UzivatelVratniceService uzivatelVratniceService;
 
-    public List<VjezdVozidla> getList(Boolean aktivita, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+    public List<VjezdVozidla> getList(Boolean aktivita, Boolean nevyporadaneVjezdy, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
         Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
 
@@ -56,17 +56,24 @@ public class VjezdVozidlaService {
 
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
+
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null) 
                 queryString.append(" and s.vratnice = :vratnice");
 
-        queryString.append(" AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL)");
+        if (nevyporadaneVjezdy != null) {
+            if (!nevyporadaneVjezdy) {
+                queryString.append(" AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL)");
+            } else {
+                queryString.append(" AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)");
+            }
+        }
 
-        
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
@@ -100,8 +107,9 @@ public class VjezdVozidlaService {
             vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
         }
 
-        if (vratnice != null)
-            vjezdVozidla.setVratnice(vratnice);
+        if (vjezdVozidla.getVratnice() == null)
+            if (vratnice != null)
+                vjezdVozidla.setVratnice(vratnice);
 
         return vjezdVozidlaRepository.save(vjezdVozidla);
     }
