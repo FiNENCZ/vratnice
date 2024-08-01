@@ -14,11 +14,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import cz.diamo.share.annotation.TransactionalROE;
 import cz.diamo.share.base.Utils;
-import cz.diamo.share.dto.ZavodDto;
-import cz.diamo.share.entity.Zavod;
-import cz.diamo.share.services.ZavodServices;
-import cz.diamo.vratnice.dto.LokalitaDto;
-import cz.diamo.vratnice.entity.Lokalita;
+import cz.diamo.vratnice.dto.VratniceDto;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryDto;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryNgDto;
 import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
@@ -31,10 +28,7 @@ public class VratniceKameryService {
     RestTemplate restVratniceKameryTemplate;
 
     @Autowired
-    private ZavodServices zavodServices;
-
-    @Autowired
-    private LokalitaService lokalitaService;
+    private VratniceService vratniceService;
 
     public KonfiguraceVratniceKameryDto getKonfiguraceDetail(String ipAdresa) {
         String url = "http://" + ipAdresa + ":8080/api/konfigurace/detail";
@@ -74,14 +68,9 @@ public class VratniceKameryService {
     public KonfiguraceVratniceKameryNgDto constructKonfiguraceNg(KonfiguraceVratniceKameryDto konfigurace) {
         KonfiguraceVratniceKameryNgDto konfiguraceNg = new KonfiguraceVratniceKameryNgDto(konfigurace);
 
-        if(konfigurace.getIdZavod() != null) {
-            Zavod zavod = zavodServices.getDetail(konfigurace.getIdZavod());
-            konfiguraceNg.setZavod(new ZavodDto(zavod));
-        }
-
-        if(konfigurace.getIdLokalita() != null) {
-            Lokalita lokalita = lokalitaService.detail(konfigurace.getIdLokalita());
-            konfiguraceNg.setLokalita(new LokalitaDto(lokalita));
+        if(konfigurace.getIdVratnice() != null) {
+            Vratnice vratnice = vratniceService.getDetail(konfigurace.getIdVratnice());
+            konfiguraceNg.setVratnice(new VratniceDto(vratnice));
         }
 
         return konfiguraceNg;

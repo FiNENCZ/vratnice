@@ -17,11 +17,8 @@ public class KonfiguraceVratniceKameryDto implements Serializable {
 
     private Integer id;
 
-    @NotBlank(message = "{konfigurace_vratnice_kamery_ng.zavod.require}")
-    private String idZavod;
-
-    @NotBlank(message = "{konfigurace_vratnice_kamery_ng.lokalita.require}")
-    private String idLokalita;
+    @NotBlank(message = "{konfigurace_vratnice_kamery_ng.vratnice.require}")
+    private String idVratnice;
 
     @NotBlank(message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.require}")
     @Size(max = 50, message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.max.50}")
@@ -47,8 +44,7 @@ public class KonfiguraceVratniceKameryDto implements Serializable {
         }
 
         this.id = 0;
-        this.idZavod = kofiguraceNg.getZavod().getId();
-        this.idLokalita = kofiguraceNg.getLokalita().getId();
+        this.idVratnice = kofiguraceNg.getVratnice().getId();
         this.vratniceApiUrl = kofiguraceNg.getVratniceApiUrl();
         this.casOdeslaniNevyporadanychZaznamuVSekundach = kofiguraceNg.getCasOdeslaniNevyporadanychZaznamuVSekundach();
         this.casInicializaceVSekundach = kofiguraceNg.getCasInicializaceVSekundach();

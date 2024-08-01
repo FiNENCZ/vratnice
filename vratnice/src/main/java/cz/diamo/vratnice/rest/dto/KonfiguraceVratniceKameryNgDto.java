@@ -3,8 +3,7 @@ package cz.diamo.vratnice.rest.dto;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import cz.diamo.share.dto.ZavodDto;
-import cz.diamo.vratnice.dto.LokalitaDto;
+import cz.diamo.vratnice.dto.VratniceDto;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,11 +19,8 @@ public class KonfiguraceVratniceKameryNgDto implements Serializable {
     private Integer id;
 
     
-    @NotNull(message = "{konfigurace_vratnice_kamery_ng.zavod.require}")
-    private ZavodDto zavod;
-
-    @NotNull(message = "{konfigurace_vratnice_kamery_ng.lokalita.require}")
-    private LokalitaDto lokalita;
+    @NotNull(message = "{konfigurace_vratnice_kamery_ng.vratnice.require}")
+    private VratniceDto vratnice;
 
     @NotBlank(message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.require}")
     @Size(max = 50, message = "{konfigurace_vratnice_kamery_ng.vratnice_api_url.max.50}")
