@@ -44,7 +44,7 @@ public class KlicService {
         return klicRepository.save(klic);
     }
 
-    public List<Klic> getList(Boolean aktivita, Boolean specialni) {
+    public List<Klic> getList(Boolean aktivita, Boolean specialni, String idLokalita, String idVratnice) {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Klic s");
@@ -55,6 +55,12 @@ public class KlicService {
 
         if (specialni != null)
             queryString.append(" and s.specialni = :specialni");
+
+        if (idLokalita != null)
+            queryString.append(" and s.lokalita.idLokalita = :idLokalita");
+        
+        if (idVratnice != null)
+            queryString.append(" and s.vratnice.idVratnice = :idVratnice");
         
         Query vysledek = entityManager.createQuery(queryString.toString());
 
@@ -63,6 +69,12 @@ public class KlicService {
         
         if (specialni != null)
             vysledek.setParameter("specialni", specialni);
+
+        if (idLokalita != null)
+            vysledek.setParameter("idLokalita", idLokalita);
+
+        if (idVratnice != null)
+            vysledek.setParameter("idVratnice", idVratnice);
         
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();

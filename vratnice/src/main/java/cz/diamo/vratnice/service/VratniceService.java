@@ -33,7 +33,7 @@ public class VratniceService {
     @Autowired
     private ResourcesComponent resourcesComponent;
 
-    public List<Vratnice> getList(Boolean aktivita) {
+    public List<Vratnice> getList(Boolean aktivita, String idLokalita) {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Vratnice s");
@@ -41,11 +41,17 @@ public class VratniceService {
 
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
+
+        if (idLokalita != null)
+            queryString.append(" and s.lokalita.idLokalita = :idLokalita");
         
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+
+        if (idLokalita != null)
+            vysledek.setParameter("idLokalita", idLokalita);
         
         
         @SuppressWarnings("unchecked")

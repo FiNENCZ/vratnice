@@ -39,9 +39,9 @@ public class VratniceController extends BaseController {
     }
     
     @GetMapping("/vratnice/list")
-    public ResponseEntity<List<VratniceDto>> list(@RequestParam @Nullable Boolean aktivni) {
+    public ResponseEntity<List<VratniceDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idLokalita) {
         List<VratniceDto> result = new ArrayList<VratniceDto>();
-        List<Vratnice> list = vratniceService.getList(aktivni);
+        List<Vratnice> list = vratniceService.getList(aktivni, idLokalita);
 
         if (list != null && list.size() > 0) {
             for (Vratnice vratnice : list) {

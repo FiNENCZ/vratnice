@@ -41,6 +41,10 @@ public class Klic implements Serializable {
     private String kodCipu;
 
     @ManyToOne
+    @JoinColumn(name = "id_vratnice")
+    private Vratnice vratnice;
+
+    @ManyToOne
     @JoinColumn(name = "id_lokalita")
     private Lokalita lokalita;
 

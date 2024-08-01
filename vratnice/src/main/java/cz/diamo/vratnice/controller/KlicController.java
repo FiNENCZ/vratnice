@@ -39,9 +39,10 @@ public class KlicController extends BaseController {
     }
 
     @GetMapping("/klic/list")
-    public ResponseEntity<List<KlicDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean specialni) {
+    public ResponseEntity<List<KlicDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean specialni,
+             @RequestParam @Nullable String idLokalita, @RequestParam @Nullable String idVratnice ) {
         List<KlicDto> result = new ArrayList<KlicDto>();
-        List<Klic> list = klicService.getList(aktivni, specialni);
+        List<Klic> list = klicService.getList(aktivni, specialni, idLokalita, idVratnice);
 
         if (list != null && list.size() > 0) {
             for (Klic klic : list) {
