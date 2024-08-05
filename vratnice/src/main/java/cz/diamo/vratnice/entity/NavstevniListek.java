@@ -37,6 +37,10 @@ public class NavstevniListek implements Serializable {
     @Column(name = "id_navstevni_listek")
     private String idNavstevniListek;
 
+    @ManyToOne
+    @JoinColumn(name = "id_vratnice")
+    private Vratnice vratnice;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "navstevni_listek_navsteva_osoba",

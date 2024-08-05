@@ -22,6 +22,8 @@ public class NavstevniListekDto implements Serializable{
 
     private String idNavstevniListek;
 
+    private VratniceDto vratnice;
+
     @NotNull(message = "{navstevni_listek.navsteva_osoba.require}")
     @Valid
     private List<NavstevaOsobaDto> navstevaOsoba;
@@ -45,6 +47,9 @@ public class NavstevniListekDto implements Serializable{
         }
 
         this.idNavstevniListek = navstevniListek.getIdNavstevniListek();
+
+        if(navstevniListek.getVratnice() != null)
+            this.vratnice = new VratniceDto(navstevniListek.getVratnice());
 
         List<NavstevaOsobaDto> navstevaOsobaDtos = new ArrayList<>();
         if(navstevniListek.getNavstevaOsoba() != null) {
@@ -71,6 +76,9 @@ public class NavstevniListekDto implements Serializable{
         NavstevniListek navstevniListek = new NavstevniListek();
 
         navstevniListek.setIdNavstevniListek(this.idNavstevniListek);
+
+        if(getVratnice() != null)
+            navstevniListek.setVratnice(this.getVratnice().toEntity());
     
         List<NavstevaOsoba> navstevaOsobas = new ArrayList<>();
         if (this.getNavstevaOsoba() != null) {
