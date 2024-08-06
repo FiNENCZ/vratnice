@@ -36,11 +36,11 @@ public class Vratnice implements Serializable {
 
     private String nazev;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_zavod")
     private Zavod zavod;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_lokalita")
     private Lokalita lokalita;
 
@@ -50,7 +50,7 @@ public class Vratnice implements Serializable {
     
     private Boolean vjezdova = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_navstevni_listek_typ")
     private NavstevniListekTyp vstupniKartyTyp;
 

@@ -16,7 +16,7 @@ public enum HistorieSluzebniVozidloAkceEnum {
         return value;
     }
 
-    public static HistorieSluzebniVozidloAkceEnum getHistorieSluzebniVozidloAkceEnum(KlicTyp klicTyp) {
+    public static HistorieSluzebniVozidloAkceEnum getHistorieSluzebniVozidloAkceEnum(KlicTyp klicTyp) { //TODO: opravit překlep a otestovat
         return getHistorieSluzebniVozidloAkceEnum(klicTyp.getIdKlicTyp());
     }
 
