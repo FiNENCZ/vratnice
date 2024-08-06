@@ -78,6 +78,7 @@ public class HistorieKlicService {
         return historieKlicRepository.save(historieKlic);
     }
 
+    @Transactional
     public HistorieKlic createUzivatelem(HistorieKlic historieKlic, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
 

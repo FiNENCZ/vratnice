@@ -10,11 +10,13 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RzTypVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
@@ -40,7 +42,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) {
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
@@ -95,7 +97,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @PostMapping(value = "/povoleni-vjezdu-vozidla/povoleni-csv", consumes = {"multipart/form-data"})
-    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
+    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException, UniqueValueException, NoSuchMessageException {
         return ResponseEntity.ok(povoleniVjezduVozidlaService.processPovoleniCsvData(file));
     }
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.VjezdVozidlaDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
@@ -48,7 +49,7 @@ public class VjezdVozidlaController extends BaseController{
 
     @PostMapping("/vjezd-vozidla/save")
     public ResponseEntity<VjezdVozidlaDto> saveVjezdVozidla(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
-                @RequestBody @Valid VjezdVozidlaDto vjezdVozidladDto) throws RecordNotFoundException, NoSuchMessageException {
+                @RequestBody @Valid VjezdVozidlaDto vjezdVozidladDto) throws RecordNotFoundException, NoSuchMessageException, UniqueValueException {
 
         if (vjezdVozidladDto.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(vjezdVozidladDto.getRidic().toEntity());

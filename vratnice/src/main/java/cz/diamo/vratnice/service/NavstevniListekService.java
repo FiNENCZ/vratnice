@@ -60,8 +60,6 @@ public class NavstevniListekService {
     @Autowired
     private UzivatelVratniceService uzivatelVratniceService;
 
-
-
     @Transactional
     public NavstevniListek create(NavstevniListekDto navstevniListekDto, Vratnice vratnice) {
         // Vytvoření NavstevaOsoba jako entity (záznam v databázi)

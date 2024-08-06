@@ -24,9 +24,4 @@ public class HistorieVypujcekService {
     public List<HistorieVypujcek> findByZadostKlic(ZadostKlic zadostKlic) {
         return historieVypujcekRepository.findByZadostKlic(zadostKlic);
     }
-
-    
-    
-
-
 }

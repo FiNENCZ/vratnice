@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.ZavodServices;
 import cz.diamo.vratnice.csvRepresentation.PovoleniVjezduVozidlaCsvRepresentation;
 import cz.diamo.vratnice.csvRepresentation.RzTypVozidlaCsvRepresentation;
@@ -111,7 +113,7 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @Transactional
-    public PovoleniVjezduVozidla create(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) {
+    public PovoleniVjezduVozidla create(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
         if (povoleniVjezduVozidlaDto.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(povoleniVjezduVozidlaDto.getRidic().toEntity());
             povoleniVjezduVozidlaDto.setRidic(new RidicDto(savedRidic));
@@ -133,7 +135,7 @@ public class PovoleniVjezduVozidlaService {
 		}
     }
 
-    public Set<PovoleniVjezduVozidlaDto>  processPovoleniCsvData(MultipartFile file) throws IOException, ParseException {
+    public Set<PovoleniVjezduVozidlaDto>  processPovoleniCsvData(MultipartFile file) throws IOException, ParseException, UniqueValueException, NoSuchMessageException {
         Set<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlas = parsePovoleniCsv(file);
         Set<PovoleniVjezduVozidlaDto> savedDtos = new HashSet<>();
     
