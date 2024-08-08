@@ -85,29 +85,31 @@ public class VratniceKameryController extends BaseController{
     }
 
 
-@GetMapping("/vratnice-kamery/konfigurace/list")
-public ResponseEntity<List<VratniceKameryDto>> listKonfigurace() {
-    List<InicializaceVratniceKamery> inicializaceList = inicializaceVratniceKameryService.list();
-
-    List<VratniceKameryDto> result = inicializaceList.stream().map(inicializace -> {
-        try {
-            KonfiguraceVratniceKameryDto konfigurace = vratniceKameryService.getKonfiguraceDetail(inicializace.getIpAdresa());
-            KonfiguraceVratniceKameryNgDto konfiguraceNg = vratniceKameryService.constructKonfiguraceNg(konfigurace);
-
+    @GetMapping("/vratnice-kamery/konfigurace/list")
+    public ResponseEntity<List<VratniceKameryDto>> listKonfigurace() {
+        List<InicializaceVratniceKamery> inicializaceList = inicializaceVratniceKameryService.list();
+    
+        List<VratniceKameryDto> result = inicializaceList.stream().map(inicializace -> {
             VratniceKameryDto vratniceKameryDto = new VratniceKameryDto();
             vratniceKameryDto.setInicializace(new InicializaceVratniceKameryDto(inicializace));
-            vratniceKameryDto.setKonfigurace(konfiguraceNg);
+    
+            try {
+                KonfiguraceVratniceKameryDto konfigurace = vratniceKameryService.getKonfiguraceDetail(inicializace.getIpAdresa());
+                KonfiguraceVratniceKameryNgDto konfiguraceNg = vratniceKameryService.constructKonfiguraceNg(konfigurace);
+                vratniceKameryDto.setKonfigurace(konfiguraceNg);
+            } catch (RestClientException e) {
+                // Zde můžete zpracovat chybu, např. zalogovat ji nebo vytvořit prázdnou konfiguraci
+                logger.error("Nepodařilo se získat konfiguraci pro IP adresu: " + inicializace.getIpAdresa());
+                // konfigurace zůstane null
+            }
+    
             return vratniceKameryDto;
-        } catch (RestClientException e) {
-            // Zde můžete zpracovat chybu, např. zalogovat ji nebo vytvořit prázdnou konfiguraci
-            logger.error("Nepodařilo se získat konfiguraci pro IP adresu: " + inicializace.getIpAdresa());
-            // Můžete se rozhodnout vrátit null nebo prázdný objekt, podle potřeby
-            return null;
-        }
-    }).filter(Objects::nonNull).collect(Collectors.toList());
-
-    return ResponseEntity.ok(result);
-}
+        }).collect(Collectors.toList());
+    
+        return ResponseEntity.ok(result);
+    }
+    
+    
     @GetMapping("/vratnice-kamery/konfigurace-ng/detail")
     public ResponseEntity<VratniceKameryDto> getVratniceKonfiguraceNgDetail(@RequestParam String ipAdresa) {
         KonfiguraceVratniceKameryDto konfigurace = vratniceKameryService.getKonfiguraceDetail(ipAdresa);
