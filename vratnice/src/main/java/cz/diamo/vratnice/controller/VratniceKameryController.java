@@ -1,7 +1,6 @@
 package cz.diamo.vratnice.controller;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;

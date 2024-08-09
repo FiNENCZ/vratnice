@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,14 +115,6 @@ public class SluzebniVozidloController extends BaseController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));
-    }
-
-    @GetMapping("/sluzebni-vozidlo/dle-stavu")
-    public  ResponseEntity<List<SluzebniVozidloDto>> getSluzebniVozidloByStav(@RequestParam String stav) {
-        List<SluzebniVozidloDto> sluzebniVozidla = sluzebniVozidloService.getSluzebniVozidloByStav(stav).stream()
-            .map(SluzebniVozidloDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(sluzebniVozidla);
     }
 
     @GetMapping("/sluzebni-vozidlo/typ")

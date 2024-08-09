@@ -87,34 +87,12 @@ public class VjezdVozidlaController extends BaseController{
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
-    @GetMapping("/vjez-vozidla/list-by-rz-vozidla")
-    public ResponseEntity<List<VjezdVozidlaDto>> listByRzVozidla(@RequestParam String rzVozidla) {
-        List<VjezdVozidlaDto> vjezdyVozidel = vjezdVozidlaService.getByRzVozidla(rzVozidla).stream()
-            .map(VjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vjezdyVozidel);
-    }
-
     @GetMapping("/vjezd-vozidla/list-nevyporadane-vjezdy")
     public ResponseEntity<List<VjezdVozidlaDto>> listNevyporadaneVjezdy(@RequestParam @Nullable Boolean aktivita) {
         List<VjezdVozidlaDto> vjezdyVozidel = vjezdVozidlaService.getNevyporadaneVjezdy(aktivita).stream()
             .map(VjezdVozidlaDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(vjezdyVozidel);
-    }
-
-    @GetMapping("/vjezd-vozidla/list-by-ridic")
-    public ResponseEntity<List<VjezdVozidlaDto>> listByRidic(@RequestParam String idRidic) throws RecordNotFoundException, NoSuchMessageException {
-        Ridic ridic = ridicService.getDetail(idRidic);
-
-        if (ridic == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<VjezdVozidlaDto> vjezdVozidel = vjezdVozidlaService.getByRidic(ridic).stream()
-            .map(VjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vjezdVozidel);
     }
 
     @GetMapping("/vjezd-vozidla/typ")

@@ -44,7 +44,4 @@ public class NavstevaOsobaService {
     public NavstevaOsoba getRidicByCisloOp(String cisloOp) {
         return navstevaOsobaRepository.geByCisloOp(cisloOp);
     }
-
-
-
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 
 public interface VjezdVozidlaRepository extends JpaRepository<VjezdVozidla, String> {
@@ -16,9 +15,6 @@ public interface VjezdVozidlaRepository extends JpaRepository<VjezdVozidla, Stri
 
     @Query(sqlSelect + "where s.rzVozidla = :rzVozidla")
     List<VjezdVozidla> getByRzVozidla(String rzVozidla);
-
-    @Query(sqlSelect + "where s.ridic = :ridic")
-    List<VjezdVozidla> getByRidic(Ridic ridic);
 
     @Query(sqlSelect+ "WHERE s.aktivita = :aktivita AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)")
     List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita);

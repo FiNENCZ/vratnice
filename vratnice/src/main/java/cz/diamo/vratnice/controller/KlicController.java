@@ -81,7 +81,6 @@ public class KlicController extends BaseController {
 
 
             return ResponseEntity.ok(new KlicDto(newKlic));
-
     }
 
     @GetMapping("/klic/list")

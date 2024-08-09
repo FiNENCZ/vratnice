@@ -73,15 +73,6 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         return ResponseEntity.ok(povoleniVjezduVozidel);
     }
 
-    @GetMapping("/povoleni-vjezdu-vozidla/get-by-rz-vozidla")
-    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> getByRzVozidla(@RequestParam String rzVozidla) {
-        List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getByRzVozidla(rzVozidla).stream()
-            .map(PovoleniVjezduVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(povoleniVjezduVozidel);
-    }
-    
-
     @GetMapping("/povoleni-vjezdu-vozidla/je-rz-vozidla-povolena")
     public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla) {
         Optional<PovoleniVjezduVozidla> povoleniVjezduVozidla = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);

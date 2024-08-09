@@ -69,13 +69,6 @@ public class VyjezdVozidlaController extends BaseController {
         return ResponseEntity.ok(new VyjezdVozidlaDto(vyjezdVozidla));
     }
 
-    @GetMapping("/vyjezd-vozidla/list-by-rz-vozidla")
-    public ResponseEntity<List<VyjezdVozidlaDto>> listByRzVozidla(@RequestParam String rzVozidla) {
-        List<VyjezdVozidlaDto> vyjezdyVozidel = vyjezdVozidlaService.getByRzVozidla(rzVozidla).stream()
-            .map(VyjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vyjezdyVozidel);
-    }
 
     @GetMapping("/vyjezd-vozidla/list-nevyporadane-vyjezdy")
     public ResponseEntity<List<VyjezdVozidlaDto>> listNevyporadaneVyjezdy(@RequestParam @Nullable Boolean aktivita) {

@@ -14,7 +14,6 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
@@ -90,10 +89,6 @@ public class VjezdVozidlaService {
 
     public List<VjezdVozidla> getByRzVozidla(String rzVozidla) {
         return vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
-    }
-
-    public List<VjezdVozidla> getByRidic(Ridic ridic) {
-        return vjezdVozidlaRepository.getByRidic(ridic);
     }
 
     public List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita) {

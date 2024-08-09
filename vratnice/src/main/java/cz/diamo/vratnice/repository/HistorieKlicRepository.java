@@ -11,7 +11,7 @@ public interface HistorieKlicRepository extends JpaRepository<HistorieKlic, Stri
     static final String sqlSelect = "select s from HistorieKlic s ";
 
     @Query(sqlSelect + "where s.klic.idKlic = :idKlic")
-    List<HistorieKlic> findByKlic(String idKlic);
+    List<HistorieKlic> findByIdKlic(String idKlic);
 
     @Query(sqlSelect + "where s.idHistorieKlic = :idHistorieKlic")
     HistorieKlic getDetail(String idHistorieKlic);

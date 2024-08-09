@@ -89,8 +89,8 @@ public class HistorieKlicService {
         
     }
 
-    public List<HistorieKlic> findByKlic(String klic) {
-        return historieKlicRepository.findByKlic(klic);
+    public List<HistorieKlic> findByKlic(String idKlic) {
+        return historieKlicRepository.findByIdKlic(idKlic);
     }
 
     public HistorieKlicAkce getAkci(String idHistorieKlic) {
@@ -105,8 +105,4 @@ public class HistorieKlicService {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 		}
     }
-
-
-
-
 }

@@ -15,7 +15,6 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
@@ -137,14 +136,6 @@ public class NavstevniListekService {
 
     public NavstevniListek getDetail(String idNavstevniListek) {
         return navstevniListekRepository.getDetail(idNavstevniListek);
-    }
-
-    public List<NavstevniListek> getNavstevniListkyByUzivatel(Uzivatel uzivatel) {
-        return navstevniListekRepository.findByUzivatel(uzivatel);
-    }
-
-    public List<NavstevniListek> getNavstevniListkyByNavstevaOsoba(NavstevaOsoba navstevaOsoba) {
-        return navstevniListekRepository.findByNavstevaOsoba(navstevaOsoba);
     }
 
     public NavstevniListekTyp getNavstevniListekTyp(String idNavstevniListek){
