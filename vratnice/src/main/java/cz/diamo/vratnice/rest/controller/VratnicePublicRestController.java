@@ -14,17 +14,20 @@ import cz.diamo.vratnice.dto.LokalitaDto;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.RzTypVozidlaDto;
+import cz.diamo.vratnice.dto.SpolecnostDto;
 import cz.diamo.vratnice.dto.StatDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.StatRepository;
 import cz.diamo.vratnice.service.LokalitaService;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import cz.diamo.vratnice.service.RidicService;
+import cz.diamo.vratnice.service.SpolecnostService;
 import cz.diamo.vratnice.service.StatService;
 import cz.diamo.vratnice.service.VozidloTypService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -81,6 +84,9 @@ public class VratnicePublicRestController extends BaseRestController{
     private RidicService ridicService;
 
     @Autowired
+    private SpolecnostService spolecnostService;
+
+    @Autowired
     private ResourcesComponent resourcesComponent;
 
     @GetMapping("/lokalita/list")
@@ -133,7 +139,6 @@ public class VratnicePublicRestController extends BaseRestController{
 
     @GetMapping("/vozidlo-typ/get-by-nazev")
     public ResponseEntity<VozidloTypDto> getVozidloTypByNazev(@RequestParam String nazev) {
-        logger.info("-------" + nazev);
         VozidloTyp vozidloTyp = vozidloTypService.getByNazev(nazev);
 
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
@@ -196,6 +201,33 @@ public class VratnicePublicRestController extends BaseRestController{
     public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
+    }
+
+    @GetMapping("/spolecnost/list")
+    public ResponseEntity<List<SpolecnostDto>> spolecnostList() {
+        List<SpolecnostDto> result = new ArrayList<SpolecnostDto>();
+		List<Spolecnost> list = spolecnostService.getList();
+		
+		if (list != null && list.size() > 0) {
+			for (Spolecnost spolecnost : list) {
+				result.add(new SpolecnostDto(spolecnost));
+			}
+		}
+
+		return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/spolecnost/get-by-nazev")
+    public ResponseEntity<SpolecnostDto> getSpolecnostByNazev(@RequestParam String nazev) {
+        Spolecnost spolecnost = spolecnostService.getByNazev(nazev);
+        return ResponseEntity.ok(new SpolecnostDto(spolecnost));
+    }
+    
+    
+    @PostMapping("/spolecnost/save")
+    public ResponseEntity<SpolecnostDto> save(@RequestBody @Valid SpolecnostDto spolecnostDto) {
+        Spolecnost savedSpolecnost = spolecnostService.save(spolecnostDto.toEntity());
+        return ResponseEntity.ok(new SpolecnostDto(savedSpolecnost));
     }
 
 

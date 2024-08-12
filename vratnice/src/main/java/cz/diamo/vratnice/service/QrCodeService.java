@@ -53,7 +53,7 @@ public class QrCodeService {
             sb.append("Jméno: ").append(navstevaOsoba.getJmeno()).append("\n");
             sb.append("Příjmení: ").append(navstevaOsoba.getPrijmeni()).append("\n");
             sb.append("Číslo OP: ").append(navstevaOsoba.getCisloOp()).append("\n");
-            sb.append("Společnost: ").append(navstevaOsoba.getFirma()).append("\n\n");
+            sb.append("Společnost: ").append(navstevaOsoba.getSpolecnost().getNazev()).append("\n\n");
             osobaIndex++;
         }
         

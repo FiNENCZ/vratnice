@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.repository.RidicRepository;
 import jakarta.transaction.Transactional;
 
@@ -20,10 +21,16 @@ public class RidicService {
     private RidicRepository ridicRepository;
 
     @Autowired
+    private SpolecnostService spolecnostService;
+
+    @Autowired
     private MessageSource messageSource;
 
     @Transactional
     public Ridic create(Ridic ridic) throws UniqueValueException, NoSuchMessageException {
+        Spolecnost savedSpolecnost = spolecnostService.save(ridic.getSpolecnost());
+        ridic.setSpolecnost((savedSpolecnost));
+ 
         if (ridic.getIdRidic() == null || ridic.getIdRidic().isEmpty()){
             if(ridicRepository.existsByCisloOp(ridic.getCisloOp())){
                 throw new UniqueValueException(

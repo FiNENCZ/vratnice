@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,8 +33,8 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
     @Pattern(regexp = "\\d+", message = "{najemnik_navstevnicka_karta.cislo_op.pattern}")
     private String cisloOp;
 
-    @Size(max = 120, message = "{najemnik_navstevnicka_karta.spolecnost.max.10}")
-    private String spolecnost;
+    @Valid
+    private SpolecnostDto spolecnost;
 
     @Size(max = 30, message = "{najemnik_navstevnicka_karta.cislo_najemni_smlouvy.max.30}")
     private String cisloNajemniSmlouvy;
@@ -60,7 +61,7 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
         this.jmeno = najemnikNavstevnickaKarta.getJmeno();
         this.prijmeni = najemnikNavstevnickaKarta.getPrijmeni();
         this.cisloOp = najemnikNavstevnickaKarta.getCisloOp();
-        this.spolecnost = najemnikNavstevnickaKarta.getSpolecnost();
+        this.spolecnost = new SpolecnostDto(najemnikNavstevnickaKarta.getSpolecnost());
         this.cisloNajemniSmlouvy = najemnikNavstevnickaKarta.getCisloNajemniSmlouvy();
         this.cisloKarty = najemnikNavstevnickaKarta.getCisloKarty();
         this.duvodVydani = najemnikNavstevnickaKarta.getDuvodVydani();
@@ -76,7 +77,7 @@ public class NajemnikNavstevnickaKartaDto implements Serializable {
         najemnikNavstevnickaKarta.setJmeno(this.jmeno);
         najemnikNavstevnickaKarta.setPrijmeni(this.prijmeni);
         najemnikNavstevnickaKarta.setCisloOp(this.cisloOp);
-        najemnikNavstevnickaKarta.setSpolecnost(this.spolecnost);
+        najemnikNavstevnickaKarta.setSpolecnost(getSpolecnost().toEntity());
         najemnikNavstevnickaKarta.setCisloNajemniSmlouvy(this.cisloNajemniSmlouvy);
         najemnikNavstevnickaKarta.setCisloKarty(this.cisloKarty);
         najemnikNavstevnickaKarta.setDuvodVydani(this.duvodVydani);

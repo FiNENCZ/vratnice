@@ -33,6 +33,7 @@ public class RidicController extends BaseController {
     @Autowired
     private RidicService ridicService;
 
+
     @PostMapping("/ridic/save")
     public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());

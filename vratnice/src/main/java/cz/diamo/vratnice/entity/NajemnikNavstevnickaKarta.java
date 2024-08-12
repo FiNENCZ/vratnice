@@ -9,8 +9,11 @@ import org.hibernate.annotations.GenericGenerator;
 import cz.diamo.share.constants.Constants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -38,7 +41,9 @@ public class NajemnikNavstevnickaKarta implements Serializable {
     @Column(name = "cislo_op", unique = true)
     private String cisloOp;
 
-    private String spolecnost;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_spolecnost")
+    private Spolecnost spolecnost;
 
     @Column(name = "cislo_najemni_smlouvy")
     private String cisloNajemniSmlouvy;

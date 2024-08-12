@@ -190,7 +190,7 @@ public class PovoleniVjezduVozidlaService {
                         ridicDto.setJmeno(csvLine.getRidic_jmeno());
                         ridicDto.setPrijmeni(csvLine.getRidic_prijmeni());
                         ridicDto.setCisloOp(csvLine.getRidic_cisloOp());
-                        ridicDto.setFirma(csvLine.getRidic_firma());
+                        //ridicDto.setFirma(csvLine.getRidic_firma());
                     } else {
                         ridicDto = new RidicDto(ridic);
                     }
