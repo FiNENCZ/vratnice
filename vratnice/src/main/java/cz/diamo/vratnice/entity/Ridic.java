@@ -27,7 +27,7 @@ public class Ridic implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_ridic")
     private String idRidic;
@@ -42,7 +42,7 @@ public class Ridic implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_spolecnost")
     private Spolecnost spolecnost;
-    
+
     @Column(name = "datum_pouceni")
     private Date datumPouceni;
 

@@ -28,7 +28,7 @@ public class NavstevaOsoba implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_navsteva_osoba")
     private String idNavstevaOsoba;
@@ -39,7 +39,7 @@ public class NavstevaOsoba implements Serializable {
 
     @Column(name = "cislo_op")
     private String cisloOp;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_spolecnost")
     private Spolecnost spolecnost;

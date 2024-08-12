@@ -35,7 +35,7 @@ public class PovoleniVjezduVozidla implements Serializable{
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_povoleni_vjezdu_vozidla")
     private String idPovoleniVjezduVozidla;

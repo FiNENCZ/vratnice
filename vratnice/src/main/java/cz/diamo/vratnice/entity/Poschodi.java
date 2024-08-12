@@ -23,7 +23,7 @@ import jakarta.persistence.ManyToOne;
 public class Poschodi {
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_poschodi")
     private String idPoschodi;
