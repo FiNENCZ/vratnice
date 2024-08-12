@@ -3,7 +3,10 @@ package cz.diamo.share.enums;
 public enum ShareTableEnum {
     Uzivatel("UZ"), ExterniUzivatel("EU"), Opravneni("OP"), PracovniPozice("PP"),
     Zavod("ZA"), Zakazka("ZK"), KmenovaData("KD"), PracovniPozicePodrizene("PO"), UzivatelskeNastaveni("UN"),
-    PracovniPoziceLog("PL"), Lokalita("LK"), Budova("BD");
+    PracovniPoziceLog("PL"), Budova("BD"), Lokalita("LK"), Poschodi("PK"), HistorieSluzebniVozidlo("HS"), 
+    HistorieVypujcek("HV"), PovoleniVjezduVozidla("PV"), Ridic("RD"), SluzebniVozidlo("SV"), VjezdVozidla("VI"), 
+    VyjezdVozidla("VO"), ZadostKlic("ZD"), InicializaceVratniceKamery("VK"),
+    JmenoKorektura("JK"), Klic("KL"), NajemnikNavstevnickaKarta("NK"), NavstevaOsoba("NO"), NavstevniListek("NL");
 
     private String prefix;
 

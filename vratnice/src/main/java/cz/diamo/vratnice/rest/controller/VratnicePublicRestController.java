@@ -9,6 +9,7 @@ import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.share.services.LokalitaServices;
 import cz.diamo.share.services.ZavodServices;
@@ -38,6 +39,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,13 +140,13 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) {
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
 
     @PostMapping(value = "/povoleni-vjezdu-vozidla/povoleni-csv", consumes = {"multipart/form-data"})
-    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
+    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException, UniqueValueException, NoSuchMessageException {
         return ResponseEntity.ok(povoleniVjezduVozidlaService.processPovoleniCsvData(file));
     }
 
@@ -191,7 +193,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @PostMapping("/ridic/save")
-    public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) {
+    public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
     }

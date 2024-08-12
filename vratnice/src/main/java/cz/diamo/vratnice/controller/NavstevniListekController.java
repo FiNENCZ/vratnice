@@ -2,7 +2,6 @@ package cz.diamo.vratnice.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,20 +12,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
-import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
-import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
 import cz.diamo.vratnice.entity.NavstevniListekTyp;
-import cz.diamo.vratnice.service.NavstevaOsobaService;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.service.NavstevniListekService;
 import cz.diamo.vratnice.service.QrCodeService;
+import cz.diamo.vratnice.service.UzivatelVratniceService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,26 +44,26 @@ public class NavstevniListekController extends BaseController {
     private NavstevniListekService navstevniListekService;
 
     @Autowired
-    private NavstevaOsobaService navstevaOsobaService;
-
-    @Autowired
     private QrCodeService qrCodeService;
 
     @Autowired
-    private UzivatelServices uzivatelService;
+    private UzivatelVratniceService uzivatelVratniceService;
 
 
     @PostMapping("/navstevni-listek/create")
-    public ResponseEntity<NavstevniListekDto> save(@RequestBody @Valid NavstevniListekDto navstevniListekDto) {
-        NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto);
+    public ResponseEntity<NavstevniListekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+    @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws RecordNotFoundException, NoSuchMessageException {
+        Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+        NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto, vratnice);
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
     }
     
 
     @GetMapping("/navstevni-listek/list")
-    public ResponseEntity<List<NavstevniListekDto>> list(@RequestParam @Nullable Boolean aktivni) {
+    public ResponseEntity<List<NavstevniListekDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+                 @RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
         List<NavstevniListekDto> result = new ArrayList<NavstevniListekDto>();
-        List<NavstevniListek> list = navstevniListekService.getList(aktivni);
+        List<NavstevniListek> list = navstevniListekService.getList(aktivni, appUserDto);
 
         if (list != null && list.size() > 0) {
             for (NavstevniListek navstevniListek : list) {
@@ -81,25 +81,6 @@ public class NavstevniListekController extends BaseController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
-    }
-    
-    
-    @GetMapping("/navstevni-listek/get-by-uzivatel")
-    public ResponseEntity<List<NavstevniListekDto>> getNavstevniListkyByUzivatel(@RequestParam String uzivatelId) throws RecordNotFoundException, NoSuchMessageException {
-        Uzivatel uzivatel = uzivatelService.getDetail(uzivatelId); 
-        List<NavstevniListekDto> navstevniListky = navstevniListekService.getNavstevniListkyByUzivatel(uzivatel).stream()
-            .map(NavstevniListekDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(navstevniListky);
-    }
-
-    @GetMapping("/navstevni-listek/get-by-navsteva-osoba")
-    public ResponseEntity<List<NavstevniListekDto>> getNavstevniListkyByNavstevaOsoba(@RequestParam String navstevaOsobaId) throws RecordNotFoundException, NoSuchMessageException {
-        NavstevaOsoba navstevaOsoba = navstevaOsobaService.getDetail(navstevaOsobaId);
-        List<NavstevniListekDto> navstevniListky = navstevniListekService.getNavstevniListkyByNavstevaOsoba(navstevaOsoba).stream()
-            .map(NavstevniListekDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(navstevniListky);
     }
 
     @GetMapping("/navstevni-listek/qrcode")

@@ -3,10 +3,13 @@ package cz.diamo.vratnice.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.Ridic;
-import cz.diamo.vratnice.exceptions.DuplicateCisloOpException;
 import cz.diamo.vratnice.repository.RidicRepository;
 import jakarta.transaction.Transactional;
 
@@ -16,11 +19,15 @@ public class RidicService {
     @Autowired
     private RidicRepository ridicRepository;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Transactional
-    public Ridic create(Ridic ridic) {
+    public Ridic create(Ridic ridic) throws UniqueValueException, NoSuchMessageException {
         if (ridic.getIdRidic() == null || ridic.getIdRidic().isEmpty()){
             if(ridicRepository.existsByCisloOp(ridic.getCisloOp())){
-                throw new DuplicateCisloOpException("Číslo OP musí být unikátní. V databázi již existuje řidič se stejným OP.");
+                throw new UniqueValueException(
+                        messageSource.getMessage("ridic.cisloOp.unique", null, LocaleContextHolder.getLocale()));
             }
         }
         return ridicRepository.save(ridic);

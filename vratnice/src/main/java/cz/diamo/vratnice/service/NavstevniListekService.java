@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,14 +13,16 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
 import cz.diamo.vratnice.entity.NavstevniListekTyp;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.NavstevniListekTypEnum;
 import cz.diamo.vratnice.repository.NavstevaOsobaRepository;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
@@ -50,10 +53,14 @@ public class NavstevniListekService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
 
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
 
     @Transactional
-    public NavstevniListek create(NavstevniListekDto navstevniListekDto) {
+    public NavstevniListek create(NavstevniListekDto navstevniListekDto, Vratnice vratnice) {
         // Vytvoření NavstevaOsoba jako entity (záznam v databázi)
         if (navstevniListekDto.getNavstevaOsoba() != null && !navstevniListekDto.getNavstevaOsoba().isEmpty()) {
     
@@ -86,10 +93,18 @@ public class NavstevniListekService {
         NavstevniListek navstevniListek = navstevniListekDto.toEntity();
         navstevniListek.setCasZmn(Utils.getCasZmn());
         navstevniListek.setZmenuProvedl(Utils.getZmenuProv());
+
+        if (navstevniListek.getVratnice() == null)
+            if (vratnice != null)
+                navstevniListek.setVratnice(vratnice);
+
         return navstevniListekRepository.save(navstevniListek);
     }
 
-    public List<NavstevniListek> getList(Boolean aktivita) {
+    public List<NavstevniListek> getList(Boolean aktivita, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from NavstevniListek s");
@@ -99,10 +114,19 @@ public class NavstevniListekService {
             queryString.append(" and s.aktivita = :aktivita");
 
         
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null) 
+                queryString.append(" and s.vratnice = :vratnice");
+
+        
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null)
+                vysledek.setParameter("vratnice", nastavenaVratnice);
         
         
         @SuppressWarnings("unchecked")
@@ -112,14 +136,6 @@ public class NavstevniListekService {
 
     public NavstevniListek getDetail(String idNavstevniListek) {
         return navstevniListekRepository.getDetail(idNavstevniListek);
-    }
-
-    public List<NavstevniListek> getNavstevniListkyByUzivatel(Uzivatel uzivatel) {
-        return navstevniListekRepository.findByUzivatel(uzivatel);
-    }
-
-    public List<NavstevniListek> getNavstevniListkyByNavstevaOsoba(NavstevaOsoba navstevaOsoba) {
-        return navstevniListekRepository.findByNavstevaOsoba(navstevaOsoba);
     }
 
     public NavstevniListekTyp getNavstevniListekTyp(String idNavstevniListek){

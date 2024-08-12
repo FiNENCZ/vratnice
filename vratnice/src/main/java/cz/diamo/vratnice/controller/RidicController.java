@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.service.RidicService;
@@ -32,7 +34,7 @@ public class RidicController extends BaseController {
     private RidicService ridicService;
 
     @PostMapping("/ridic/save")
-    public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) {
+    public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
     }

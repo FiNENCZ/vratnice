@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.NajemnikNavstevnickaKartaDto;
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
 import cz.diamo.vratnice.service.NajemnikNavstevnickaKartaService;
@@ -29,7 +31,7 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
     private NajemnikNavstevnickaKartaService najemnikNavstevnickaKartaService;
 
      @PostMapping("/najemnik-navstevnicka-karta/save")
-    public ResponseEntity<NajemnikNavstevnickaKartaDto> save(@RequestBody @Valid NajemnikNavstevnickaKartaDto najemnikNavstevnickaKartaDto) {
+    public ResponseEntity<NajemnikNavstevnickaKartaDto> save(@RequestBody @Valid NajemnikNavstevnickaKartaDto najemnikNavstevnickaKartaDto) throws UniqueValueException, NoSuchMessageException {
         NajemnikNavstevnickaKarta najemnikNavstevnickaKarta = najemnikNavstevnickaKartaService.create(najemnikNavstevnickaKartaDto.toEntity());
         return ResponseEntity.ok(new NajemnikNavstevnickaKartaDto(najemnikNavstevnickaKarta));
     }

@@ -9,7 +9,10 @@ import org.hibernate.annotations.GenericGenerator;
 import cz.diamo.share.constants.Constants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
@@ -29,6 +32,10 @@ public class VyjezdVozidla implements Serializable{
     @GeneratedValue(generator = "id")
     @Column(name = "id_vyjezd_vozidla")
     private String idVyjezdVozidla;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vratnice")
+    private Vratnice vratnice;
 
     @Column(name = "rz_vozidla")
     private String rzVozidla;

@@ -18,6 +18,8 @@ public class VyjezdVozidlaDto implements Serializable {
 
     private String idVyjezdVozidla;
 
+    private VratniceDto vratnice;
+
     @NotBlank(message = "{vyjezd_vozidla.rz_vozidla.require}")
     @Size(max = 30, message = "{vyjezd_vozidla.rz_vozidla.max.30}")
     private String rzVozidla;
@@ -41,6 +43,11 @@ public class VyjezdVozidlaDto implements Serializable {
         }
 
         this.idVyjezdVozidla = vyjezdVozidla.getIdVyjezdVozidla();
+
+        if (vyjezdVozidla.getVratnice() != null) {
+            this.vratnice = new VratniceDto(vyjezdVozidla.getVratnice());
+        }
+
         this.rzVozidla = vyjezdVozidla.getRzVozidla();
         this.naklad = vyjezdVozidla.getNaklad();
         this.cisloPruchodky = vyjezdVozidla.getCisloPruchodky();
@@ -53,6 +60,11 @@ public class VyjezdVozidlaDto implements Serializable {
         VyjezdVozidla vyjezdVozidla = new VyjezdVozidla();
 
         vyjezdVozidla.setIdVyjezdVozidla(this.idVyjezdVozidla);
+
+        if (getVratnice() != null) {
+            vyjezdVozidla.setVratnice(this.vratnice.toEntity());
+        }
+
         vyjezdVozidla.setRzVozidla(this.rzVozidla);
         vyjezdVozidla.setNaklad(this.naklad);
         vyjezdVozidla.setCisloPruchodky(this.cisloPruchodky);

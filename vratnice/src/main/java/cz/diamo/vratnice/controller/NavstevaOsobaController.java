@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.service.NavstevaOsobaService;
@@ -30,7 +32,7 @@ public class NavstevaOsobaController extends BaseController {
     private NavstevaOsobaService navstevaOsobaService;
 
     @PostMapping("/navsteva-osoba/save")
-    public ResponseEntity<NavstevaOsobaDto> save(@RequestBody @Valid NavstevaOsobaDto navstevaOsobaDto) {
+    public ResponseEntity<NavstevaOsobaDto> save(@RequestBody @Valid NavstevaOsobaDto navstevaOsobaDto) throws UniqueValueException, NoSuchMessageException {
         NavstevaOsoba newNavstevaOsoba = navstevaOsobaService.create(navstevaOsobaDto.toEntity());
         return ResponseEntity.ok(new NavstevaOsobaDto(newNavstevaOsoba));
     }

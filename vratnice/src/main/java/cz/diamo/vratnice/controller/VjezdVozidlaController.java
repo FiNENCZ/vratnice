@@ -8,18 +8,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.VjezdVozidlaDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.service.RidicService;
+import cz.diamo.vratnice.service.UzivatelVratniceService;
 import cz.diamo.vratnice.service.VjezdVozidlaService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,20 +44,29 @@ public class VjezdVozidlaController extends BaseController{
     @Autowired
     private RidicService ridicService;
 
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
     @PostMapping("/vjezd-vozidla/save")
-    public ResponseEntity<VjezdVozidlaDto> saveVjezdVozidla(@RequestBody @Valid VjezdVozidlaDto vjezdVozidladDto) {
+    public ResponseEntity<VjezdVozidlaDto> saveVjezdVozidla(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                @RequestBody @Valid VjezdVozidlaDto vjezdVozidladDto) throws RecordNotFoundException, NoSuchMessageException, UniqueValueException {
+
         if (vjezdVozidladDto.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(vjezdVozidladDto.getRidic().toEntity());
             vjezdVozidladDto.setRidic(new RidicDto(savedRidic));
         }
-        VjezdVozidla vjezdVozidla = vjezdVozidlaService.create(vjezdVozidladDto.toEntity());
+
+        Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
+        VjezdVozidla vjezdVozidla = vjezdVozidlaService.create(vjezdVozidladDto.toEntity(), vratnice);
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
     @GetMapping("/vjezd-vozidla/list")
-    public ResponseEntity<List<VjezdVozidlaDto>> list(@RequestParam @Nullable Boolean aktivni) {
+    public ResponseEntity<List<VjezdVozidlaDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+                @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean nevyporadaneVjezdy) throws RecordNotFoundException, NoSuchMessageException {
         List<VjezdVozidlaDto> result = new ArrayList<VjezdVozidlaDto>();
-        List<VjezdVozidla> list = vjezdVozidlaService.getList(aktivni);
+        List<VjezdVozidla> list = vjezdVozidlaService.getList(aktivni, nevyporadaneVjezdy, appUserDto);
 
         if (list != null && list.size() > 0) {
             for (VjezdVozidla vjezdVozidla : list) {
@@ -72,26 +87,12 @@ public class VjezdVozidlaController extends BaseController{
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
-    @GetMapping("/vjez-vozidla/list-by-rz-vozidla")
-    public ResponseEntity<List<VjezdVozidlaDto>> listByRzVozidla(@RequestParam String rzVozidla) {
-        List<VjezdVozidlaDto> vjezdyVozidel = vjezdVozidlaService.getByRzVozidla(rzVozidla).stream()
+    @GetMapping("/vjezd-vozidla/list-nevyporadane-vjezdy")
+    public ResponseEntity<List<VjezdVozidlaDto>> listNevyporadaneVjezdy(@RequestParam @Nullable Boolean aktivita) {
+        List<VjezdVozidlaDto> vjezdyVozidel = vjezdVozidlaService.getNevyporadaneVjezdy(aktivita).stream()
             .map(VjezdVozidlaDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(vjezdyVozidel);
-    }
-
-    @GetMapping("/vjezd-vozidla/list-by-ridic")
-    public ResponseEntity<List<VjezdVozidlaDto>> listByRidic(@RequestParam String idRidic) throws RecordNotFoundException, NoSuchMessageException {
-        Ridic ridic = ridicService.getDetail(idRidic);
-
-        if (ridic == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<VjezdVozidlaDto> vjezdVozidel = vjezdVozidlaService.getByRidic(ridic).stream()
-            .map(VjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vjezdVozidel);
     }
 
     @GetMapping("/vjezd-vozidla/typ")

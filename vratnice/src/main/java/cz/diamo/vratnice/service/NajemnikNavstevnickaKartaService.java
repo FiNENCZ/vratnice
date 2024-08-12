@@ -4,11 +4,14 @@ package cz.diamo.vratnice.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import cz.diamo.share.base.Utils;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
-import cz.diamo.vratnice.exceptions.DuplicateCisloOpException;
 import cz.diamo.vratnice.repository.NajemnikNavstevnickaKartaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -24,11 +27,15 @@ public class NajemnikNavstevnickaKartaService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Transactional
-    public NajemnikNavstevnickaKarta create(NajemnikNavstevnickaKarta najemnikNavstevnickaKarta) {
+    public NajemnikNavstevnickaKarta create(NajemnikNavstevnickaKarta najemnikNavstevnickaKarta) throws UniqueValueException, NoSuchMessageException {
         if (najemnikNavstevnickaKarta.getIdNajemnikNavstevnickaKarta() == null || najemnikNavstevnickaKarta.getIdNajemnikNavstevnickaKarta().isEmpty()){
             if(najemnikNavstevnickaKartaRepository.existsByCisloOp(najemnikNavstevnickaKarta.getCisloOp())){
-                throw new DuplicateCisloOpException("Číslo OP musí být unikátní. V databázi již existuje nájemník se stejným OP.");
+                throw new UniqueValueException(
+                        messageSource.getMessage("navsteva_osoba.cislo_op.unique", null, LocaleContextHolder.getLocale()));
             }
         }
         najemnikNavstevnickaKarta.setCasZmn(Utils.getCasZmn());

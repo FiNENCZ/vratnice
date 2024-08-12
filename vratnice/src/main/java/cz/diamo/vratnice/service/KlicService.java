@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.KlicTyp;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.KlicRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -35,6 +39,12 @@ public class KlicService {
     @Autowired
     private ResourcesComponent resourcesComponent;
 
+    @Autowired
+    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
+
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
     public List<Klic> getAllKeys() {
         return klicRepository.findAll();
     }
@@ -46,7 +56,10 @@ public class KlicService {
         return klicRepository.save(klic);
     }
 
-    public List<Klic> getList(Boolean aktivita, Boolean specialni) {
+    public List<Klic> getList(Boolean aktivita, Boolean specialni, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Klic s");
@@ -57,6 +70,10 @@ public class KlicService {
 
         if (specialni != null)
             queryString.append(" and s.specialni = :specialni");
+
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null) 
+                queryString.append(" and s.vratnice = :vratnice");
         
         Query vysledek = entityManager.createQuery(queryString.toString());
 
@@ -65,6 +82,10 @@ public class KlicService {
         
         if (specialni != null)
             vysledek.setParameter("specialni", specialni);
+
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null)
+                vysledek.setParameter("vratnice", nastavenaVratnice);
         
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();

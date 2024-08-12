@@ -84,14 +84,6 @@ public class SluzebniVozidloService {
         return sluzebniVozidloRepository.getByRz(rz);
     }
 
-    public List<SluzebniVozidlo> getSluzebniVozidloByStav(String stav) {
-        return sluzebniVozidloRepository.getSluzebniVozidloByStav(stav);
-    }
-
-    public List<SluzebniVozidlo> getSluzebniVozidloByAktivita(Boolean aktivita) {
-        return sluzebniVozidloRepository.findByAktivita(aktivita);
-    }
-
     public VozidloTyp getVozidloTyp(String idVozidlo) {
         SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
         try {

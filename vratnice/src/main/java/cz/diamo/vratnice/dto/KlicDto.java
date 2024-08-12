@@ -10,6 +10,8 @@ import cz.diamo.share.entity.Budova;
 import cz.diamo.share.entity.Lokalita;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.Poschodi;
+import cz.diamo.vratnice.entity.Vratnice;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -34,6 +36,9 @@ public class KlicDto implements Serializable {
     @NotBlank(message = "{klic.rfid.require}")
     @Size(max = 50, message = "{klic.rfid.max.50}")
     private String kodCipu;
+
+    @NotNull(message = "{klic.vratnice.require}")
+    private VratniceDto vratnice;
 
     @NotNull(message = "{klic.lokace.require}")
     private LokalitaDto lokalita;
@@ -64,6 +69,7 @@ public class KlicDto implements Serializable {
         setNazev(key.getNazev());
         setKodCipu(key.getKodCipu());
         setMistnost(key.getMistnost());
+        setVratnice(new VratniceDto(key.getVratnice()));
         setLokalita(new LokalitaDto(key.getLokalita()));
         setTyp(new KlicTypDto(key.getTyp()));
         setAktivita(key.getAktivita());
@@ -82,6 +88,10 @@ public class KlicDto implements Serializable {
         key.setSpecialni(this.specialni);
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
+        key.setVratnice(new Vratnice(getVratnice().getId()));
+        key.setLokalita(new Lokalita(getLokalita().getId()));
+        key.setBudova(new Budova(getBudova().getId()));
+        key.setPoschodi(new Poschodi(getPoschodi().getId()));
         key.setMistnost(this.mistnost);
 
         if (getTyp() != null)
@@ -99,4 +109,20 @@ public class KlicDto implements Serializable {
 
         return key;
     }
+
+    @AssertTrue(message = "{klic.vratnice.require")
+    public boolean isVratniceValid() {
+        return vratnice != null && vratnice.getId() != null && !vratnice.getId().isEmpty();
+    }
+
+    @AssertTrue(message = "{klic.budoba.require")
+    public boolean isBudovaValid() {
+        return budova != null && budova.getId() != null && !budova.getId().isEmpty();
+    }
+
+    @AssertTrue(message = "{klic.poschodi.require")
+    public boolean isPoschodiValid() {
+        return poschodi != null && poschodi.getId() != null && !poschodi.getId().isEmpty();
+    }
 }
+

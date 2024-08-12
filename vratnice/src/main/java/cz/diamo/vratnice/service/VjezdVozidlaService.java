@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
-import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -35,7 +38,16 @@ public class VjezdVozidlaService {
     @Autowired
     private ResourcesComponent resourcesComponent;
 
-    public List<VjezdVozidla> getList(Boolean aktivita) {
+    @Autowired
+    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
+
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
+    public List<VjezdVozidla> getList(Boolean aktivita, Boolean nevyporadaneVjezdy, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from VjezdVozidla s");
@@ -44,11 +56,26 @@ public class VjezdVozidlaService {
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
 
-        
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null) 
+                queryString.append(" and s.vratnice = :vratnice");
+
+        if (nevyporadaneVjezdy != null) {
+            if (!nevyporadaneVjezdy) {
+                queryString.append(" AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL)");
+            } else {
+                queryString.append(" AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)");
+            }
+        }
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+
+        if (!maVsechnyVratnice)
+            if (nastavenaVratnice != null)
+                vysledek.setParameter("vratnice", nastavenaVratnice);
         
         
         @SuppressWarnings("unchecked")
@@ -64,14 +91,21 @@ public class VjezdVozidlaService {
         return vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
-    public List<VjezdVozidla> getByRidic(Ridic ridic) {
-        return vjezdVozidlaRepository.getByRidic(ridic);
+    public List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita) {
+        return vjezdVozidlaRepository.getNevyporadaneVjezdy(aktivita);
     }
 
     @Transactional
-    public VjezdVozidla create(VjezdVozidla vjezdVozidla) {
-        vjezdVozidla.setCasZmn(Utils.getCasZmn());
-        vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+    public VjezdVozidla create(VjezdVozidla vjezdVozidla, Vratnice vratnice) {
+        if (vjezdVozidla.getZmenuProvedl() == null ) {        
+            vjezdVozidla.setCasZmn(Utils.getCasZmn());
+            vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
+        }
+
+        if (vjezdVozidla.getVratnice() == null)
+            if (vratnice != null)
+                vjezdVozidla.setVratnice(vratnice);
+
         return vjezdVozidlaRepository.save(vjezdVozidla);
     }
 

@@ -82,15 +82,5 @@ public class VozidloTypController extends BaseController {
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
         
     }
-
-    @GetMapping("/vozidlo-typ/get-by-nazev")
-    public ResponseEntity<VozidloTypDto> getByNazev(@RequestParam String nazev) {
-        logger.info("------" + nazev);
-        VozidloTyp vozidloTyp = vozidloTypService.getByNazev(nazev);
-        return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
-    }
-    
-    
-
 }
 

@@ -35,6 +35,10 @@ public class VjezdVozidla implements Serializable {
     private String idVjezdVozidla;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vratnice")
+    private Vratnice vratnice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ridic")
     private Ridic ridic;
 
