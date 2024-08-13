@@ -84,6 +84,8 @@ public class KlicService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
+            else
+                return null;
         
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();

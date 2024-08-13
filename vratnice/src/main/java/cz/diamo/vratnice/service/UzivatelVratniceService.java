@@ -75,19 +75,32 @@ public class UzivatelVratniceService {
 
     @Transactional
     public UzivatelVratnice save(UzivatelVratnice uzivatelVratnice) throws UniqueValueException, NoSuchMessageException{
+        // Nový záznam - kontrola, zda již neexistuje nějaký záznam s daným uživatelem
         if (uzivatelVratnice.getIdUzivatelVratnice() == null || uzivatelVratnice.getIdUzivatelVratnice().isEmpty()){
             if(uzivatelVratniceRepository.existsByIdUzivatel(uzivatelVratnice.getUzivatel().getIdUzivatel())){
                 throw new UniqueValueException(
                         messageSource.getMessage("uzivatel_vratnice.uzivatel.unique", null, LocaleContextHolder.getLocale()), null, true);
             }
+        } 
+        // Editace záznamu - kontrola, zda již neexistuje nějaký záznam s daným uživatelem
+        else {
+            UzivatelVratnice alreadySavedUzivatelVratnice = uzivatelVratniceRepository.getDetail(uzivatelVratnice.getIdUzivatelVratnice());
+            if (!alreadySavedUzivatelVratnice.getUzivatel().getIdUzivatel().equals(uzivatelVratnice.getUzivatel().getIdUzivatel())) {
+                if (uzivatelVratniceRepository.existsByIdUzivatel(uzivatelVratnice.getUzivatel().getIdUzivatel())) {
+                    throw new UniqueValueException(
+                        messageSource.getMessage("uzivatel_vratnice.uzivatel.unique", null, LocaleContextHolder.getLocale()), null, true);
+                }
+            }
         }
 
+        // pokud není nastavená výchozí vrátnice pro daného uživatele, vybere se ta první 
         if (uzivatelVratnice.getNastavenaVratnice() == null) {
             if (uzivatelVratnice.getVratnice() != null && !uzivatelVratnice.getVratnice().isEmpty()) {
                 uzivatelVratnice.setNastavenaVratnice(uzivatelVratnice.getVratnice().get(0));
             }
         }
 
+        // Pokud má nastavený přístup do všech vrátnic, tak při vytvoření napojení vrátnic (UzivatelVratnice) nastaví v dropdownu "nastavenou vrátnici"
         UzivatelVsechnyVratnice uzivatelVsechnyVratnice = uzivatelVsechnyVratniceRepository.getDetail(uzivatelVratnice.getUzivatel().getIdUzivatel());
         if (uzivatelVsechnyVratnice != null) {
             uzivatelVsechnyVratnice.setAktivniVsechnyVratnice(false);
@@ -109,7 +122,14 @@ public class UzivatelVratniceService {
     }
 
     public Vratnice getNastavenaVratniceByUzivatel(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        return getByUzivatel(appUserDto).getNastavenaVratnice();
+        UzivatelVratnice uzivatelVratnice = getByUzivatel(appUserDto);
+        
+        if (uzivatelVratnice == null) {
+            return null;
+        }
+
+        Vratnice vratnice = uzivatelVratnice.getNastavenaVratnice();
+        return vratnice;
     }
 
     public Boolean jeVjezdova(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {

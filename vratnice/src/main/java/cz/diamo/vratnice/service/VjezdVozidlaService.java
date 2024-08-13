@@ -76,6 +76,8 @@ public class VjezdVozidlaService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
+            else
+                return null;
         
         
         @SuppressWarnings("unchecked")

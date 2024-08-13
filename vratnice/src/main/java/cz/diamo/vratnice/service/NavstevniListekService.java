@@ -133,7 +133,8 @@ public class NavstevniListekService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
-        
+            else
+                return null;
         
         @SuppressWarnings("unchecked")
         List<NavstevniListek> list = vysledek.getResultList();
