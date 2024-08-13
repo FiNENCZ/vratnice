@@ -2,12 +2,12 @@ package cz.diamo.vratnice.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +48,7 @@ public class VjezdVozidlaController extends BaseController{
     private UzivatelVratniceService uzivatelVratniceService;
 
     @PostMapping("/vjezd-vozidla/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
     public ResponseEntity<VjezdVozidlaDto> saveVjezdVozidla(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                 @RequestBody @Valid VjezdVozidlaDto vjezdVozidladDto) throws RecordNotFoundException, NoSuchMessageException, UniqueValueException {
 
@@ -63,6 +64,7 @@ public class VjezdVozidlaController extends BaseController{
     }
 
     @GetMapping("/vjezd-vozidla/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
     public ResponseEntity<List<VjezdVozidlaDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
                 @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean nevyporadaneVjezdy) throws RecordNotFoundException, NoSuchMessageException {
         List<VjezdVozidlaDto> result = new ArrayList<VjezdVozidlaDto>();
@@ -79,6 +81,7 @@ public class VjezdVozidlaController extends BaseController{
     
 
     @GetMapping("/vjezd-vozidla/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
     public ResponseEntity<VjezdVozidlaDto> getDetail(@RequestParam String idVjezdVozidla) {
         VjezdVozidla vjezdVozidla = vjezdVozidlaService.getDetail(idVjezdVozidla);
         if (vjezdVozidla == null) {
@@ -87,15 +90,8 @@ public class VjezdVozidlaController extends BaseController{
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
-    @GetMapping("/vjezd-vozidla/list-nevyporadane-vjezdy")
-    public ResponseEntity<List<VjezdVozidlaDto>> listNevyporadaneVjezdy(@RequestParam @Nullable Boolean aktivita) {
-        List<VjezdVozidlaDto> vjezdyVozidel = vjezdVozidlaService.getNevyporadaneVjezdy(aktivita).stream()
-            .map(VjezdVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(vjezdyVozidel);
-    }
-
     @GetMapping("/vjezd-vozidla/typ")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
     public ResponseEntity<VozidloTypDto> typ(@RequestParam String idVozidlo) {
         VozidloTyp vozidloTyp = vjezdVozidlaService.getVozidloTyp(idVozidlo);
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));

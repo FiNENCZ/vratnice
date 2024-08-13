@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,7 @@ public class UzivatelVratniceController extends BaseController {
     private UzivatelVratniceService uzivatelVratniceService;
 
     @PostMapping("/uzivatel-vratnice/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNI')")
     public ResponseEntity<UzivatelVratniceDto> save(@RequestBody @Valid UzivatelVratniceDto uzivatelVratniceDto) throws UniqueValueException, NoSuchMessageException {
         UzivatelVratnice uzivatelVratnice = uzivatelVratniceService.save(uzivatelVratniceDto.toEntity());
         return ResponseEntity.ok(new UzivatelVratniceDto(uzivatelVratnice));
@@ -45,6 +47,7 @@ public class UzivatelVratniceController extends BaseController {
     
 
     @GetMapping("/uzivatel-vratnice/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNI')")
     public ResponseEntity<List<UzivatelVratniceDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
                 @RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
 
@@ -77,6 +80,7 @@ public class UzivatelVratniceController extends BaseController {
 
 
     @GetMapping("/uzivatel-vratnice/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNI')")
     public ResponseEntity<UzivatelVratniceDto> getDetail(@RequestParam String idUzivatelVratnice) {
         UzivatelVratnice uzivatelVratnice = uzivatelVratniceService.getDetail(idUzivatelVratnice);
         if (uzivatelVratnice == null) {

@@ -15,8 +15,4 @@ public interface VjezdVozidlaRepository extends JpaRepository<VjezdVozidla, Stri
 
     @Query(sqlSelect + "where s.rzVozidla = :rzVozidla")
     List<VjezdVozidla> getByRzVozidla(String rzVozidla);
-
-    @Query(sqlSelect+ "WHERE s.aktivita = :aktivita AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)")
-    List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita);
-
 }

@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,6 +40,7 @@ public class HistorieKlicController extends BaseController {
 
 
     @GetMapping("/historie-klic/list-by-klic")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<List<HistorieKlicDto>> listByKlic(@RequestParam String idKlic) {
         List<HistorieKlicDto> historieSluzebniVozidloDtos = historieKlicService.findByKlic(idKlic).stream()
             .map(HistorieKlicDto::new)
@@ -48,12 +50,14 @@ public class HistorieKlicController extends BaseController {
     }
 
     @GetMapping("/historie-klic/akce")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<HistorieKlicAkceDto> akce(@RequestParam String idHistorieKlic) {
         HistorieKlicAkce historieKlicAkce = historieKlicService.getAkci(idHistorieKlic);
         return ResponseEntity.ok(new HistorieKlicAkceDto(historieKlicAkce));
     }
 
     @PostMapping("/historie-klic/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<HistorieKlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
         @RequestBody @Valid HistorieKlicDto historieKlicDto) throws RecordNotFoundException, NoSuchMessageException {
 

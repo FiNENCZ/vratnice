@@ -17,6 +17,7 @@ import cz.diamo.vratnice.service.SluzebniVozidloService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,6 +37,7 @@ public class HistorieSluzebniVozidloController extends BaseController {
     
 
     @GetMapping("/historie-sluzebni-vozidlo/list-by-sluzebni-vozidlo")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<List<HistorieSluzebniVozidloDto>> listBySluzebniVozidlo(@RequestParam String idSluzebniVozidlo) {
         SluzebniVozidlo sluzebniVozidloEntity = sluzebniVozidloService.getDetail(idSluzebniVozidlo);
         List<HistorieSluzebniVozidloDto> historieSluzebniVozidloDtos = historieSluzebniVozidloService.findBySluzebniVozidlo(sluzebniVozidloEntity).stream()
@@ -47,6 +49,7 @@ public class HistorieSluzebniVozidloController extends BaseController {
 
 
     @GetMapping("/historie-sluzebni-vozidlo/akce")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<HistorieSluzebniVozidloAkceDto> akce(@RequestParam String idHistorieSluzebniVozidlo) {
         HistorieSluzebniVozidloAkce historieSluzebniVozidloAkce = historieSluzebniVozidloService.getAkci(idHistorieSluzebniVozidlo);
         return ResponseEntity.ok(new HistorieSluzebniVozidloAkceDto(historieSluzebniVozidloAkce));

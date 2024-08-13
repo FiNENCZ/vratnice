@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,12 +32,14 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
     private NajemnikNavstevnickaKartaService najemnikNavstevnickaKartaService;
 
      @PostMapping("/najemnik-navstevnicka-karta/save")
+     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAJEMNICI_KARTY')")
     public ResponseEntity<NajemnikNavstevnickaKartaDto> save(@RequestBody @Valid NajemnikNavstevnickaKartaDto najemnikNavstevnickaKartaDto) throws UniqueValueException, NoSuchMessageException {
         NajemnikNavstevnickaKarta najemnikNavstevnickaKarta = najemnikNavstevnickaKartaService.create(najemnikNavstevnickaKartaDto.toEntity());
         return ResponseEntity.ok(new NajemnikNavstevnickaKartaDto(najemnikNavstevnickaKarta));
     }
 
     @GetMapping("/najemnik-navstevnicka-karta/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAJEMNICI_KARTY')")
     public ResponseEntity<List<NajemnikNavstevnickaKartaDto>> list(@RequestParam @Nullable Boolean aktivni) {
         List<NajemnikNavstevnickaKartaDto> result = new ArrayList<NajemnikNavstevnickaKartaDto>();
         List<NajemnikNavstevnickaKarta> list = najemnikNavstevnickaKartaService.getList(aktivni);
@@ -51,6 +54,7 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
     }
 
     @GetMapping("/najemnik-navstevnicka-karta/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAJEMNICI_KARTY')")
     public ResponseEntity<NajemnikNavstevnickaKartaDto> getDetail(@RequestParam String idNajemnikNavstevnickaKarta) {
         NajemnikNavstevnickaKarta najemnikNavstevnickaKarta = najemnikNavstevnickaKartaService.getDetail(idNajemnikNavstevnickaKarta);
         if (najemnikNavstevnickaKarta == null) {
@@ -60,6 +64,7 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
     }
 
     @GetMapping("/najemnik-navstevnicka-karta/list-by-cislo-op")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAJEMNICI_KARTY')")
     public ResponseEntity<NajemnikNavstevnickaKartaDto> getByCisloOp(@RequestParam String cisloOp) {
         NajemnikNavstevnickaKarta najemnikNavstevnickaKarta = najemnikNavstevnickaKartaService.getByCisloOp(cisloOp);
         if (najemnikNavstevnickaKarta == null) {

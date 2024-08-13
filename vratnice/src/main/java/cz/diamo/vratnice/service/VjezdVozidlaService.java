@@ -93,10 +93,6 @@ public class VjezdVozidlaService {
         return vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
-    public List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita) {
-        return vjezdVozidlaRepository.getNevyporadaneVjezdy(aktivita);
-    }
-
     @Transactional
     public VjezdVozidla create(VjezdVozidla vjezdVozidla, Vratnice vratnice) {
         if (vjezdVozidla.getZmenuProvedl() == null ) {        

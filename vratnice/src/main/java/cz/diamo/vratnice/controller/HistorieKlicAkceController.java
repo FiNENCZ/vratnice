@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,7 @@ public class HistorieKlicAkceController extends BaseController {
     private HistorieKlicAkceService historieKlicAkceService;
 
     @GetMapping("/historie-klic-akce/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<List<HistorieKlicAkceDto>> list(@RequestParam(defaultValue = "true") @Nullable Boolean uzivatelskeAkce) {
         List<HistorieKlicAkceDto> result = new ArrayList<HistorieKlicAkceDto>();
         List<HistorieKlicAkce> list = historieKlicAkceService.getList(uzivatelskeAkce);

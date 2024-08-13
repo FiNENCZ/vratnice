@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 
@@ -41,11 +42,13 @@ public class VratniceKameryController extends BaseController{
     private InicializaceVratniceKameryService inicializaceVratniceKameryService;
 
     @GetMapping("/vratnice-kamery/konfigurace/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<KonfiguraceVratniceKameryDto> getVratniceKameryKonfigurace(@RequestParam String ipAdresa) {
         return ResponseEntity.ok(vratniceKameryService.getKonfiguraceDetail(ipAdresa));
     }
 
     @GetMapping("/vratnice-kamery/vjezd-vyjezd-vozidla/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<List<VjezdVyjezdVozidlaDto>> getVjezdVyjezdVozidlaList(@RequestParam String ipAdresa) {
         return ResponseEntity.ok(vratniceKameryService.getVjezdVyjezd(ipAdresa));
     }
@@ -53,6 +56,7 @@ public class VratniceKameryController extends BaseController{
 
 
     @PostMapping("/vratnice-kamery/konfigurace/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<KonfiguraceVratniceKameryDto> saveKonfigurace(
             @RequestBody @Valid KonfiguraceVratniceKameryDto konfiguraceVratniceKameryDto,
             @RequestParam String ipAdresa) {
@@ -61,6 +65,7 @@ public class VratniceKameryController extends BaseController{
     }
 
     @PostMapping("/vratnice-kamery/konfigurace-ng/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<VratniceKameryDto> saveKonfiguraceNg(
             @RequestBody @Valid VratniceKameryDto vratniceKameryDto) {
 
@@ -85,6 +90,7 @@ public class VratniceKameryController extends BaseController{
 
 
     @GetMapping("/vratnice-kamery/konfigurace/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<List<VratniceKameryDto>> listKonfigurace() {
         List<InicializaceVratniceKamery> inicializaceList = inicializaceVratniceKameryService.list();
     
@@ -110,6 +116,7 @@ public class VratniceKameryController extends BaseController{
     
     
     @GetMapping("/vratnice-kamery/konfigurace-ng/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<VratniceKameryDto> getVratniceKonfiguraceNgDetail(@RequestParam String ipAdresa) {
         KonfiguraceVratniceKameryDto konfigurace = vratniceKameryService.getKonfiguraceDetail(ipAdresa);
 

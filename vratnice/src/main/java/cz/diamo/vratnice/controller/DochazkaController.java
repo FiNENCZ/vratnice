@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +34,7 @@ public class DochazkaController extends BaseController{
 
 
     @GetMapping("/dochazka/get-uzivatele-dle-nastavene-vratnice")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_DOCHAZKA')")
     public ResponseEntity<List<UzivatelDto>> getUzivateleDleNastaveneVratnice(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
                 List<UzivatelDto> result = new ArrayList<UzivatelDto>();
 

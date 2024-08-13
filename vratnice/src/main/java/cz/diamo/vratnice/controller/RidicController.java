@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -35,12 +36,14 @@ public class RidicController extends BaseController {
 
 
     @PostMapping("/ridic/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_RIDIC')")
     public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
     }
 
     @GetMapping("/ridic/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_RIDIC')")
     public ResponseEntity<List<RidicDto>> list() {
         List<RidicDto> ridicDtos = ridicService.list().stream()
             .map(RidicDto::new)
@@ -49,6 +52,7 @@ public class RidicController extends BaseController {
     }
 
     @GetMapping("/ridic/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_RIDIC')")
     public ResponseEntity<RidicDto> getDetail(@RequestParam String idRidic) {
         Ridic ridic = ridicService.getDetail(idRidic);
         if (ridic == null) {
