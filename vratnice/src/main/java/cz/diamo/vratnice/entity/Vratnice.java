@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

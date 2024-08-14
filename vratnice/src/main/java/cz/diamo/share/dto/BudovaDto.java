@@ -34,7 +34,7 @@ public class BudovaDto implements Serializable {
     
 
     public BudovaDto(Budova budova) {
-        if (lokalita == null) {
+        if (budova == null) {
             return;
         }
 

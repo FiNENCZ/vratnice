@@ -2,6 +2,8 @@ package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.entity.Budova;
 import cz.diamo.vratnice.entity.Poschodi;
@@ -22,6 +24,8 @@ public class PoschodiDto implements Serializable {
     @Size(max = 80, message = "{poschodi.nazev.max.80}")
     private String nazev;
     
+    private Boolean aktivita;
+
     @NotNull(message = "{poschodi.budova.require}")
     private BudovaDto budova;
 
@@ -30,17 +34,24 @@ public class PoschodiDto implements Serializable {
             return;
         }
 
-        this.id = poschodi.getIdPoschodi();
-        this.nazev = poschodi.getNazev();
-        this.budova = new BudovaDto(poschodi.getBudova());
+        setId(poschodi.getIdPoschodi());
+        setNazev(poschodi.getNazev());
+        setAktivita(poschodi.getAktivita());
+        setBudova(new BudovaDto(poschodi.getBudova()));
     }
 
-    public Poschodi toEntity() {
-        Poschodi poschodi = new Poschodi();
+    @JsonIgnore
+    public Poschodi getPoschodi(Poschodi poschodi, boolean pouzeId) {
+        if (poschodi == null)
+            poschodi = new Poschodi();
 
         poschodi.setIdPoschodi(this.id);
-        poschodi.setNazev(this.nazev);
-        poschodi.setBudova(new Budova(getBudova().getId()));
+
+        if (!pouzeId) {
+            poschodi.setNazev(this.nazev);
+            poschodi.setAktivita(getAktivita());
+            poschodi.setBudova(new Budova(getBudova().getId()));
+        }
 
         return poschodi;
     }

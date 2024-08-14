@@ -48,7 +48,7 @@ public class HistorieKlicDto implements Serializable {
         HistorieKlic historieKlic = new HistorieKlic();
 
         historieKlic.setIdHistorieKlic(this.idHistorieKlic);
-        historieKlic.setKlic(new Klic(getKlic().getIdKlic()));
+        historieKlic.setKlic(new Klic(getKlic().getId()));
         historieKlic.setAkce(getAkce().toEntity());
         historieKlic.setDuvod(this.duvod);
         historieKlic.setDatum(this.datum);
