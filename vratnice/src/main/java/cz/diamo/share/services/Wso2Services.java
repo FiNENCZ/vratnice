@@ -21,6 +21,7 @@ import cz.diamo.share.annotation.TransactionalROE;
 import cz.diamo.share.configuration.AppProperties;
 import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.dto.Ws02ZastupDto;
+import cz.diamo.share.dto.Wso2UzivatelExtDto;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.ValidationException;
 
@@ -107,6 +108,41 @@ public class Wso2Services {
                         return null;
                 } catch (Exception e) {
                         return e.toString();
+                }
+        }
+
+        @TransactionalRO
+        public void uzivateleExterni(List<Wso2UzivatelExtDto> uzivatele) throws Exception {
+
+                try {
+                        // kontrola URL
+                        if (StringUtils.isBlank(appProperties.getWso2Url()))
+                                throw new ValidationException(
+                                                messageSource.getMessage("wso2.url.null", null,
+                                                                LocaleContextHolder.getLocale()));
+                        HttpEntity<Wso2UzivatelExtDto[]> requestEntity = new HttpEntity<Wso2UzivatelExtDto[]>(
+                                        (Wso2UzivatelExtDto[]) uzivatele.toArray(new Wso2UzivatelExtDto[0]),
+                                        new HttpHeaders());
+
+                        ResponseEntity<Void> result = restWso2
+                                        .exchange("/externi-uzivatele", HttpMethod.POST,
+                                                        requestEntity, Void.class,
+                                                        new HashMap<>());
+
+                        if (result.getStatusCode().isError())
+                                throw new BaseException(
+                                                String.format(
+                                                                messageSource.getMessage("wso2.externi.uzivatele.error",
+                                                                                null,
+                                                                                LocaleContextHolder.getLocale()),
+                                                                result.getStatusCode()));
+                } catch (Exception e) {
+                        throw new BaseException(
+                                        String.format(
+                                                        messageSource.getMessage("wso2.externi.uzivatele.error",
+                                                                        null,
+                                                                        LocaleContextHolder.getLocale()),
+                                                        e.toString()));
                 }
         }
 }

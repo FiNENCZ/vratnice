@@ -10,10 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.diamo.share.dto.opravneni.OpravneniDto;
 import cz.diamo.share.dto.opravneni.RoleDto;
 import cz.diamo.share.entity.Opravneni;
-import cz.diamo.share.entity.PracovniPozice;
 import cz.diamo.share.entity.Role;
 import cz.diamo.share.entity.Uzivatel;
-import cz.diamo.share.entity.Zakazka;
 import cz.diamo.share.entity.Zavod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -56,6 +54,7 @@ public class UzivatelDto implements Serializable {
 
     private String tel;
 
+    @NotNull(message = "{datum.od.require}")
     private Date datumOd;
 
     private Date datumDo;
@@ -87,6 +86,10 @@ public class UzivatelDto implements Serializable {
 
     private String varovaniText;
 
+    private Boolean externi;
+
+    private Boolean canEdit = false;
+
     public String getNazevSapId() {
         return String.format("%s (%s)", getNazev(), getSapId());
     }
@@ -116,6 +119,7 @@ public class UzivatelDto implements Serializable {
         setPruznaPracDoba(uzivatel.getPruznaPracDoba());
         setRfid1(uzivatel.getCip1());
         setRfid2(uzivatel.getCip2());
+        setExterni(uzivatel.getExterni());
         setAktivita(uzivatel.getAktivita());
 
         if (uzivatel.getZakazka() != null)
@@ -148,41 +152,51 @@ public class UzivatelDto implements Serializable {
 
     @JsonIgnore
     public Uzivatel getUzivatel(Uzivatel uzivatel, boolean pouzeId) {
-        if (uzivatel == null)
+        return getUzivatel(uzivatel, null, pouzeId);
+    }
+
+    @JsonIgnore
+    public Uzivatel getUzivatel(Uzivatel uzivatel, AppUserDto appUserDto, boolean pouzeId) {
+        boolean novy = false;
+        if (uzivatel == null) {
             uzivatel = new Uzivatel();
+            novy = true;
+        }
 
         uzivatel.setIdUzivatel(getId());
         if (!pouzeId) {
-            uzivatel.setSapId(getSapId());
-            uzivatel.setZavod(new Zavod(getZavod().getId()));
-            uzivatel.setPracovniPozice(new PracovniPozice(getPracovniPozice().getId()));
-            uzivatel.setNazev(getNazev());
-            uzivatel.setJmeno(getJmeno());
-            uzivatel.setPrijmeni(getPrijmeni());
-            uzivatel.setTitulPred(getTitulPred());
-            uzivatel.setTitulZa(getTitulZa());
-            uzivatel.setEmail(getEmail());
-            uzivatel.setSoukromyEmail(getSoukromyEmail());
-            uzivatel.setTel(getTel());
-            uzivatel.setPruznaPracDoba(getPruznaPracDoba());
-            uzivatel.setDatumOd(getDatumOd());
-            uzivatel.setDatumDo(getDatumDo());
-            uzivatel.setPoznamka(getPoznamka());
-            uzivatel.setPlatnostKeDni(getPlatnostKeDni());
-            uzivatel.setCasAktualizace(getCasAktualizace());
-            uzivatel.setUkonceno(getUkonceno());
+
             uzivatel.setAktivita(getAktivita());
 
-            if (getZakazka() != null)
-                uzivatel.setZakazka(new Zakazka(getZakazka().getId()));
+            if (novy)
+                uzivatel.setExterni(getExterni());
 
-            List<Opravneni> opravneniList = new ArrayList<>();
-            if (getOpravneni() != null) {
-                for (OpravneniDto opravneni : getOpravneni()) {
-                    opravneniList.add(new Opravneni(opravneni.getId()));
-                }
+            if (uzivatel.getExterni()) {
+                uzivatel.setZavod(new Zavod(appUserDto.getZavod().getId()));
+                uzivatel.setNazev(getNazev());
+                uzivatel.setJmeno(getJmeno());
+                uzivatel.setPrijmeni(getPrijmeni());
+                uzivatel.setEmail(getEmail());
+                uzivatel.setTel(getTel());
+                uzivatel.setDatumOd(getDatumOd());
+                uzivatel.setDatumDo(getDatumDo());
+                uzivatel.setPoznamka(getPoznamka());
+                uzivatel.setCip1(getRfid1());
+                uzivatel.setCip2(getRfid2());
+                if (novy)
+                    uzivatel.setPruznaPracDoba(true);
             }
-            uzivatel.setOpravneni(opravneniList);
+
+            // if (getZakazka() != null)
+            // uzivatel.setZakazka(new Zakazka(getZakazka().getId()));
+
+            // List<Opravneni> opravneniList = new ArrayList<>();
+            // if (getOpravneni() != null) {
+            // for (OpravneniDto opravneni : getOpravneni()) {
+            // opravneniList.add(new Opravneni(opravneni.getId()));
+            // }
+            // }
+            // uzivatel.setOpravneni(opravneniList);
 
             List<Zavod> zavodList = new ArrayList<>();
             if (getOstatniZavody() != null) {

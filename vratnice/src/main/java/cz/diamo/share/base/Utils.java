@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -400,8 +401,10 @@ public class Utils {
 		return sekundyZaok;
 	}
 
-	public static boolean stejnyDen(Date datum1, Date datum2) {
+	public static boolean stejnyDen(Date datum1, Date datum2, boolean vcetneNull) {
 
+		if (datum1 == null && datum2 == null)
+			return true;
 		if (datum1 == null || datum2 == null)
 			return false;
 		Calendar calendar1 = Calendar.getInstance();
@@ -412,6 +415,12 @@ public class Utils {
 		return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR)
 				&& calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH)
 				&& calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
+
+	}
+
+	public static boolean stejnyDen(Date datum1, Date datum2) {
+
+		return Utils.stejnyDen(datum1, datum2, false);
 
 	}
 
@@ -478,6 +487,25 @@ public class Utils {
 		Double minuty = (diff / (60.0 * 1000.0));
 		Integer minutyZaok = (int) (Math.ceil(minuty));
 		return minutyZaok;
+	}
+
+	public static Long rozdilVeDnech(Date date1, Date date2) {
+
+		Calendar calendar1 = Calendar.getInstance();
+		calendar1.setTime(date1);
+		calendar1.add(Calendar.HOUR, 6);// přidám hodiny kvůli chybě při změně času - raději 6
+		Calendar calendar2 = Calendar.getInstance();
+		calendar2.setTime(date2);
+
+		Long rozdil = Duration.between(calendar2.toInstant(), calendar1.toInstant()).toDays();
+
+		// Calendar calendar1 = Calendar.getInstance();
+		// calendar1.setTime(date1);
+		// Calendar calendar2 = Calendar.getInstance();
+		// calendar2.setTime(date2);
+		// double rozdil = Math.floor((calendar1.getTimeInMillis() -
+		// calendar2.getTimeInMillis()) / 1000 / 60 / 60 / 24);
+		return rozdil;
 	}
 
 	public static String minuteToString(Integer minuty) {

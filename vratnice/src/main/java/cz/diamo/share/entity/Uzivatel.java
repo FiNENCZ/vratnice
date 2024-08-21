@@ -127,6 +127,8 @@ public class Uzivatel implements Serializable {
     @Transient
     private Uzivatel zastup;
 
+    private Boolean externi;
+
     @Transient
     private List<Role> role;
 
@@ -138,6 +140,9 @@ public class Uzivatel implements Serializable {
 
     @Transient
     private List<String> moduly;
+
+    @Transient
+    private boolean zmena = false;
 
     public Uzivatel(String idUzivatel) {
         setIdUzivatel(idUzivatel);

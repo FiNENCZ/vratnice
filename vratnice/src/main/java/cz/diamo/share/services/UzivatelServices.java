@@ -1,10 +1,12 @@
 package cz.diamo.share.services;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import cz.diamo.share.annotation.TransactionalROE;
 import cz.diamo.share.annotation.TransactionalWrite;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.constants.Constants;
+import cz.diamo.share.dto.Wso2UzivatelExtDto;
 import cz.diamo.share.dto.opravneni.FilterOpravneniDto;
 import cz.diamo.share.entity.Opravneni;
 import cz.diamo.share.entity.Role;
@@ -25,13 +29,14 @@ import cz.diamo.share.entity.UzivatelModul;
 import cz.diamo.share.entity.UzivatelOpravneni;
 import cz.diamo.share.entity.UzivatelZavod;
 import cz.diamo.share.entity.Zavod;
-import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.repository.UzivatelModulRepository;
 import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.repository.UzivatelZavodRepository;
+import cz.diamo.share.repository.ZavodRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -55,6 +60,12 @@ public class UzivatelServices {
     private UzivatelModulRepository uzivatelModulRepository;
 
     @Autowired
+    private ZavodRepository zavodRepository;
+
+    @Autowired
+    private Wso2Services wso2Services;
+
+    @Autowired
     private ResourcesComponent resourcesComponent;
 
     @PersistenceContext
@@ -66,6 +77,18 @@ public class UzivatelServices {
     @TransactionalROE
     public Uzivatel getDetail(String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
         return getDetail(idUzivatel, true);
+    }
+
+    @TransactionalROE
+    public String getUsername(String rfid) throws RecordNotFoundException, NoSuchMessageException {
+        Uzivatel uzivatel = uzivatelRepository.getDetailByRfid(rfid);
+
+        if (uzivatel == null)
+            throw new RecordNotFoundException(
+                    messageSource.getMessage("uzivatel.by.rfid.not.found", null, LocaleContextHolder.getLocale()),
+                    rfid, true);
+
+        return String.format("%s-%s", uzivatel.getZavod().getSapId(), uzivatel.getSapId());
     }
 
     @TransactionalROE
@@ -93,7 +116,7 @@ public class UzivatelServices {
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Boolean aktivita)
             throws RecordNotFoundException {
-        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), aktivita);
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), aktivita, null);
     }
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni) throws RecordNotFoundException {
@@ -102,10 +125,11 @@ public class UzivatelServices {
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni)
             throws RecordNotFoundException {
-        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), null);
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), null, null);
     }
 
-    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni, Boolean aktivita)
+    public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni, Boolean aktivita,
+            Boolean externi)
             throws RecordNotFoundException {
         StringBuilder queryString = new StringBuilder();
 
@@ -119,6 +143,8 @@ public class UzivatelServices {
             queryString.append(" and zavod.idZavod = :idZavod");
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
+        if (externi != null)
+            queryString.append(" and s.externi = :externi");
         if (opravneni != null)
             queryString.append(" and " + opravneni.getHqlWhere("s.idUzivatel"));
         if (platnostKeDni != null)
@@ -134,6 +160,8 @@ public class UzivatelServices {
             vysledek.setParameter("idZavod", idZavod);
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+        if (externi != null)
+            vysledek.setParameter("externi", externi);
         if (opravneni != null)
             vysledek.setParameter("idVedouci", opravneni.getIdVedouci());
         if (platnostKeDni != null)
@@ -147,9 +175,21 @@ public class UzivatelServices {
 
     @TransactionalWrite
     public Uzivatel save(Uzivatel uzivatel, boolean ukladatRole, boolean ukladatZavody, boolean ukladatModuly)
-            throws BaseException {
+            throws Exception {
+        return save(uzivatel, ukladatRole, ukladatZavody, ukladatModuly, true);
+    }
+
+    @TransactionalWrite
+    public Uzivatel save(Uzivatel uzivatel, boolean ukladatRole, boolean ukladatZavody, boolean ukladatModuly,
+            boolean synchronizaceExtUziv)
+            throws Exception {
+
+        boolean novy = StringUtils.isBlank(uzivatel.getIdUzivatel());
 
         // kontrola jedinečnosti sapId
+        if (novy && uzivatel.getExterni())
+            uzivatel.setSapId(generateSapIdExterni());
+
         Integer existSapId = uzivatelRepository.existsBySapId(uzivatel.getSapId(),
                 Utils.toString(uzivatel.getIdUzivatel()));
         if (existSapId > 0)
@@ -157,14 +197,25 @@ public class UzivatelServices {
                     messageSource.getMessage("sapid.unique", null, LocaleContextHolder.getLocale()),
                     uzivatel.getSapId(), true);
 
-        uzivatel.setCasZmn(Utils.getCasZmn());
-        uzivatel.setZmenuProvedl(Utils.getZmenuProv());
+        Timestamp casZmn = Utils.getCasZmn();
+        String zmenuProv = Utils.getZmenuProv();
+        uzivatel.setCasZmn(casZmn);
+        uzivatel.setZmenuProvedl(zmenuProv);
 
         List<Opravneni> listOpravneni = uzivatel.getOpravneni();
         List<Zavod> listZavod = uzivatel.getOstatniZavody();
         List<String> listModuly = uzivatel.getModuly();
 
         uzivatel = uzivatelRepository.save(uzivatel);
+
+        // u ostatních uživatelů provedu odstranění čipů
+        uzivatelRepository.resetCip1(uzivatel.getCip1(), uzivatel.getCip2(), uzivatel.getIdUzivatel(), casZmn,
+                zmenuProv);
+        uzivatelRepository.resetCip2(uzivatel.getCip1(), uzivatel.getCip2(), uzivatel.getIdUzivatel(), casZmn,
+                zmenuProv);
+
+        if (uzivatel.getExterni())
+            uzivatel.setCasAktualizace(new Date(casZmn.getTime()));
 
         // uložení rolí
         if (ukladatRole) {
@@ -287,7 +338,70 @@ public class UzivatelServices {
 
         }
 
+        // aktualizace
+        if (synchronizaceExtUziv && uzivatel.getExterni()) {
+            List<Wso2UzivatelExtDto> extUziv = new ArrayList<Wso2UzivatelExtDto>();
+            uzivatel.setZavod(zavodRepository.getDetail(uzivatel.getZavod().getIdZavod()));
+            if (uzivatel.getOstatniZavody() != null) {
+                for (Zavod zavod : uzivatel.getOstatniZavody()) {
+                    Zavod z = zavodRepository.getDetail(zavod.getIdZavod());
+                    zavod.setSapId(z.getSapId());
+                    zavod.setNazev(z.getNazev());
+                }
+            }
+            extUziv.add(new Wso2UzivatelExtDto(uzivatel));
+            wso2Services.uzivateleExterni(extUziv);
+        }
+
         return uzivatel;
+    }
+
+    private String generateSapIdExterni() {
+        Integer porCislo = uzivatelRepository.porCisloExt();
+        String sapId = String.format("%s%04d", Constants.SCHEMA.toUpperCase().substring(0, 2), porCislo);
+        return sapId;
+    }
+
+    @TransactionalWrite
+    public void aktualizovatExterniUzivatele(List<Wso2UzivatelExtDto> externiUzivatele)
+            throws Exception {
+        if (externiUzivatele != null && externiUzivatele.size() > 0) {
+            for (Wso2UzivatelExtDto wso2UzivatelExtDto : externiUzivatele) {
+
+                Uzivatel uzivatel = uzivatelRepository.getDetailBySapId(wso2UzivatelExtDto.getSapId());
+                if (uzivatel != null) {
+                    // entityManager.detach(uzivatel);
+                    uzivatel.setOstatniZavody(uzivatelZavodRepository.listZavod(uzivatel.getIdUzivatel()));
+                }
+                uzivatel = wso2UzivatelExtDto.getUzivatel(uzivatel);
+
+                if (!uzivatel.getExterni())
+                    throw new AccessDeniedException(
+                            messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+
+                if (uzivatel.isZmena()) {
+
+                    // dohledám závody
+                    uzivatel.setZavod(zavodRepository.getDetailBySapId(uzivatel.getZavod().getSapId()));
+                    if (uzivatel.getZavod() == null)
+                        throw new RecordNotFoundException(
+                                messageSource.getMessage("zavod.not.found", null, LocaleContextHolder.getLocale()));
+
+                    if (uzivatel.getOstatniZavody() != null && uzivatel.getOstatniZavody().size() > 0) {
+                        for (Zavod zavod : uzivatel.getOstatniZavody()) {
+                            Zavod z = zavodRepository.getDetailBySapId(zavod.getSapId());
+                            if (z == null)
+                                throw new RecordNotFoundException(messageSource.getMessage("zavod.not.found", null,
+                                        LocaleContextHolder.getLocale()));
+                            zavod.setIdZavod(z.getIdZavod());
+                        }
+                    }
+
+                    save(uzivatel, false, true, false, false);
+                }
+
+            }
+        }
     }
 
 }
