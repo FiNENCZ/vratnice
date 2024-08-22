@@ -127,7 +127,7 @@ public class Uzivatel implements Serializable {
     @Transient
     private Uzivatel zastup;
 
-    private Boolean externi;
+    private Boolean externi = false;
 
     @Transient
     private List<Role> role;
