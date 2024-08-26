@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -16,11 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -42,6 +47,15 @@ public class ZadostKlicController extends BaseController{
 
     @Autowired
     private UzivatelServices uzivatelServices;
+
+    @Autowired
+    private UzivatelRepository uzivatelRepository;
+
+    @Autowired
+    private KlicService klicService;
+
+    @Autowired
+    private MessageSource messageSource;
 
 
     @PostMapping("/zadost-klic/save")
@@ -80,13 +94,18 @@ public class ZadostKlicController extends BaseController{
     
 
     @GetMapping("/zadosti-klic/list")
-    public ResponseEntity<List<ZadostKlicDto>> list(@RequestParam @Nullable Boolean aktivni) {
+    public ResponseEntity<List<ZadostKlicDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) {
         List<ZadostKlicDto> result = new ArrayList<ZadostKlicDto>();
-        List<ZadostKlic> list = zadostKlicService.getList(aktivni);
+        List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel);
 
         if (list != null && list.size() > 0) {
             for (ZadostKlic zadostKlic : list) {
-                result.add(new ZadostKlicDto(zadostKlic));
+                
+                Boolean dostupny = klicService.jeDostupny(zadostKlic.getKlic().getIdKlic());
+                ZadostKlicDto zadostKlicDto = new ZadostKlicDto(zadostKlic);
+                zadostKlicDto.setJeKlicDostupny(dostupny);
+
+                result.add(zadostKlicDto);
             }
         }
 
@@ -138,6 +157,19 @@ public class ZadostKlicController extends BaseController{
 
         return ResponseEntity.ok(dostupnychVypujcek);
     }
+
+    @GetMapping("/zadost-klic/get-uzivatel-by-rfid")
+    public ResponseEntity<UzivatelDto> getUzivatelByRfid(@RequestParam String rfid) throws RecordNotFoundException, NoSuchMessageException {
+        Uzivatel uzivatel = uzivatelRepository.getDetailByRfid(rfid);
+
+        if (uzivatel == null || uzivatel.getIdUzivatel() == null) {
+            throw new RecordNotFoundException(
+                String.format(messageSource.getMessage("zadost_klic.uzivatel_rfid", null, LocaleContextHolder.getLocale())));
+        }
+
+        return ResponseEntity.ok(new UzivatelDto(uzivatel));
+    }
+    
     
     
 

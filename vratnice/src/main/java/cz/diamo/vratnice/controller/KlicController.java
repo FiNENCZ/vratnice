@@ -50,7 +50,6 @@ public class KlicController extends BaseController {
     @Autowired
     private UzivatelServices uzivatelServices;
 
-
     @PostMapping("/klic/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
@@ -118,6 +117,4 @@ public class KlicController extends BaseController {
         KlicTyp klicTyp = klicService.getKlicTyp(idKlic);
         return ResponseEntity.ok(new KlicTypDto(klicTyp));
     }
-    
-    
 }

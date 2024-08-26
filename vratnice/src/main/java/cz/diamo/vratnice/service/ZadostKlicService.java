@@ -25,7 +25,7 @@ public class ZadostKlicService {
     private EntityManager entityManager;
 
 
-    public List<ZadostKlic> getList(Boolean aktivita) {
+    public List<ZadostKlic> getList(Boolean aktivita, String idUzivatel) {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from ZadostKlic s");
@@ -33,12 +33,18 @@ public class ZadostKlicService {
 
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
+        
+        if (idUzivatel != null)
+            queryString.append(" and s.uzivatel.idUzivatel = :idUzivatel");
 
         
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+
+        if (idUzivatel != null)
+            vysledek.setParameter("idUzivatel", idUzivatel);
         
         
         @SuppressWarnings("unchecked")

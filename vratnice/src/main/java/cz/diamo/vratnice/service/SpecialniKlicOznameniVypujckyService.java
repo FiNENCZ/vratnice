@@ -28,6 +28,7 @@ import cz.diamo.share.services.OznameniServices;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.SpecialniKlicOznameniVypujcky;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.repository.SpecialniKlicOznameniVypujckyRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -51,6 +52,9 @@ public class SpecialniKlicOznameniVypujckyService {
 
     @Autowired
     private OznameniServices oznameniServices;
+
+    @Autowired
+    private KlicService klicService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -123,10 +127,13 @@ public class SpecialniKlicOznameniVypujckyService {
     }
 
     @TransactionalRO
-    public void oznamitVypujcku(Klic klic, HttpServletRequest request) throws NoSuchMessageException, BaseException {
+    public void oznamitVypujcku(String idKlic, HistorieVypujcekAkceEnum akceEnum,HttpServletRequest request) throws NoSuchMessageException, BaseException {
+        Klic klic = klicService.getDetail(idKlic);
         if (!klic.isSpecialni()) {
             return;
         }
+
+        logger.info(klic);
 
         SpecialniKlicOznameniVypujcky oznameniVypujcky = specialniKlicOznameniVypujckyRepository.getByKlic(klic);
 
@@ -140,16 +147,32 @@ public class SpecialniKlicOznameniVypujckyService {
 
         AvizaceRequestDto avizaceRequestDto = new AvizaceRequestDto();
         String predmet = messageSource.getMessage("avizace.specialni_klic_oznameni_vypujcky.predmet", null, LocaleContextHolder.getLocale());
+        String oznameniText = new String();
 
-        String oznameniText = String.format(
-            "Nová výpůjčka speciálního klíče.\n" +
-            "Klíč: <strong>%s</strong> - %s (%s)\n" +
-            "Uživatel: <strong>TEST</strong>\n" +
-            "Datum výpůjčky: <strong>%s</strong>",
-            klic.getNazev(),
-            klic.getLokalita().getNazev(), klic.getBudova().getNazev(),
-            formattedNow
-        );
+        if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
+            oznameniText = String.format(
+                "Nová výpůjčka speciálního klíče.\n" +
+                "Klíč: <strong>%s</strong> - %s (%s)\n" +
+                "Uživatel: <strong>TEST</strong>\n" +
+                "Datum výpůjčky: <strong>%s</strong>",
+                klic.getNazev(),
+                klic.getLokalita().getNazev(), klic.getBudova().getNazev(),
+                formattedNow
+            );
+        } 
+
+        if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
+            oznameniText = String.format(
+                "Speciální klíč byl vrácen.\n" +
+                "Klíč: <strong>%s</strong> - %s (%s)\n" +
+                "Uživatel: <strong>TEST</strong>\n" +
+                "Datum vrácení: <strong>%s</strong>",
+                klic.getNazev(),
+                klic.getLokalita().getNazev(), klic.getBudova().getNazev(),
+                formattedNow
+            );
+        }
+
 
         String telo = String.format("Dobrý den, \n") + oznameniText;
 
