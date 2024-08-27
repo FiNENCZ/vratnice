@@ -2,6 +2,8 @@ package cz.diamo.vratnice.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -11,7 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,12 +52,43 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
 
-    @GetMapping("/povoleni-vjezdu-vozidla/list-all")
-    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> listAll() {
-        List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getAll().stream()
-            .map(PovoleniVjezduVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(povoleniVjezduVozidel);
+    @GetMapping("/povoleni-vjezdu-vozidla/list")
+    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> list(
+                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumOd,
+                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumDo,
+                        @RequestParam @Nullable Integer minimalniPocetVjezdu) {
+
+        boolean isAnyParamFilled = datumOd != null || datumDo != null || minimalniPocetVjezdu != null;
+
+        // Kontrola, zda jsou vyplněny všechny parametry, pokud je alespoň jeden vyplněn
+        if (isAnyParamFilled && (datumOd == null || datumDo == null || minimalniPocetVjezdu == null)) {
+            return ResponseEntity.badRequest().body(null); // Vrátíme 400 Bad Request, pokud není vyplněn alespoň jeden parametr
+        }
+        
+        if (isAnyParamFilled) {
+            // Pokud jsou vyplněny všechny parametry, provede se tato logika
+            List<PovoleniVjezduVozidlaDto> result = new ArrayList<>();
+            List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getAll();
+    
+            if (list != null && !list.isEmpty()) {
+                for (PovoleniVjezduVozidla povoleniVjezduVozidla : list) {
+                    PovoleniVjezduVozidlaDto povoleni = new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla);
+                    Integer pocetVjezdu = povoleniVjezduVozidlaService.pocetVjezdu(povoleni.getIdPovoleniVjezduVozidla());
+    
+                    if (pocetVjezdu < minimalniPocetVjezdu) {
+                        result.add(povoleni);
+                    }
+                }
+            }
+    
+            return ResponseEntity.ok(result);
+        } else {
+            // Pokud není vyplněn žádný parametr, provede se tato logika
+            List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getAll().stream()
+                .map(PovoleniVjezduVozidlaDto::new)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(povoleniVjezduVozidel);
+        }
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/detail")
@@ -98,6 +133,12 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     public ResponseEntity<RzTypVozidlaDto> rzTypVozidlaCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
         return ResponseEntity.ok(povoleniVjezduVozidlaService.processRzTypVozidlaCsvData(file));
     }
+
+    @GetMapping("/povoleni-vjezdu-vozidla/pocet-vjezdu")
+    public ResponseEntity<Integer> pocetVjezdu(@RequestParam String idPovoleni) {
+        return ResponseEntity.ok(povoleniVjezduVozidlaService.pocetVjezdu(idPovoleni));
+    }
+    
     
     
 

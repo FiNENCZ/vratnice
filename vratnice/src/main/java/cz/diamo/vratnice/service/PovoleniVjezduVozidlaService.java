@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -46,8 +47,10 @@ import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Stat;
+import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaRepository;
+import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -84,6 +87,9 @@ public class PovoleniVjezduVozidlaService {
 
     @Autowired
     private ZavodServices zavodServices;
+
+    @Autowired
+    private VjezdVozidlaRepository vjezdVozidlaRepository;
 
     public List<PovoleniVjezduVozidla> getAll() {
         return povoleniVjezduVozidlaRepository.findAll();
@@ -342,5 +348,27 @@ public class PovoleniVjezduVozidlaService {
     }
 
 
+    public Integer pocetVjezdu(String idPovoleniVjezduVozidla) {
+        PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
 
-}
+        if (povoleni == null || povoleni.getRzVozidla() == null || povoleni.getDatumOd() == null || povoleni.getDatumDo() == null) {
+            throw new IllegalArgumentException("Povolení nebo jeho klíčové údaje nemohou být null.");
+        }
+        
+        ZonedDateTime datumOd = ZonedDateTime.ofInstant(povoleni.getDatumOd().toInstant(), ZoneId.systemDefault());
+        ZonedDateTime datumDo = ZonedDateTime.ofInstant(povoleni.getDatumDo().toInstant(), ZoneId.systemDefault());
+
+        List<String> rzVozidla = povoleni.getRzVozidla();
+        int pocetVjezdu = 0;
+        
+        for (String rz : rzVozidla) {
+            // Získání vjezdů podle RZ vozidla v daném období
+            List<VjezdVozidla> vjezdy = vjezdVozidlaRepository.findByRzVozidlaAndDatumOdBetween(rz, datumOd, datumDo);
+ 
+            pocetVjezdu += vjezdy.size();
+        }
+        
+        return pocetVjezdu;
+        }
+
+    }

@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.repository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,7 @@ public interface VjezdVozidlaRepository extends JpaRepository<VjezdVozidla, Stri
 
     @Query(sqlSelect + "where s.rzVozidla = :rzVozidla")
     List<VjezdVozidla> getByRzVozidla(String rzVozidla);
+
+    @Query(sqlSelect + "where s.rzVozidla = :rzVozidla AND s.casPrijezdu BETWEEN :datumOd AND :datumDo")
+    List<VjezdVozidla> findByRzVozidlaAndDatumOdBetween(String rzVozidla, ZonedDateTime datumOd, ZonedDateTime datumDo);
 }
