@@ -115,7 +115,8 @@ public class AuthServices {
     }
 
     @TransactionalWrite
-    public ResponseEntity<AppUserDto> zmenaZavodu(AppUserDto appUserDto, String idZavodu) throws JsonProcessingException, BaseException {
+    public ResponseEntity<AppUserDto> zmenaZavodu(AppUserDto appUserDto, String idZavodu)
+            throws JsonProcessingException, BaseException {
 
         Uzivatel uzivatel = uzivatelServices.getDetail(appUserDto.getIdUzivatel(), false);
 
@@ -145,7 +146,8 @@ public class AuthServices {
     }
 
     @TransactionalWrite
-    private ResponseEntity<AppUserDto> loginKeyCloak(Uzivatel uzivatel, List<ZastupSimple> zastupy, HttpServletResponse response,
+    private ResponseEntity<AppUserDto> loginKeyCloak(Uzivatel uzivatel, List<ZastupSimple> zastupy,
+            HttpServletResponse response,
             AccessTokenResponse accessTokenResponse) {
         if (uzivatel != null) {
 
@@ -177,7 +179,8 @@ public class AuthServices {
     }
 
     @TransactionalWrite
-    private ResponseEntity<AppUserDto> loginKeyCloak(Uzivatel uzivatel, HttpServletRequest request, HttpServletResponse response) {
+    private ResponseEntity<AppUserDto> loginKeyCloak(Uzivatel uzivatel, HttpServletRequest request,
+            HttpServletResponse response) {
         if (uzivatel != null) {
 
             // sestavení T tabulek oprávnění
@@ -220,13 +223,20 @@ public class AuthServices {
     }
 
     @TransactionalWrite
-    public ResponseEntity<AppUserDto> loginKeyCloakByAuthorizationCode(String authorizationCode, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AppUserDto> loginKeyCloakByAuthorizationCode(String authorizationCode,
+            HttpServletRequest request, HttpServletResponse response) {
         AccessTokenResponse accessTokenResponse = tokenByAuthorizationCode(request, authorizationCode);
         return loginKeyCloak(accessTokenResponse, response);
     }
 
     @TransactionalWrite
-    public ResponseEntity<AppUserDto> loginKeyCloak(AccessTokenResponse accessTokenResponse, HttpServletResponse response) {
+    public void updateRoles(String accesToken) {
+
+    }
+
+    @TransactionalWrite
+    public ResponseEntity<AppUserDto> loginKeyCloak(AccessTokenResponse accessTokenResponse,
+            HttpServletResponse response) {
         try {
             if (!StringUtils.isBlank(accessTokenResponse.getToken())) {
                 KeyCloakPayloadDto keyCloakPayload = securityUtils.extractPayload(accessTokenResponse.getToken());
@@ -266,7 +276,8 @@ public class AuthServices {
 
                         if (opravneniString != null) {
                             for (String role : opravneniString) {
-                                Opravneni opravneni = opravneniRepository.getDetailByKod(role.toUpperCase(), uzivatel.getZavod().getIdZavod(), true);
+                                Opravneni opravneni = opravneniRepository.getDetailByKod(role.toUpperCase(),
+                                        uzivatel.getZavod().getIdZavod(), true);
                                 if (opravneni != null)
                                     listOpravneni.add(opravneni);
                             }
@@ -279,7 +290,8 @@ public class AuthServices {
                         uzivatel = uzivatelServices.save(uzivatel, true, false, true);
                         uzivatel.setOstatniZavody(uzivatelZavodRepository.listZavod(uzivatel.getIdUzivatel()));
 
-                        List<ZastupSimple> zastupy = zastupServices.getListDostupne(uzivatel.getIdUzivatel(), uzivatel.getIdZastup());
+                        List<ZastupSimple> zastupy = zastupServices.getListDostupne(uzivatel.getIdUzivatel(),
+                                uzivatel.getIdZastup());
 
                         return loginKeyCloak(uzivatel, zastupy, response, accessTokenResponse);
                     } else
@@ -290,7 +302,8 @@ public class AuthServices {
                 }
 
             } else {
-                throw new BaseException(messageSource.getMessage("ldap.empty.token", null, LocaleContextHolder.getLocale()));
+                throw new BaseException(
+                        messageSource.getMessage("ldap.empty.token", null, LocaleContextHolder.getLocale()));
             }
         } catch (Exception e) {
             logger.error(e);
@@ -325,7 +338,8 @@ public class AuthServices {
         cfg.setCredentials(credentials);
         cfg.setRealm(appProperties.getKeycloakRealm());
 
-        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm() + "/protocol/openid-connect/token";
+        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm()
+                + "/protocol/openid-connect/token";
         String clientId = appProperties.getKeycloakClientId();
         String secret = appProperties.getKeycloakSecret();
 
@@ -333,8 +347,10 @@ public class AuthServices {
         clientIdAndSecretCredentialsProvider.init(cfg, cfg);
         Http http = new Http(cfg, clientIdAndSecretCredentialsProvider);
 
-        return http.<AccessTokenResponse>post(url).authentication().client().form().param("grant_type", "refresh_token").param("refresh_token", refreshToken)
-                .param("client_id", clientId).param("client_secret", secret).response().json(AccessTokenResponse.class).execute();
+        return http.<AccessTokenResponse>post(url).authentication().client().form().param("grant_type", "refresh_token")
+                .param("refresh_token", refreshToken)
+                .param("client_id", clientId).param("client_secret", secret).response().json(AccessTokenResponse.class)
+                .execute();
     }
 
     public AccessTokenResponse tokenByAuthorizationCode(HttpServletRequest request, String authorizationCode) {
@@ -347,7 +363,8 @@ public class AuthServices {
         cfg.setCredentials(credentials);
         cfg.setRealm(appProperties.getKeycloakRealm());
 
-        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm() + "/protocol/openid-connect/token";
+        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm()
+                + "/protocol/openid-connect/token";
         String clientId = appProperties.getKeycloakClientId();
         String secret = appProperties.getKeycloakSecret();
 
@@ -355,10 +372,14 @@ public class AuthServices {
         clientIdAndSecretCredentialsProvider.init(cfg, cfg);
         Http http = new Http(cfg, clientIdAndSecretCredentialsProvider);
         try {
-            return http.<AccessTokenResponse>post(url).authentication().client().form().param("grant_type", "authorization_code")
+            return http.<AccessTokenResponse>post(url).authentication().client().form()
+                    .param("grant_type", "authorization_code")
                     .param("code", authorizationCode)
-                    .param("redirect_uri", request.getRequestURL().toString().replace(request.getRequestURI(), "") + "/api/login-sso-complete")
-                    .param("client_id", clientId).param("client_secret", secret).response().json(AccessTokenResponse.class).execute();
+                    .param("redirect_uri",
+                            request.getRequestURL().toString().replace(request.getRequestURI(), "")
+                                    + "/api/login-sso-complete")
+                    .param("client_id", clientId).param("client_secret", secret).response()
+                    .json(AccessTokenResponse.class).execute();
         } catch (Exception e) {
             logger.error(e);
             return null;
@@ -376,7 +397,8 @@ public class AuthServices {
         cfg.setCredentials(credentials);
         cfg.setRealm(appProperties.getKeycloakRealm());
 
-        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm() + "/protocol/openid-connect/logout";
+        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm()
+                + "/protocol/openid-connect/logout";
         String clientId = appProperties.getKeycloakClientId();
         String secret = appProperties.getKeycloakSecret();
 
@@ -384,12 +406,14 @@ public class AuthServices {
         clientIdAndSecretCredentialsProvider.init(cfg, cfg);
         Http http = new Http(cfg, clientIdAndSecretCredentialsProvider);
 
-        http.<Void>post(url).authentication().client().form().param("grant_type", "refresh_token").param("refresh_token", refreshToken)
+        http.<Void>post(url).authentication().client().form().param("grant_type", "refresh_token")
+                .param("refresh_token", refreshToken)
                 .param("client_id", clientId).param("client_secret", secret).response().execute();
     }
 
     public String loginPageKeyCloak(HttpServletRequest request) {
-        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm() + "/protocol/openid-connect/auth?client_id="
+        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm()
+                + "/protocol/openid-connect/auth?client_id="
                 + appProperties.getKeycloakClientId() + "&response_type=code&login=true&redirect_uri="
                 + request.getRequestURL().toString().replace(request.getRequestURI(), "") + "/api/login-sso-complete";
 
@@ -402,6 +426,36 @@ public class AuthServices {
         return url;
     }
 
+    @TransactionalWrite
+    public void refreshRoles(AppUserDto appUserDto, HttpServletRequest request) throws Exception {
+
+        AuthCookieDto authCookieDto = securityUtils.extractAuthCookieDto(request);
+
+        KeyCloakPayloadDto keyCloakPayloadDto = new KeyCloakPayloadDto();
+        keyCloakPayloadDto = getRoles(authCookieDto.getAccessToken(), keyCloakPayloadDto);
+        Uzivatel uzivatel = uzivatelRepository.getDetail(appUserDto.getIdUzivatel());
+        if (uzivatel == null)
+            return;
+
+        List<Opravneni> listOpravneni = new ArrayList<Opravneni>();
+        List<String> opravneniString = keyCloakPayloadDto.getRole();
+
+        if (opravneniString != null) {
+            for (String role : opravneniString) {
+                Opravneni opravneni = opravneniRepository.getDetailByKod(role.toUpperCase(),
+                        uzivatel.getZavod().getIdZavod(), true);
+                if (opravneni != null)
+                    listOpravneni.add(opravneni);
+            }
+        }
+
+        uzivatel.setModuly(keyCloakPayloadDto.getModuly());
+        uzivatel.setOpravneni(listOpravneni);
+        uzivatel.setZmenuProvedl(Utils.getZmenuProv());
+        uzivatel.setCasZmn(Utils.getCasZmn());
+        uzivatel = uzivatelServices.save(uzivatel, true, false, true);
+    }
+
     @SuppressWarnings("unchecked")
     public KeyCloakPayloadDto getRoles(String accesToken, KeyCloakPayloadDto keyCloakPayloadDto) {
 
@@ -410,14 +464,16 @@ public class AuthServices {
 
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("Authorization", "Bearer " + accesToken);
-        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm() + "/protocol/openid-connect/userinfo";
+        String url = appProperties.getKeycloakUrl() + "/realms/" + appProperties.getKeycloakRealm()
+                + "/protocol/openid-connect/userinfo";
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
         UserInfo userInfo = restKeyCloak.postForObject(url, request, UserInfo.class);
 
         if (userInfo != null && userInfo.getOtherClaims() != null) {
 
             ArrayList<String> role = new ArrayList<String>();
-            if (userInfo.getOtherClaims().get("roles") != null && userInfo.getOtherClaims().get("roles").getClass() == role.getClass()) {
+            if (userInfo.getOtherClaims().get("roles") != null
+                    && userInfo.getOtherClaims().get("roles").getClass() == role.getClass()) {
                 role = (ArrayList<String>) userInfo.getOtherClaims().get("roles");
                 if (role != null && role.size() > 0) {
                     for (String r : role) {
@@ -441,7 +497,8 @@ public class AuthServices {
     }
 
     @TransactionalWrite
-    public ResponseEntity<AppUserDto> zmenaZastupu(AppUserDto appUserDto, String idZastupu, HttpServletRequest request, HttpServletResponse httpServletResponse)
+    public ResponseEntity<AppUserDto> zmenaZastupu(AppUserDto appUserDto, String idZastupu, HttpServletRequest request,
+            HttpServletResponse httpServletResponse)
             throws JsonProcessingException, BaseException {
 
         // zrušení zástupu
@@ -477,7 +534,8 @@ public class AuthServices {
 
         Databaze databaze = databazeServices.getDetail();
         if (StringUtils.isBlank(databaze.getKcUzivateleJmeno()) || StringUtils.isBlank(databaze.getKcUzivateleHeslo()))
-            throw new ValidationException(messageSource.getMessage("kc.admin.user.null", null, LocaleContextHolder.getLocale()));
+            throw new ValidationException(
+                    messageSource.getMessage("kc.admin.user.null", null, LocaleContextHolder.getLocale()));
 
         Configuration cfg = new Configuration();
         cfg.setAuthServerUrl(appProperties.getKeycloakUrl());
@@ -511,17 +569,21 @@ public class AuthServices {
 
             MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
             headers.add("Authorization", "Bearer " + accessTokenResponse.getToken());
-            String url = appProperties.getKeycloakUrl() + "/admin/realms/" + appProperties.getKeycloakRealm() + "/users?username=" + username;
+            String url = appProperties.getKeycloakUrl() + "/admin/realms/" + appProperties.getKeycloakRealm()
+                    + "/users?username=" + username;
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(null, headers);
-            ResponseEntity<UzivatelKcDto[]> kcUzivatel = restKeyCloak.exchange(url, HttpMethod.GET, request, UzivatelKcDto[].class, new HashMap<>());
+            ResponseEntity<UzivatelKcDto[]> kcUzivatel = restKeyCloak.exchange(url, HttpMethod.GET, request,
+                    UzivatelKcDto[].class, new HashMap<>());
 
             if (kcUzivatel != null && kcUzivatel.getBody() != null && kcUzivatel.getBody().length == 1
                     && !StringUtils.isBlank(kcUzivatel.getBody()[0].getId())) {
 
                 // získání rolí
-                url = appProperties.getKeycloakUrl() + "/admin/realms/" + appProperties.getKeycloakRealm() + "/users/" + kcUzivatel.getBody()[0].getId()
+                url = appProperties.getKeycloakUrl() + "/admin/realms/" + appProperties.getKeycloakRealm() + "/users/"
+                        + kcUzivatel.getBody()[0].getId()
                         + "/role-mappings/realm/composite";
-                ResponseEntity<RoleKcDto[]> roleKc = restKeyCloak.exchange(url, HttpMethod.GET, request, RoleKcDto[].class, new HashMap<>());
+                ResponseEntity<RoleKcDto[]> roleKc = restKeyCloak.exchange(url, HttpMethod.GET, request,
+                        RoleKcDto[].class, new HashMap<>());
                 if (roleKc != null && roleKc.getBody() != null && roleKc.getBody().length > 0) {
                     List<String> roleZastupu = new ArrayList<String>();
                     for (RoleKcDto role : Arrays.asList(roleKc.getBody())) {

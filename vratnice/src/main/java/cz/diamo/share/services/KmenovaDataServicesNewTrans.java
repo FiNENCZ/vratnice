@@ -69,7 +69,8 @@ public class KmenovaDataServicesNewTrans {
 
         if (StringUtils.isBlank(uzivatel.getIdUzivatel()) || StringUtils.isBlank(uzivatel.getIdUzivatel()))
             datumAktualizace = Utils.getMinDate();
-        uzivatel.setZavod(kmenovaData.getZavod());
+        // uzivatel.setZavod(kmenovaData.getZavod()); 2024-08-26 přesun do aktualizace
+        // udaju - změna ORG.STR, přesun na nový závod
 
         // aktualizace/založení uživatele
         if ((uzivatel.getPlatnostKeDni() == null
@@ -105,6 +106,11 @@ public class KmenovaDataServicesNewTrans {
             throws RecordNotFoundException, NoSuchMessageException {
         boolean zmena = false;
         boolean ukonceniPomeru = kmenovaData.getDatumUkonceniPracPomeru() != null;
+
+        if (!StringUtils.equals(kmenovaData.getZavod().getIdZavod(), uzivatel.getZavod().getIdZavod())) {
+            uzivatel.setZavod(kmenovaData.getZavod());
+            zmena = true;
+        }
 
         if (StringUtils.isBlank(uzivatel.getNazev())) {
             uzivatel.setNazev(kmenovaData.getJmeno() + " " + kmenovaData.getPrijmeni());

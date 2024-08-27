@@ -53,12 +53,14 @@ public class AppProperties {
     private String s3SecretAccessKey;
 
     private String s3Region;
-    
+
     private String s3Bucket;
 
+    private String jidelnaApiUrl;
+
     public boolean isS3Set() {
-        return StringUtils.isNotBlank(s3StorageUrl) && StringUtils.isNotBlank(s3AccessKeyId) && 
-        StringUtils.isNotBlank(s3SecretAccessKey) && StringUtils.isNotBlank(s3Region) &&
-        StringUtils.isNotBlank(s3Bucket);
+        return StringUtils.isNotBlank(s3StorageUrl) && StringUtils.isNotBlank(s3AccessKeyId) &&
+                StringUtils.isNotBlank(s3SecretAccessKey) && StringUtils.isNotBlank(s3Region) &&
+                StringUtils.isNotBlank(s3Bucket);
     }
 }
