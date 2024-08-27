@@ -80,6 +80,7 @@ public class HistorieVypujcekController extends BaseController {
 
         if (list != null && list.size() > 0) {
             for (HistorieVypujcek vypujcka : list) {
+                vypujcka.setAkce(historieVypujcekService.getHistorieVypujcekAkce(vypujcka.getIdHistorieVypujcek()));
                 result.add(new HistorieVypujcekDto(vypujcka));
             }
         }

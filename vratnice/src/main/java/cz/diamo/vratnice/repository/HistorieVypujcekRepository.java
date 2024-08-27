@@ -13,6 +13,9 @@ import cz.diamo.vratnice.entity.ZadostKlic;
 public interface HistorieVypujcekRepository extends JpaRepository<HistorieVypujcek, String> {
     static final String sqlSelect = "select s from HistorieVypujcek s ";
 
+    @Query(sqlSelect + "where s.idHistorieVypujcek = :idHistorieVypujcek")
+    HistorieVypujcek getDetail(String idHistorieVypujcek);
+
     @Query(sqlSelect + "where s.zadostKlic = :zadostKlic")
     List<HistorieVypujcek> findByZadostKlic(ZadostKlic zadostKlic);
 

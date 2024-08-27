@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.BaseException;
@@ -42,9 +45,11 @@ public class HistorieVypujcekService {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Autowired
     private SpecialniKlicOznameniVypujckyService specialniKlicOznameniVypujckyService;
+
+    @Autowired
+    private ResourcesComponent resourcesComponent;
 
     @Transactional
     public HistorieVypujcek create(ZadostKlic zadostKlic, AppUserDto appUserDto, HistorieVypujcekAkceEnum akce, HttpServletRequest request)
@@ -104,6 +109,19 @@ public class HistorieVypujcekService {
 
     public List<HistorieVypujcek> findByZadostKlic(ZadostKlic zadostKlic) {
         return historieVypujcekRepository.findByZadostKlic(zadostKlic);
+    }
+
+    public HistorieVypujcekAkce getHistorieVypujcekAkce(String idHistorieVypujcek) {
+        HistorieVypujcek historieVypujcek = historieVypujcekRepository.getDetail(idHistorieVypujcek);
+        try {
+            if (historieVypujcek == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            historieVypujcek.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieVypujcek.getAkce().getNazevResx()));
+            return historieVypujcek.getAkce();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        }
     }
 
 }
