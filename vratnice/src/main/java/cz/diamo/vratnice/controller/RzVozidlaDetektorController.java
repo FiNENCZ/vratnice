@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.RzDetectedMessageDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
@@ -27,6 +28,7 @@ import cz.diamo.vratnice.service.WebSocketService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -43,9 +45,10 @@ public class RzVozidlaDetektorController extends BaseController {
 
     @Autowired
     private VyjezdVozidlaService vyjezdVozidlaService;
-    
+
     @Autowired
     WebSocketService webSocketService;
+
 
     @PostMapping(value = "/rz-vozidla-detektor/detekce-vjezd", consumes = "multipart/form-data")
     public String processRzVozidlaVjezd(
@@ -54,7 +57,7 @@ public class RzVozidlaDetektorController extends BaseController {
         @RequestParam(value = "vehiclePicture.jpg", required = false) MultipartFile vehiclePicture,
         @RequestParam(value = "detectionPicture.jpg", required = false) MultipartFile detectionPicture) {
 
-        return processRzVozidla(xmlFile, true);
+        return processRzVozidla(xmlFile, true, "test");
     }
 
     @PostMapping(value = "/rz-vozidla-detektor/detekce-vyjezd", consumes = "multipart/form-data")
@@ -64,16 +67,16 @@ public class RzVozidlaDetektorController extends BaseController {
         @RequestParam(value = "vehiclePicture.jpg", required = false) MultipartFile vehiclePicture,
         @RequestParam(value = "detectionPicture.jpg", required = false) MultipartFile detectionPicture) {
 
-        return processRzVozidla(xmlFile, false);
+        return processRzVozidla(xmlFile, false, "test");
     }
 
-    private String processRzVozidla(MultipartFile xmlFile, boolean vjezd) {
+    private String processRzVozidla(MultipartFile xmlFile, boolean vjezd, String idVratnice) {
         try {
             String licensePlateValue = getLicensePlateFromXml(xmlFile);
             if (licensePlateValue != null) {
                 if (licensePlateValue != "unknown") {
                     if (vjezd) {
-                        checkIfRzVozidlaIsAllowedAndSendWS(licensePlateValue, vjezd);
+                        checkIfRzVozidlaIsAllowedAndSendWS(licensePlateValue, vjezd, idVratnice);
                     } else {
                         checkIfRzVozidlaCanLeaveAndSendWs(licensePlateValue, vjezd);
                     }
@@ -113,17 +116,17 @@ public class RzVozidlaDetektorController extends BaseController {
     }
 
     @PostMapping(value = "/rz-vozidla-detektor/test")
-    public void test(@RequestParam String rzVozidla, @RequestParam Boolean vjezd ) throws JSONException {
+    public void test(@RequestParam String rzVozidla, @RequestParam Boolean vjezd, @RequestParam String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException {
         if (vjezd) {
-            checkIfRzVozidlaIsAllowedAndSendWS(rzVozidla, vjezd);
+            checkIfRzVozidlaIsAllowedAndSendWS(rzVozidla, vjezd, idVratnice);
         } else {
             checkIfRzVozidlaCanLeaveAndSendWs(rzVozidla, vjezd);
         }
         
     }
 
-    public void checkIfRzVozidlaIsAllowedAndSendWS(String rzVozidla, Boolean vjezd) throws JSONException {
-        Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);
+    public void checkIfRzVozidlaIsAllowedAndSendWS(String rzVozidla, Boolean vjezd, String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException {
+        Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla, idVratnice);
 
         if (result.isPresent()) {
             sendWebSocketMessage(rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);

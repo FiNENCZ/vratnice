@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RzTypVozidlaDto;
@@ -74,8 +75,8 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/je-rz-vozidla-povolena")
-    public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla) {
-        Optional<PovoleniVjezduVozidla> povoleniVjezduVozidla = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);
+    public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla, @RequestParam String idVratnice) throws RecordNotFoundException, NoSuchMessageException {
+        Optional<PovoleniVjezduVozidla> povoleniVjezduVozidla = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla, idVratnice);
         Optional<PovoleniVjezduVozidlaDto> optionalPovoleniVjezduVozidlaDto = povoleniVjezduVozidla.map(PovoleniVjezduVozidlaDto::new);
         return ResponseEntity.ok(optionalPovoleniVjezduVozidlaDto);
     }

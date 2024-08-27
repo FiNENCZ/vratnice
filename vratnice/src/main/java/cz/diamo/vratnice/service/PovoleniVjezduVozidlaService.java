@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -31,6 +33,7 @@ import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.ZavodServices;
 import cz.diamo.vratnice.csvRepresentation.PovoleniVjezduVozidlaCsvRepresentation;
@@ -43,6 +46,7 @@ import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Stat;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
@@ -73,6 +77,9 @@ public class PovoleniVjezduVozidlaService {
     private VozidloTypService vozidloTypService;
 
     @Autowired
+    private VratniceService vratniceService;
+
+    @Autowired
     private StatService statService;
 
     @Autowired
@@ -94,22 +101,49 @@ public class PovoleniVjezduVozidlaService {
         return povoleniVjezduVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
-    public Optional<PovoleniVjezduVozidla> jeRzVozidlaPovolena(String rzVozidla) {
-        List<PovoleniVjezduVozidla> povoleniVjezduVozidlaList = getByRzVozidla(rzVozidla);
+    public Optional<PovoleniVjezduVozidla> jeRzVozidlaPovolena(String rzVozidla, String idVratnice) throws RecordNotFoundException, NoSuchMessageException {
+        Vratnice vratniceKamery = vratniceService.getDetail(idVratnice);
 
+        if (vratniceKamery == null) 
+            throw new RecordNotFoundException(
+                String.format(messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
+        
+
+        Zavod zavodKameryVratnice = vratniceKamery.getZavod();
+
+
+        List<PovoleniVjezduVozidla> povoleniVjezduVozidlaList = getByRzVozidla(rzVozidla);
+        
+        // Pokud není žádné povolení, vrátí prázdný Optional
         if (povoleniVjezduVozidlaList.isEmpty()) {
             return Optional.empty();
         }
+    
+        LocalDate currentDate = LocalDate.now();
+        logger.info(currentDate);
+            
+        return povoleniVjezduVozidlaList.stream()
+            .filter(povoleni -> isPovoleniPlatne(povoleni, currentDate))
+            .filter(povoleni -> obsahujeZavod(povoleni, zavodKameryVratnice.getIdZavod()))
+            .findFirst();
+    }
 
-        Date currentDate = new Date();
-        for (PovoleniVjezduVozidla povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
-            if (currentDate.compareTo(povoleniVjezduVozidla.getDatumOd()) >= 0 
-                    && currentDate.compareTo(povoleniVjezduVozidla.getDatumDo()) <= 0) {
-                return Optional.of(povoleniVjezduVozidla);
-            }
-        }
+    private boolean isPovoleniPlatne(PovoleniVjezduVozidla povoleni, LocalDate currentDate) {
+        //Porovnání pouze data, nikoliv času
+        LocalDate datumOd = convertToLocalDate(povoleni.getDatumOd());
+        LocalDate datumDo = convertToLocalDate(povoleni.getDatumDo());
+        
+        return (currentDate.isEqual(datumOd) || currentDate.isAfter(datumOd)) 
+                && (currentDate.isEqual(datumDo) || currentDate.isBefore(datumDo));
+    }
 
-        return Optional.empty();
+    private LocalDate convertToLocalDate(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    private boolean obsahujeZavod(PovoleniVjezduVozidla povoleni, String idZavodKameryVratnice) {
+        return povoleni.getZavod() != null && povoleni.getZavod().stream()
+            .anyMatch(zavod -> idZavodKameryVratnice.equals(zavod.getIdZavod()));
     }
 
     @Transactional
