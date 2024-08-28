@@ -26,6 +26,7 @@ import cz.diamo.vratnice.entity.NavstevniListekTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.NavstevniListekTypEnum;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
+import cz.diamo.vratnice.repository.NavstevniListekTypRepository;
 import cz.diamo.vratnice.repository.UzivatelNavstevniListekTypRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -40,6 +41,9 @@ public class NavstevniListekService {
 
     @Autowired
     private UzivatelNavstevniListekTypRepository uzivatelNavstevniListekTypRepository;
+
+    @Autowired
+    private NavstevniListekTypRepository navstevniListekTypRepository;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -162,8 +166,9 @@ public class NavstevniListekService {
         NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository.findNavstevniListekTypByUzivatelId(idUzivatel);
 
         try {
-            if (navstevniListekTypUzivatele == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+            if (navstevniListekTypUzivatele == null) // pokud není nalezen, nastaví se PAPIROVY jako výchozí
+                navstevniListekTypUzivatele = navstevniListekTypRepository.getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY.getValue());
+            
                 
             navstevniListekTypUzivatele.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListekTypUzivatele.getNazevResx()));
             return navstevniListekTypUzivatele; 
