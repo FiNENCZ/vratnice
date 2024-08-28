@@ -17,4 +17,15 @@ public class VratniceUtils {
                (datumOdDate.equals(intervalDoDate) || datumOdDate.isBefore(intervalDoDate));
     }
 
+    public static Boolean isDateRangeOverlapping(Date intervalOd, Date intervalDo, Date datumOd, Date datumDo) {
+        // Prevod Date na LocalDate
+        LocalDate intervalOdDate = intervalOd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate intervalDoDate = intervalDo.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate datumOdDate = datumOd.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate datumDoDate = datumDo.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // Kontrola, zda je datumOd starsi nez intervalDo a datumDo novejsi nez intervalOd
+        return datumOdDate.isBefore(intervalDoDate) && datumDoDate.isAfter(intervalOdDate);
+    }
+
 }

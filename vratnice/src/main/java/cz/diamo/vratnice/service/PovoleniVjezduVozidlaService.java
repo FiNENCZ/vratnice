@@ -352,23 +352,42 @@ public class PovoleniVjezduVozidlaService {
         PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
 
         if (povoleni == null || povoleni.getRzVozidla() == null || povoleni.getDatumOd() == null || povoleni.getDatumDo() == null) {
-            throw new IllegalArgumentException("Povolení nebo jeho klíčové údaje nemohou být null.");
+            throw new IllegalArgumentException("Povoleni nebo jeho klicove udaje nemohou byt null.");
         }
-        
-        ZonedDateTime datumOd = ZonedDateTime.ofInstant(povoleni.getDatumOd().toInstant(), ZoneId.systemDefault());
-        ZonedDateTime datumDo = ZonedDateTime.ofInstant(povoleni.getDatumDo().toInstant(), ZoneId.systemDefault());
 
-        List<String> rzVozidla = povoleni.getRzVozidla();
+        // Pouziti pomoci metody s daty z povoleni
+        return pocetVjezduProInterval(povoleni.getRzVozidla(), povoleni.getDatumOd(), povoleni.getDatumDo());
+    }
+
+    public Integer pocetVjezdu(String idPovoleniVjezduVozidla, Date datumOd, Date datumDo) {
+        PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
+
+        if (povoleni == null || povoleni.getRzVozidla() == null || datumOd == null || datumDo == null) {
+            throw new IllegalArgumentException("Povoleni, jeho klicove udaje nebo datumy od a do nemohou byt null.");
+        }
+
+        // Pouziti pomoci metody s poskytnutymi daty
+        return pocetVjezduProInterval(povoleni.getRzVozidla(), datumOd, datumDo);
+    }
+
+    private Integer pocetVjezduProInterval(List<String> rzVozidla, Date datumOd, Date datumDo) {
+        ZonedDateTime datumOdZoned = ZonedDateTime.ofInstant(datumOd.toInstant(), ZoneId.systemDefault());
+        ZonedDateTime datumDoZoned = ZonedDateTime.ofInstant(datumDo.toInstant(), ZoneId.systemDefault());
+
+        logger.info("---------------------------");
+        logger.info(datumOdZoned);
+        logger.info(datumDoZoned);
+
         int pocetVjezdu = 0;
-        
+
         for (String rz : rzVozidla) {
-            // Získání vjezdů podle RZ vozidla v daném období
-            List<VjezdVozidla> vjezdy = vjezdVozidlaRepository.findByRzVozidlaAndDatumOdBetween(rz, datumOd, datumDo);
- 
+            // Ziskani vjezdu podle RZ vozidla v danem obdobi
+            List<VjezdVozidla> vjezdy = vjezdVozidlaRepository.findByRzVozidlaAndDatumOdBetween(rz, datumOdZoned, datumDoZoned);
+
             pocetVjezdu += vjezdy.size();
         }
-        
-        return pocetVjezdu;
-        }
 
+        return pocetVjezdu;
     }
+
+}

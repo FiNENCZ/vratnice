@@ -12,16 +12,21 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
+import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RzTypVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
@@ -46,6 +51,9 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     @Autowired
     private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @PostMapping("/povoleni-vjezdu-vozidla/save")
     public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
@@ -58,37 +66,43 @@ public class PovoleniVjezduVozidlaController extends BaseController {
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumDo,
                         @RequestParam @Nullable Integer minimalniPocetVjezdu) {
 
-        boolean isAnyParamFilled = datumOd != null || datumDo != null || minimalniPocetVjezdu != null;
 
-        // Kontrola, zda jsou vyplněny všechny parametry, pokud je alespoň jeden vyplněn
-        if (isAnyParamFilled && (datumOd == null || datumDo == null || minimalniPocetVjezdu == null)) {
-            return ResponseEntity.badRequest().body(null); // Vrátíme 400 Bad Request, pokud není vyplněn alespoň jeden parametr
-        }
-        
-        if (isAnyParamFilled) {
-            // Pokud jsou vyplněny všechny parametry, provede se tato logika
+        // Pokud jsou vyplněny všechny parametry vyplněny
+        if (datumOd != null && datumDo != null && minimalniPocetVjezdu != null) {
+            
             List<PovoleniVjezduVozidlaDto> result = new ArrayList<>();
             List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getAll();
     
             if (list != null && !list.isEmpty()) {
                 for (PovoleniVjezduVozidla povoleniVjezduVozidla : list) {
                     PovoleniVjezduVozidlaDto povoleni = new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla);
-                    Integer pocetVjezdu = povoleniVjezduVozidlaService.pocetVjezdu(povoleni.getIdPovoleniVjezduVozidla());
-    
-                    if (pocetVjezdu < minimalniPocetVjezdu) {
-                        result.add(povoleni);
+                    if (VratniceUtils.isDateInInterval(datumDo, datumDo, povoleni.getDatumOd()) || 
+                        VratniceUtils.isDateInInterval(datumDo, datumDo, povoleni.getDatumDo()) ||
+                        VratniceUtils.isDateRangeOverlapping(datumDo, datumDo, povoleni.getDatumOd(), povoleni.getDatumDo())) {
+
+                        Integer pocetVjezdu = povoleniVjezduVozidlaService.pocetVjezdu(povoleni.getIdPovoleniVjezduVozidla(), datumOd, datumDo);
+
+                        if (pocetVjezdu < minimalniPocetVjezdu) {
+                            povoleni.setPocetVjezdu(pocetVjezdu);
+                            result.add(povoleni);
+                        }
                     }
                 }
             }
     
             return ResponseEntity.ok(result);
-        } else {
-            // Pokud není vyplněn žádný parametr, provede se tato logika
+        } 
+        // pokud není žádný parametr vyplněn
+        if (datumOd == null && datumDo == null && minimalniPocetVjezdu == null) {
             List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getAll().stream()
                 .map(PovoleniVjezduVozidlaDto::new)
                 .collect(Collectors.toList());
             return ResponseEntity.ok(povoleniVjezduVozidel);
         }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			messageSource.getMessage("povoleni_vjezdu_vozidla.list_parametry_error", null, LocaleContextHolder.getLocale()));
+
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/detail")
@@ -138,8 +152,13 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     public ResponseEntity<Integer> pocetVjezdu(@RequestParam String idPovoleni) {
         return ResponseEntity.ok(povoleniVjezduVozidlaService.pocetVjezdu(idPovoleni));
     }
-    
-    
-    
 
+
+    @PostMapping("/povoleni-vjezdu-vozidla/zneplatnit-povoleni")
+    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) {
+        //TODO: dodělat logiku zneplatnění povolení vjezdu vozidla
+        
+        return ResponseEntity.ok(povoleni);
+    }
+    
 }
