@@ -73,8 +73,7 @@ public class KmenovaDataServicesNewTrans {
         // udaju - změna ORG.STR, přesun na nový závod
 
         // aktualizace/založení uživatele
-        if ((uzivatel.getPlatnostKeDni() == null
-                || uzivatel.getPlatnostKeDni().compareTo(kmenovaData.getPlatnostKeDni()) == -1)) {
+        if ((uzivatel.getPlatnostKeDni() == null || uzivatel.getPlatnostKeDni().compareTo(kmenovaData.getPlatnostKeDni()) == -1)) {
             if (aktualizaceUdaju(uzivatel, kmenovaData)) {
 
                 uzivatel.setPlatnostKeDni(kmenovaData.getPlatnostKeDni());
@@ -88,8 +87,7 @@ public class KmenovaDataServicesNewTrans {
         }
 
         // nastavení zpracování kmenových dat
-        kmenovaDataRepository.oznacitZaZpracovane(kmenovaData.getIdKmenovaData(), Utils.getCasZmn(),
-                Utils.getZmenuProv());
+        kmenovaDataRepository.oznacitZaZpracovane(kmenovaData.getIdKmenovaData(), Utils.getCasZmn(), Utils.getZmenuProv());
 
         entityManager.detach(kmenovaData);
         entityManager.detach(uzivatel);
@@ -97,17 +95,15 @@ public class KmenovaDataServicesNewTrans {
 
     @TransactionalWriteTrans
     public void zapsatChybu(KmenovaData kmenovaData, Exception e) {
-        kmenovaDataRepository.zapsatChybu(kmenovaData.getIdKmenovaData(), e.toString(), Utils.getCasZmn(),
-                Utils.getZmenuProv());
+        kmenovaDataRepository.zapsatChybu(kmenovaData.getIdKmenovaData(), e.toString(), Utils.getCasZmn(), Utils.getZmenuProv());
     }
 
     @TransactionalROE
-    private boolean aktualizaceUdaju(Uzivatel uzivatel, KmenovaData kmenovaData)
-            throws RecordNotFoundException, NoSuchMessageException {
+    private boolean aktualizaceUdaju(Uzivatel uzivatel, KmenovaData kmenovaData) throws RecordNotFoundException, NoSuchMessageException {
         boolean zmena = false;
         boolean ukonceniPomeru = kmenovaData.getDatumUkonceniPracPomeru() != null;
 
-        if (!StringUtils.equals(kmenovaData.getZavod().getIdZavod(), uzivatel.getZavod().getIdZavod())) {
+        if (uzivatel.getZavod() == null || !StringUtils.equals(kmenovaData.getZavod().getIdZavod(), uzivatel.getZavod().getIdZavod())) {
             uzivatel.setZavod(kmenovaData.getZavod());
             zmena = true;
         }
@@ -173,14 +169,12 @@ public class KmenovaDataServicesNewTrans {
             zmena = true;
         }
 
-        if (kmenovaData.getCisloPopisne() != null
-                && !kmenovaData.getCisloPopisne().equals(uzivatel.getCisloPopisne())) {
+        if (kmenovaData.getCisloPopisne() != null && !kmenovaData.getCisloPopisne().equals(uzivatel.getCisloPopisne())) {
             uzivatel.setCisloPopisne(kmenovaData.getCisloPopisne());
             zmena = true;
         }
 
-        if (kmenovaData.getDilciPersonalniOblastSapId() != null
-                && !kmenovaData.getDilciPersonalniOblastSapId().equals(uzivatel.getDilciPersonalniOblast())) {
+        if (kmenovaData.getDilciPersonalniOblastSapId() != null && !kmenovaData.getDilciPersonalniOblastSapId().equals(uzivatel.getDilciPersonalniOblast())) {
             uzivatel.setDilciPersonalniOblast(kmenovaData.getDilciPersonalniOblastSapId());
             zmena = true;
         }
@@ -195,14 +189,12 @@ public class KmenovaDataServicesNewTrans {
             zmena = true;
         }
 
-        if (kmenovaData.getSoukromyEmail() != null
-                && !kmenovaData.getSoukromyEmail().equals(uzivatel.getSoukromyEmail())) {
+        if (kmenovaData.getSoukromyEmail() != null && !kmenovaData.getSoukromyEmail().equals(uzivatel.getSoukromyEmail())) {
             uzivatel.setSoukromyEmail(kmenovaData.getSoukromyEmail());
             zmena = true;
         }
 
-        if (kmenovaData.getPruznaPracDoba() != null
-                && !kmenovaData.getPruznaPracDoba().equals(uzivatel.getPruznaPracDoba())) {
+        if (kmenovaData.getPruznaPracDoba() != null && !kmenovaData.getPruznaPracDoba().equals(uzivatel.getPruznaPracDoba())) {
             uzivatel.setPruznaPracDoba(kmenovaData.getPruznaPracDoba());
             zmena = true;
         }
@@ -216,8 +208,7 @@ public class KmenovaDataServicesNewTrans {
             zmena = true;
         }
 
-        if (kmenovaData.getDatumUkonceniPracPomeru() != null
-                && !kmenovaData.getDatumUkonceniPracPomeru().equals(uzivatel.getDatumDo())) {
+        if (kmenovaData.getDatumUkonceniPracPomeru() != null && !kmenovaData.getDatumUkonceniPracPomeru().equals(uzivatel.getDatumDo())) {
             uzivatel.setDatumDo(kmenovaData.getDatumUkonceniPracPomeru());
             zmena = true;
         }
@@ -227,22 +218,19 @@ public class KmenovaDataServicesNewTrans {
             Zakazka zakazka = null;
 
             if (StringUtils.isNotBlank(kmenovaData.getZakazkaSapId()))
-                zakazka = zakazkaRepository.getDetailBySapId(kmenovaData.getZakazkaSapId(),
-                        uzivatel.getZavod().getIdZavod(), true);
+                zakazka = zakazkaRepository.getDetailBySapId(kmenovaData.getZakazkaSapId(), uzivatel.getZavod().getIdZavod(), true);
 
             uzivatel.setZakazka(zakazka);
         }
 
         String sapIdPracovniPozicePuv = "";
         String sapIdPracovniPoziceNew = kmenovaData.getPlanovaneMistoSapId();
-        if ((Utils.sapIdPracovniPoziceNull.equals(sapIdPracovniPoziceNew)
-                || Utils.sapIdPracovniPoziceNull2.equals(sapIdPracovniPoziceNew))
+        if ((Utils.sapIdPracovniPoziceNull.equals(sapIdPracovniPoziceNew) || Utils.sapIdPracovniPoziceNull2.equals(sapIdPracovniPoziceNew))
                 && kmenovaData.getDatumUkonceniPracPomeru() != null)
             sapIdPracovniPoziceNew = "";
 
         // pokusím se dohledat pracovní pozici pro dohodáře
-        if (Utils.sapIdPracovniPoziceNull.equals(sapIdPracovniPoziceNew)
-                || Utils.sapIdPracovniPoziceNull2.equals(sapIdPracovniPoziceNew)) {
+        if (Utils.sapIdPracovniPoziceNull.equals(sapIdPracovniPoziceNew) || Utils.sapIdPracovniPoziceNull2.equals(sapIdPracovniPoziceNew)) {
             sapIdPracovniPoziceNew = pracovniPoziceRepository.getSapIdProDohodare(uzivatel.getSapId());
             if (StringUtils.isBlank(sapIdPracovniPoziceNew))
                 sapIdPracovniPoziceNew = Utils.sapIdPracovniPoziceNull;
@@ -258,9 +246,7 @@ public class KmenovaDataServicesNewTrans {
                 PracovniPozice pracovniPozice = pracovniPoziceRepository.getDetailBySapId(sapIdPracovniPoziceNew);
                 uzivatel.setPracovniPozice(pracovniPozice);
                 if (uzivatel.getPracovniPozice() == null && !ukonceniPomeru)
-                    throw new RecordNotFoundException(
-                            messageSource.getMessage("pracovni.pozice.zamestnance.not.found", null,
-                                    LocaleContextHolder.getLocale()),
+                    throw new RecordNotFoundException(messageSource.getMessage("pracovni.pozice.zamestnance.not.found", null, LocaleContextHolder.getLocale()),
                             sapIdPracovniPoziceNew, true);
             }
             zmena = true;
