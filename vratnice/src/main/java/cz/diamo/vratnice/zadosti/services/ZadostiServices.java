@@ -3,6 +3,7 @@ package cz.diamo.vratnice.zadosti.services;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,13 +26,18 @@ import org.springframework.web.client.RestOperations;
 import com.google.gson.Gson;
 
 import cz.diamo.share.annotation.TransactionalROE;
+import cz.diamo.share.annotation.TransactionalWrite;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.security.AuthCookieDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.entity.ZadostExterni;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.repository.UzivatelRepository;
+import cz.diamo.share.repository.ZadostExterniZaznamRepository;
 import cz.diamo.share.security.SecurityUtils;
 import cz.diamo.share.services.AuthServices;
 import cz.diamo.share.services.ZadostiExterniServices;
@@ -39,8 +45,13 @@ import cz.diamo.vratnice.dto.KlicDto;
 import cz.diamo.vratnice.dto.PoschodiDto;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.Poschodi;
+import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.entity.ZadostStav;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.repository.PoschodiRepository;
 import cz.diamo.vratnice.service.KlicService;
+import cz.diamo.vratnice.service.ZadostKlicService;
+import cz.diamo.vratnice.zadosti.dto.ZadostKlicExtDto;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -57,6 +68,9 @@ public class ZadostiServices extends ZadostiExterniServices {
     private KlicService klicService;
 
     @Autowired
+    private ZadostKlicService zadostKlicService;
+
+    @Autowired
     private UzivatelRepository uzivatelRepository;
 
     @Autowired
@@ -66,11 +80,15 @@ public class ZadostiServices extends ZadostiExterniServices {
     private RestOperations restZadosti;
 
     @Autowired
+    private ZadostExterniZaznamRepository zadostExterniZaznamRepository;
+
+    @Autowired
     private AuthServices authServices;
 
     @Autowired
     private MessageSource messageSource;
 
+    @TransactionalROE
     public List<PoschodiDto> seznamPoschodi(String idBudova, AppUserDto appUserDto) throws BaseException {
         List<Poschodi> poschodiList = poschodiRepository.getList(idBudova, true);
 
@@ -82,6 +100,7 @@ public class ZadostiServices extends ZadostiExterniServices {
         return poschodiDtos;
     }
 
+    @TransactionalROE
     public List<KlicDto> seznamKlic(String idLokalita, String idBudova, String idPoschodi, AppUserDto appUserDto) throws BaseException {
         List<Klic> klicList = klicService.getList(idLokalita, idBudova, idPoschodi, true, null);
 
@@ -91,6 +110,45 @@ public class ZadostiServices extends ZadostiExterniServices {
         }
 
         return klicDtos;
+    }
+
+    @TransactionalWrite
+    public void saveZadostKlic(ZadostKlicExtDto zadostKlicDto, AppUserDto appUserDto) throws ValidationException, BaseException {
+        Uzivatel uzivatel = uzivatelRepository.getDetailBySapId(zadostKlicDto.getSapIdZamestnance());
+        if (uzivatel == null)
+            throw new RecordNotFoundException(
+                    messageSource.getMessage("uzivatel.not.found", null, LocaleContextHolder.getLocale()), null, true);
+
+        List<String> idZaznamList = zadostExterniZaznamRepository.listIdZaznam(zadostKlicDto.getId());
+
+        ZadostKlic zadost;
+
+        if (idZaznamList != null && idZaznamList.size() > 0) {
+            // aktualizuji původní žádost
+            zadost = zadostKlicService.getDetail(idZaznamList.get(0));
+        } else {
+            // vytvořím novou žádost
+            zadost = new ZadostKlic();
+        }
+
+        zadost.setDatumOd(zadostKlicDto.getDatumOd());
+        zadost.setDatumDo(zadostKlicDto.getDatumDo());
+        zadost.setDuvod(zadostKlicDto.getDuvod());
+        zadost.setKlic(new Klic(zadostKlicDto.getKlicId()));
+        zadost.setZadostStav(new ZadostStav(ZadostStavEnum.SCHVALENO));
+        zadost.setUzivatel(uzivatel);
+        zadost.setTrvala(zadostKlicDto.getDatumDo() == null);
+
+        zadost = zadostKlicService.save(zadost);
+
+        ZadostExterni zadostExterni = new ZadostExterni();
+        zadostExterni.setIdZadostExterni(zadostKlicDto.getId());
+        zadostExterni.setCas(Calendar.getInstance().getTime());
+        zadostExterni.setUzivatel(uzivatel);
+        zadostExterni.setUzivatelVytvoril(new Uzivatel(appUserDto.getIdUzivatel()));
+        zadostExterni.setDatumPredani(zadostKlicDto.getDatumPredani());
+        zadostExterni.setTyp(zadostKlicDto.getTyp());
+        save(zadostExterni, List.of(zadost.getIdZadostKlic()));
     }
 
     public void saveBudova(BudovaDto budovaDto, HttpServletRequest request, AppUserDto appUserDto) throws BaseException {

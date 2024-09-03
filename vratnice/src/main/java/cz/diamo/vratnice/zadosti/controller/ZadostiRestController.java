@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,10 +28,12 @@ import cz.diamo.share.security.UserAuthentication;
 import cz.diamo.share.services.AuthServices;
 import cz.diamo.vratnice.dto.KlicDto;
 import cz.diamo.vratnice.dto.PoschodiDto;
+import cz.diamo.vratnice.zadosti.dto.ZadostKlicExtDto;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 /**
  * Žádost REST - voláno ze žádostí
@@ -90,6 +93,26 @@ public class ZadostiRestController extends BaseRestController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
         }
 	}
+
+    /**
+	 * Seznam klíčů
+	 * @param appUserDto
+	 * @param zadostKlicDto
+	 * @return
+	 */
+	@PostMapping("/klic/pristup")
+	@PreAuthorize("isFullyAuthenticated()")
+    public void saveZadostKlic(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicExtDto zadostKlicDto) {
+        try {
+            zadostiServices.saveZadostKlic(zadostKlicDto, appUserDto);
+        } catch (BaseException be) {
+            logger.error(be);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, be.toString());
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        }
+    }
 
     @PostMapping("/zastup")
     @PreAuthorize("isFullyAuthenticated()")

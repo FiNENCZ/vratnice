@@ -15,8 +15,8 @@ public interface ZadostKlicRepository extends JpaRepository<ZadostKlic, String> 
     @Query(sqlSelect + "where s.idZadostKlic = :idZadostKlic")
     ZadostKlic getDetail(String idZadostKlic);
 
-    @Query(sqlSelect + "where s.stav = :stav")
-    List<ZadostKlic> getZadostiByStav(String stav);
+    @Query(sqlSelect + "where s.zadostStav.idZadostStav = :idZadostStav and s.aktivita = :aktivita")
+    List<ZadostKlic> getZadostiByStav(Integer idZadostStav, Boolean aktivita);
 
     @Query(sqlSelect + "where s.klic = :klic")
     List<ZadostKlic> findByKlic(Klic klic);
