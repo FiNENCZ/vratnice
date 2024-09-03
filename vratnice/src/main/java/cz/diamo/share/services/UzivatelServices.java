@@ -149,7 +149,7 @@ public class UzivatelServices {
             queryString.append(" and " + opravneni.getHqlWhere("s.idUzivatel"));
         if (platnostKeDni != null)
             queryString.append(
-                    " and (s.datumOd is null or s.datumOd < :platnostKeDni) and (s.datumDo is null or s.datumDo > :platnostKeDni)");
+                    " and (s.datumOd is null or s.datumOd <= :platnostKeDni) and (s.datumDo is null or s.datumDo => :platnostKeDni)");
         queryString.append(" and s.aktivita = true");
 
         queryString.append(" order by s.prijmeni ASC, s.jmeno ASC");
