@@ -31,12 +31,12 @@ public class VratniceKameryService {
     private VratniceService vratniceService;
 
     public KonfiguraceVratniceKameryDto getKonfiguraceDetail(String ipAdresa) {
-        String url = "http://" + ipAdresa + ":8080/api/konfigurace/detail";
+        String url = "http://" + ipAdresa + ":8091/api/konfigurace/detail";
         return restVratniceKameryTemplate.getForObject(url, KonfiguraceVratniceKameryDto.class);
     }
 
     public List<VjezdVyjezdVozidlaDto> getVjezdVyjezd(String ipAdresa) {
-        String url = "http://" + ipAdresa + ":8080/api/vjezd-vyjezd-vozidla/list";
+        String url = "http://" + ipAdresa + ":8091/api/vjezd-vyjezd-vozidla/list";
         ResponseEntity<List<VjezdVyjezdVozidlaDto>> response = restVratniceKameryTemplate.exchange(
             url, 
             HttpMethod.GET, 
@@ -47,7 +47,7 @@ public class VratniceKameryService {
     }
 
     public KonfiguraceVratniceKameryDto saveKonfigurace(KonfiguraceVratniceKameryDto konfiguraceDto, String ipAdresa) {
-        String url = "http://" + ipAdresa + ":8080/api/konfigurace/save";
+        String url = "http://" + ipAdresa + ":8091/api/konfigurace/save";
 
         konfiguraceDto.setCasZmn(Utils.getCasZmn());
         konfiguraceDto.setZmenuProvedl(Utils.getZmenuProv());

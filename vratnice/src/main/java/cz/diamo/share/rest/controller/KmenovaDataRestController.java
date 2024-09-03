@@ -18,11 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.dto.Ws02ZastupDto;
+import cz.diamo.share.dto.Wso2UzivatelExtDto;
 import cz.diamo.share.entity.KmenovaData;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.rest.dto.KmenovaDataDto;
 import cz.diamo.share.services.KmenovaDataServices;
+import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.share.services.ZastupServices;
 import cz.diamo.share.services.ZavodServices;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +48,9 @@ public class KmenovaDataRestController extends BaseRestController {
 
 	@Autowired
 	private ZastupServices zastupServices;
+
+	@Autowired
+	private UzivatelServices uzivatelServices;
 
 	/**
 	 * Uložení údajů o zaměstnanci
@@ -113,6 +118,41 @@ public class KmenovaDataRestController extends BaseRestController {
 				Utils.validate(zaznam);
 				zastupServices.aktualizovat(zaznam);
 			}
+
+		} catch (ValidationException ve) {
+			logger.error(ve);
+
+			String message = "";
+			String[] resx = ve.getMessage().replace("{", "").replace("}", "").split("\n");
+			for (String res : resx) {
+				if (!StringUtils.isBlank(message))
+					message += "\n";
+				message += messageSource.getMessage(res, null, LocaleContextHolder.getLocale());
+			}
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+
+		} catch (ResponseStatusException re) {
+			throw re;
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+		}
+	}
+
+	@PostMapping("/kmenova-data/externi-uzivatele/save")
+	@PreAuthorize("hasAnyAuthority('ROLE_PERSONALISTIKA')")
+	public void externiUzivateleSave(HttpServletRequest request, @RequestBody List<Wso2UzivatelExtDto> zaznamy) {
+		if (zaznamy == null || zaznamy.size() == 0)
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					messageSource.getMessage("zaznam.not.null", null, LocaleContextHolder.getLocale()));
+		try {
+
+			for (Wso2UzivatelExtDto zaznam : zaznamy) {
+				// validace
+				Utils.validate(zaznam);
+			}
+
+			uzivatelServices.aktualizovatExterniUzivatele(zaznamy);
 
 		} catch (ValidationException ve) {
 			logger.error(ve);

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.NajemnikNavstevnickaKarta;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.repository.NajemnikNavstevnickaKartaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -24,6 +25,9 @@ public class NajemnikNavstevnickaKartaService {
     @Autowired
     private NajemnikNavstevnickaKartaRepository najemnikNavstevnickaKartaRepository;
 
+    @Autowired
+    private SpolecnostService spolecnostService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -32,6 +36,9 @@ public class NajemnikNavstevnickaKartaService {
 
     @Transactional
     public NajemnikNavstevnickaKarta create(NajemnikNavstevnickaKarta najemnikNavstevnickaKarta) throws UniqueValueException, NoSuchMessageException {
+        Spolecnost savedSpolecnost = spolecnostService.save(najemnikNavstevnickaKarta.getSpolecnost());
+        najemnikNavstevnickaKarta.setSpolecnost((savedSpolecnost));
+        
         if (najemnikNavstevnickaKarta.getIdNajemnikNavstevnickaKarta() == null || najemnikNavstevnickaKarta.getIdNajemnikNavstevnickaKarta().isEmpty()){
             if(najemnikNavstevnickaKartaRepository.existsByCisloOp(najemnikNavstevnickaKarta.getCisloOp())){
                 throw new UniqueValueException(

@@ -67,7 +67,8 @@ public class SwaggerConfiguration {
 					new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic"));
 			openApi.info(new Info().title("REST API").version("v1"));
 		};
-		String packagesToscan[] = { "cz.diamo.share.rest.controller" };
+		String packagesToscan[] = { "cz.diamo.share.rest.controller",
+				"cz.diamo." + Constants.BASE_PACKAGE + ".rest.controller" };
 		return GroupedOpenApi.builder().group("rest-api").packagesToScan(packagesToscan)
 				.addOpenApiCustomizer(customizer).addOperationCustomizer(globalOperationCustomizer).build();
 	}

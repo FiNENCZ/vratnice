@@ -16,6 +16,7 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
@@ -24,8 +25,8 @@ import cz.diamo.vratnice.entity.NavstevniListek;
 import cz.diamo.vratnice.entity.NavstevniListekTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.NavstevniListekTypEnum;
-import cz.diamo.vratnice.repository.NavstevaOsobaRepository;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
+import cz.diamo.vratnice.repository.NavstevniListekTypRepository;
 import cz.diamo.vratnice.repository.UzivatelNavstevniListekTypRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -42,13 +43,16 @@ public class NavstevniListekService {
     private UzivatelNavstevniListekTypRepository uzivatelNavstevniListekTypRepository;
 
     @Autowired
+    private NavstevniListekTypRepository navstevniListekTypRepository;
+
+    @Autowired
     private ResourcesComponent resourcesComponent;
 
     @Autowired
 	private MessageSource messageSource;
 
     @Autowired
-    private NavstevaOsobaRepository navstevaOsobaRepository;
+    private NavstevaOsobaService navstevaOsobaService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -69,8 +73,14 @@ public class NavstevniListekService {
                 .collect(Collectors.toList());
     
             List<NavstevaOsoba> savedNavstevaOsoby = navstevaOsobaEntities.stream()
-                .map(navstevaOsobaRepository::save)
-                .collect(Collectors.toList());
+            .map(navstevaOsoba -> {
+                try {
+                    return navstevaOsobaService.create(navstevaOsoba);
+                } catch (UniqueValueException | NoSuchMessageException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .collect(Collectors.toList());
     
             navstevniListekDto.setNavstevaOsoba(savedNavstevaOsoby.stream()
                 .map(NavstevaOsobaDto::new)
@@ -127,7 +137,8 @@ public class NavstevniListekService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
-        
+            else
+                return null;
         
         @SuppressWarnings("unchecked")
         List<NavstevniListek> list = vysledek.getResultList();
@@ -155,8 +166,9 @@ public class NavstevniListekService {
         NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository.findNavstevniListekTypByUzivatelId(idUzivatel);
 
         try {
-            if (navstevniListekTypUzivatele == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+            if (navstevniListekTypUzivatele == null) // pokud není nalezen, nastaví se PAPIROVY jako výchozí
+                navstevniListekTypUzivatele = navstevniListekTypRepository.getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY.getValue());
+            
                 
             navstevniListekTypUzivatele.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListekTypUzivatele.getNazevResx()));
             return navstevniListekTypUzivatele; 

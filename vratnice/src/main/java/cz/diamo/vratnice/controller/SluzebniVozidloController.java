@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,6 +57,7 @@ public class SluzebniVozidloController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/sluzebni-vozidlo/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid SluzebniVozidloDto sluzebniVozidloDto) throws RecordNotFoundException, NoSuchMessageException, InterruptedException, ExecutionException {
         
   
@@ -94,6 +96,7 @@ public class SluzebniVozidloController extends BaseController {
     }
     
     @GetMapping("/sluzebni-vozidlo/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<List<SluzebniVozidloDto>> list(@RequestParam @Nullable Boolean aktivni) {
         List<SluzebniVozidloDto> result = new ArrayList<SluzebniVozidloDto>();
         List<SluzebniVozidlo> list = sluzebniVozidloService.getList(aktivni);
@@ -109,6 +112,7 @@ public class SluzebniVozidloController extends BaseController {
     
 
     @GetMapping("/sluzebni-vozidlo/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloDto> getDetail(@RequestParam String id) {
         SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getDetail(id);
         if (sluzebniVozidlo == null) {
@@ -118,30 +122,35 @@ public class SluzebniVozidloController extends BaseController {
     }
 
     @GetMapping("/sluzebni-vozidlo/typ")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<VozidloTypDto> typ(@RequestParam String idSluzebniVozidlo) {
         VozidloTyp vozidloTyp = sluzebniVozidloService.getVozidloTyp(idSluzebniVozidlo);
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
     }
 
     @GetMapping("/sluzebni-vozidlo/kategorie")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloKategorieDto> kategorie(@RequestParam String idSluzebniVozidlo) {
         SluzebniVozidloKategorie kategorie = sluzebniVozidloService.getKategorie(idSluzebniVozidlo);
         return ResponseEntity.ok(new SluzebniVozidloKategorieDto(kategorie));
     }
 
     @GetMapping("/sluzebni-vozidlo/funkce")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloFunkceDto> funkce(@RequestParam String idSluzebniVozidlo) {
         SluzebniVozidloFunkce funkce = sluzebniVozidloService.getFunkce(idSluzebniVozidlo);
         return ResponseEntity.ok(new SluzebniVozidloFunkceDto(funkce));
     }
 
     @GetMapping("/sluzebni-vozidlo/stav")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloStavDto> stav(@RequestParam String idSluzebniVozidlo) {
         SluzebniVozidloStav stav = sluzebniVozidloService.getVozidloStav(idSluzebniVozidlo);
         return ResponseEntity.ok(new SluzebniVozidloStavDto(stav));
     }
 
     @GetMapping("/sluzebni-vozidlo/get-by-rz")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public ResponseEntity<SluzebniVozidloDto> getByRz(@RequestParam String rz) {
         SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getByRz(rz);
         return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));

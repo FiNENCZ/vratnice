@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import cz.diamo.vratnice.entity.NavstevaOsoba;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -30,8 +31,8 @@ public class NavstevaOsobaDto implements Serializable {
     @Pattern(regexp = "\\d+", message = "{navsteva_osoba.cislo_op.pattern}")
     private String cisloOp;
 
-    @Size(max = 120, message = "{navsteva_osoba.firma.max.120}")
-    private String firma;
+    @Valid
+    private SpolecnostDto spolecnost;
 
     private Date datumPouceni;
 
@@ -44,7 +45,7 @@ public class NavstevaOsobaDto implements Serializable {
         this.jmeno = navstevaOsoba.getJmeno();
         this.prijmeni = navstevaOsoba.getPrijmeni();
         this.cisloOp = navstevaOsoba.getCisloOp();
-        this.firma = navstevaOsoba.getFirma();
+        this.spolecnost = new SpolecnostDto(navstevaOsoba.getSpolecnost());
         this.datumPouceni = navstevaOsoba.getDatumPouceni();
     }
 
@@ -55,7 +56,7 @@ public class NavstevaOsobaDto implements Serializable {
         navstevaOsoba.setJmeno(this.jmeno);
         navstevaOsoba.setPrijmeni(this.prijmeni);
         navstevaOsoba.setCisloOp(this.cisloOp);
-        navstevaOsoba.setFirma(this.firma);
+        navstevaOsoba.setSpolecnost(getSpolecnost().toEntity());
         navstevaOsoba.setDatumPouceni(this.datumPouceni);
 
         return navstevaOsoba;

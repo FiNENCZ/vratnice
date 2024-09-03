@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,6 +52,7 @@ public class NavstevniListekController extends BaseController {
 
 
     @PostMapping("/navstevni-listek/create")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevniListekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
     @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws RecordNotFoundException, NoSuchMessageException {
         Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
@@ -60,6 +62,7 @@ public class NavstevniListekController extends BaseController {
     
 
     @GetMapping("/navstevni-listek/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<List<NavstevniListekDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
                  @RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
         List<NavstevniListekDto> result = new ArrayList<NavstevniListekDto>();
@@ -75,6 +78,7 @@ public class NavstevniListekController extends BaseController {
     }
 
     @GetMapping("/navstevni-listek/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevniListekDto> getDetail(@RequestParam String idNavstevniListek) {
         NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
         if (navstevniListek == null) {
@@ -84,6 +88,7 @@ public class NavstevniListekController extends BaseController {
     }
 
     @GetMapping("/navstevni-listek/qrcode")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<byte[]> getQRCode(@RequestParam String idNavstevniListek) {
         NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
         if (navstevniListek == null) {

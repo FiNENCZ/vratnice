@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,6 +33,7 @@ public class SluzebniVozidloFunkceController extends BaseController {
     private SluzebniVozidloFunkceRepository sluzebniVozidloFunkceRepository;
 
     @GetMapping("/sluzebni-vozidlo-funkce/list")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
     public List<SluzebniVozidloFunkceDto> list(HttpServletRequest request) {
         List<SluzebniVozidloFunkceDto> result = new ArrayList<SluzebniVozidloFunkceDto>();
 

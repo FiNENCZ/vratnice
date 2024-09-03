@@ -4,8 +4,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.RzDetectedMessageDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
@@ -26,8 +28,8 @@ public class RzVozidlaDetektorService {
     @Autowired
     WebSocketService webSocketService;
 
-    public RzDetectedMessageDto checkIfRzVozidlaIsAllowedAndSendWS(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException {
-        Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla);
+    public RzDetectedMessageDto checkIfRzVozidlaIsAllowedAndSendWS(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException, RecordNotFoundException, NoSuchMessageException {
+        Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla, idVratnice);
 
         if (result.isPresent()) {
             return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);

@@ -71,6 +71,8 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
 
     private String stav = "vyžádáno";
 
+    private Integer pocetVjezdu;
+
     public PovoleniVjezduVozidlaDto(PovoleniVjezduVozidla povoleniVjezduVozidla) {
         if (povoleniVjezduVozidla == null) {
             return;

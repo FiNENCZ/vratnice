@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.vratnice.dto.InicializaceVratniceKameryDto;
 import cz.diamo.vratnice.dto.RzDetectedMessageDto;
@@ -44,7 +46,7 @@ public class VratniceKameryRestController extends BaseRestController {
 
 
     @PostMapping("/rz-vozidla-detektor/detekce")
-    private RzDetectedMessageDto processRzVozidla(@RequestParam String idVratnice, @RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException {
+    private RzDetectedMessageDto processRzVozidla(@RequestParam String idVratnice, @RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException, RecordNotFoundException, NoSuchMessageException {
         if (vjezd) {
             return rzVozidlaDetektorService.checkIfRzVozidlaIsAllowedAndSendWS(idVratnice, rzVozidla, vjezd);
         } else {

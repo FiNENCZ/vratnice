@@ -1,6 +1,6 @@
 package cz.diamo.vratnice.enums;
 
-import cz.diamo.vratnice.entity.KlicTyp;
+import cz.diamo.vratnice.entity.HistorieSluzebniVozidloAkce;
 
 public enum HistorieSluzebniVozidloAkceEnum {
     HISTORIE_SLUZEBNI_VOZIDLO_AKCE_VYTVORENO(1), HISTORIE_SLUZEBNI_VOZIDLO_AKCE_UPRAVENO(2), HISTORIE_SLUZEBNI_VOZIDLO_AKCE_ODSTRANENO(3), 
@@ -16,8 +16,8 @@ public enum HistorieSluzebniVozidloAkceEnum {
         return value;
     }
 
-    public static HistorieSluzebniVozidloAkceEnum getHistorieSluzebniVozidloAkceEnum(KlicTyp klicTyp) { //TODO: opravit překlep a otestovat
-        return getHistorieSluzebniVozidloAkceEnum(klicTyp.getIdKlicTyp());
+    public static HistorieSluzebniVozidloAkceEnum getHistorieSluzebniVozidloAkceEnum(HistorieSluzebniVozidloAkce historieSluzebniVozidloAkce) { 
+        return getHistorieSluzebniVozidloAkceEnum(historieSluzebniVozidloAkce.getIdHistorieSluzebniVozidloAkce());
     }
 
     public static HistorieSluzebniVozidloAkceEnum getHistorieSluzebniVozidloAkceEnum(int value) {

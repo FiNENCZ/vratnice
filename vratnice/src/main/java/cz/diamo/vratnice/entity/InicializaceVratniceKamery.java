@@ -23,7 +23,7 @@ public class InicializaceVratniceKamery implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_inicializace_vratnice_kamery")
     private String idInicializaceVratniceKamery;

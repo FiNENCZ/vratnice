@@ -1,24 +1,25 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.HistorieVypujcekDto;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
-import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
@@ -26,17 +27,13 @@ import cz.diamo.vratnice.service.HistorieVypujcekService;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.Date;
 
 
 
@@ -54,30 +51,43 @@ public class HistorieVypujcekController extends BaseController {
     @Autowired
     private KlicService klicService;
 
-    @Autowired
-    private UzivatelServices uzivatelServices;
 
     @PostMapping("/historie-vypujcek/save")
     public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                                 @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
-                                @RequestParam HistorieVypujcekAkceEnum akce) throws RecordNotFoundException {  
-        
-         logger.info(zadostKlicDto);
-        // Vytvoření historie výpůjčky
-        HistorieVypujcek historieVypujcek = new HistorieVypujcek();
-        Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
-        
-        ZadostKlic zadostKlic = zadostKlicDto.toEntity();
-        logger.info(zadostKlic);
-         
-        historieVypujcek.setZadostKlic(zadostKlic);
-        historieVypujcek.setAkce(new HistorieVypujcekAkce(akce));
-        historieVypujcek.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        historieVypujcek.setVratny(vratny);
-        
-        HistorieVypujcek newHistorieVypujcek = historieVypujcekService.create(historieVypujcek);
+                                @RequestParam HistorieVypujcekAkceEnum akce,
+                                HttpServletRequest request) throws NoSuchMessageException, BaseException {  
+    
+        HistorieVypujcek newHistorieVypujcek = historieVypujcekService.create(zadostKlicDto.toEntity(), appUserDto, akce, request);
         return ResponseEntity.ok(new HistorieVypujcekDto(newHistorieVypujcek));
     }
+
+    @PostMapping("/historie-vypujcek/vratit-klic-by-rfid")
+    public ResponseEntity<HistorieVypujcekDto> vratitKlicByRfid(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                        @RequestParam String rfid,
+                        HttpServletRequest request) throws NoSuchMessageException, BaseException {
+
+        HistorieVypujcek newHistorieVypujcek = historieVypujcekService.vratitKlicByRfid(rfid, appUserDto, request);
+        return ResponseEntity.ok(new HistorieVypujcekDto(newHistorieVypujcek));
+
+    }
+    
+    @GetMapping("/historie-vypujcek/list")
+    public ResponseEntity<List<HistorieVypujcekDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+            @RequestParam @Nullable String idKlic, @RequestParam @Nullable String idZadostKlic) throws RecordNotFoundException, NoSuchMessageException {
+        List<HistorieVypujcekDto> result = new ArrayList<HistorieVypujcekDto>();
+        List<HistorieVypujcek> list = historieVypujcekService.getList(idKlic, idZadostKlic, appUserDto);
+
+        if (list != null && list.size() > 0) {
+            for (HistorieVypujcek vypujcka : list) {
+                vypujcka.setAkce(historieVypujcekService.getHistorieVypujcekAkce(vypujcka.getIdHistorieVypujcek()));
+                result.add(new HistorieVypujcekDto(vypujcka));
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 
 
     @GetMapping("/historie-vypujcek/list-by-zadost")
@@ -103,36 +113,5 @@ public class HistorieVypujcekController extends BaseController {
         return ResponseEntity.ok(historieVypujcekDtos);
     }
 
-    @GetMapping("historie-vypujcek/last-vypujcka-by-id-zadost-klic")
-    public ResponseEntity<HistorieVypujcekDto> lastVypujckaByIdZadostKlic(@RequestParam String idZadostKlic) {
-
-        ZadostKlic zadostKlic = zadostKlicService.getDetail(idZadostKlic);
-        if (zadostKlic == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Načtení historie vypůjček pro daný ZadostKlic
-        List<HistorieVypujcekDto> historieVypujcekDtos = historieVypujcekService.findByZadostKlic(zadostKlic).stream()
-            .map(HistorieVypujcekDto::new)
-            .collect(Collectors.toList());
-
-        if (historieVypujcekDtos.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Najdeme nejnovější záznam podle data
-        HistorieVypujcekDto nejnovejsiVypujcka = historieVypujcekDtos.stream()
-            .max(Comparator.comparing(HistorieVypujcekDto::getDatum))
-            .orElse(null);
-
-        if (nejnovejsiVypujcka == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(nejnovejsiVypujcka);
-    }
-    
-    
-    
     
 }

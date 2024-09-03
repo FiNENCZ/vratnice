@@ -34,6 +34,8 @@ public class ZadostKlicDto implements Serializable {
 
     private String duvod;
 
+    private Boolean jeKlicDostupny;
+
     @NotNull(message = "{aktivita.require}")
     private Boolean aktivita = true;
 

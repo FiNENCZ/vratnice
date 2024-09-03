@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,14 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
+import cz.diamo.share.dto.Wso2UzivatelExtDto;
 import cz.diamo.share.dto.opravneni.FilterOpravneniDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.enums.RoleEnum;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.repository.UzivatelRepository;
+import cz.diamo.share.services.OpravneniServices;
 import cz.diamo.share.services.UzivatelServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityManager;
@@ -47,19 +52,49 @@ public class UzivatelController extends BaseController {
 	@Autowired
 	private UzivatelServices uzivatelServices;
 
+	@Autowired
+	private OpravneniServices opravneniServices;
+
+	@Autowired
+	private UzivatelRepository uzivatelRepository;
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@GetMapping("/uzivatel/detail")
-	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU')")
-	public UzivatelDto detail(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, HttpServletRequest request, @RequestParam String id) {
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU', 'ROLE_SPRAVA_UZIVATELU_EXT')")
+	public UzivatelDto detail(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+			HttpServletRequest request, @RequestParam String id) {
 		try {
+
+			List<RoleEnum> role = Arrays
+					.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU, RoleEnum.ROLE_SPRAVA_UZIVATELU_EXT });
+			if (!opravneniServices.jePodrizeny(new FilterOpravneniDto(appUserDto.getIdUzivatel(), role),
+					id))
+				throw new AccessDeniedException(
+						messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
 
 			Uzivatel uzivatel = uzivatelServices.getDetail(id);
 			if (uzivatel == null)
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+
+			boolean canEdit = true;
+			role = Arrays
+					.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU_EXT });
+			if (uzivatel.getExterni()
+					&& !opravneniServices.jePodrizeny(new FilterOpravneniDto(appUserDto.getIdUzivatel(), role),
+							uzivatel.getIdUzivatel()))
+				canEdit = false;
+			role = Arrays
+					.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU });
+			if (!uzivatel.getExterni()
+					&& !opravneniServices.jePodrizeny(new FilterOpravneniDto(appUserDto.getIdUzivatel(), role),
+							uzivatel.getIdUzivatel()))
+				canEdit = false;
 
 			UzivatelDto uzivatelDto = new UzivatelDto(uzivatel);
+			uzivatelDto.setCanEdit(canEdit);
 
 			return uzivatelDto;
 
@@ -76,15 +111,18 @@ public class UzivatelController extends BaseController {
 	}
 
 	@GetMapping("/uzivatel/list")
-	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU')")
-	public List<UzivatelDto> list(HttpServletRequest request, @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU', 'ROLE_SPRAVA_UZIVATELU_EXT')")
+	public List<UzivatelDto> list(HttpServletRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			@RequestParam @Nullable Boolean aktivni) {
 
 		try {
 
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
-			List<RoleEnum> role = Arrays.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU });
-			List<Uzivatel> list = uzivatelServices.getList(null, new FilterOpravneniDto(appUserDto.getIdUzivatel(), role), aktivni);
+			List<RoleEnum> role = Arrays
+					.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU, RoleEnum.ROLE_SPRAVA_UZIVATELU_EXT });
+			List<Uzivatel> list = uzivatelServices.getList(null,
+					new FilterOpravneniDto(appUserDto.getIdUzivatel(), role), aktivni);
 			if (list != null && list.size() > 0) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.add(Calendar.DAY_OF_MONTH, -2);
@@ -97,7 +135,9 @@ public class UzivatelController extends BaseController {
 							&& (uzivatel.getDatumDo() == null || uzivatel.getDatumDo().compareTo(date) == 1)) {
 						uzivatelDto.setVarovani(true);
 						uzivatelDto.setVarovaniText(
-								String.format(messageSource.getMessage("uzivatel.platnost.ke.dni.varovani", null, LocaleContextHolder.getLocale()),
+								String.format(
+										messageSource.getMessage("uzivatel.platnost.ke.dni.varovani", null,
+												LocaleContextHolder.getLocale()),
 										Utils.dateToString(uzivatelDto.getPlatnostKeDni())));
 					}
 
@@ -120,20 +160,28 @@ public class UzivatelController extends BaseController {
 
 	@GetMapping("/uzivatel/list-dle-opravneni")
 	@PreAuthorize("isFullyAuthenticated()")
-	public List<UzivatelDto> listDleOpravneni(HttpServletRequest request, @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+	public List<UzivatelDto> listDleOpravneni(HttpServletRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			@RequestParam List<RoleEnum> role) {
 
 		try {
 
 			// kontrola rolí
+			List<RoleEnum> roleNew = new ArrayList<RoleEnum>();
 			for (RoleEnum roleEnum : role) {
-				if (!appUserDto.testAuthority(roleEnum))
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+				if (appUserDto.testAuthority(roleEnum)) {
+					roleNew.add(roleEnum);
+				}
+				// throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+				// messageSource.getMessage("record.access.denied", null,
+				// LocaleContextHolder.getLocale()));
 			}
 
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
-			List<Uzivatel> list = uzivatelServices.getList(appUserDto.getZavod().getId(), new FilterOpravneniDto(appUserDto.getIdUzivatel(), role));
+			if (roleNew.size() == 0)
+				return result;
+			List<Uzivatel> list = uzivatelServices.getList(appUserDto.getZavod().getId(),
+					new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
 			if (list != null && list.size() > 0) {
 				for (Uzivatel uzivatel : list) {
 					result.add(new UzivatelDto(uzivatel));
@@ -155,20 +203,28 @@ public class UzivatelController extends BaseController {
 
 	@GetMapping("/uzivatel/list-dle-opravneni-cely-podnik")
 	@PreAuthorize("isFullyAuthenticated()")
-	public List<UzivatelDto> listDleOpravneniCelyPodnik(HttpServletRequest request, @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+	public List<UzivatelDto> listDleOpravneniCelyPodnik(HttpServletRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			@RequestParam List<RoleEnum> role) {
 
 		try {
 
 			// kontrola rolí
+			List<RoleEnum> roleNew = new ArrayList<RoleEnum>();
 			for (RoleEnum roleEnum : role) {
-				if (!appUserDto.testAuthority(roleEnum))
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+				if (appUserDto.testAuthority(roleEnum)) {
+					roleNew.add(roleEnum);
+				}
+				// throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+				// messageSource.getMessage("record.access.denied", null,
+				// LocaleContextHolder.getLocale()));
 			}
 
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
-			List<Uzivatel> list = uzivatelServices.getList(null, new FilterOpravneniDto(appUserDto.getIdUzivatel(), role));
+			if (roleNew.size() == 0)
+				return result;
+			List<Uzivatel> list = uzivatelServices.getList(null,
+					new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
 			if (list != null && list.size() > 0) {
 				for (Uzivatel uzivatel : list) {
 					result.add(new UzivatelDto(uzivatel));
@@ -190,7 +246,8 @@ public class UzivatelController extends BaseController {
 
 	@GetMapping("/uzivatel/list-all")
 	@PreAuthorize("isFullyAuthenticated()")
-	public List<UzivatelDto> listAll(HttpServletRequest request, @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+	public List<UzivatelDto> listAll(HttpServletRequest request,
+			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			@RequestParam Boolean vsechnyZavody) {
 
 		try {
@@ -220,15 +277,77 @@ public class UzivatelController extends BaseController {
 	}
 
 	@PostMapping("/uzivatel/save")
-	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU')")
-	public UzivatelDto save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid UzivatelDto detail) {
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU', 'ROLE_SPRAVA_UZIVATELU_EXT')")
+	public UzivatelDto save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+			@RequestBody @Valid UzivatelDto detail) {
 		try {
 
-			Uzivatel uzivatel = uzivatelServices.save(detail.getUzivatel(null, false), false, true, false);
-			entityManager.detach(uzivatel);
+			Uzivatel uzivatelPuv = null;
+			if (!StringUtils.isBlank(detail.getId())) {
+				uzivatelPuv = uzivatelRepository.getDetail(detail.getId());
+				if (uzivatelPuv == null)
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+							messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
 
-			uzivatel = uzivatelServices.getDetail(uzivatel.getIdUzivatel());
+				List<RoleEnum> role = Arrays
+						.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU });
+				if (!uzivatelPuv.getExterni()
+						&& !opravneniServices.jePodrizeny(new FilterOpravneniDto(appUserDto.getIdUzivatel(), role),
+								uzivatelPuv.getIdUzivatel()))
+					throw new AccessDeniedException(
+							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+
+				role = Arrays
+						.asList(new RoleEnum[] { RoleEnum.ROLE_SPRAVA_UZIVATELU_EXT });
+				if (uzivatelPuv.getExterni()
+						&& !opravneniServices.jePodrizeny(new FilterOpravneniDto(appUserDto.getIdUzivatel(), role),
+								uzivatelPuv.getIdUzivatel()))
+					throw new AccessDeniedException(
+							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+
+			} else {
+				if (!detail.getExterni())
+					throw new AccessDeniedException(
+							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+
+				if (!appUserDto.testAuthority(RoleEnum.ROLE_SPRAVA_UZIVATELU_EXT))
+					throw new AccessDeniedException(
+							messageSource.getMessage("record.access.denied", null, LocaleContextHolder.getLocale()));
+			}
+
+			Uzivatel uzivatel = uzivatelServices.save(detail.getUzivatel(uzivatelPuv, appUserDto, false), false, true,
+					false);
+			// entityManager.detach(uzivatel);
+
+			// uzivatel = uzivatelServices.getDetail(uzivatel.getIdUzivatel());
 			return new UzivatelDto(uzivatel);
+		} catch (BaseException e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+	}
+
+	@PostMapping("/uzivatel/externi/synchronizace")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_UZIVATELU_EXT')")
+	public void uzivatelExterniSynchronizace(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) {
+		try {
+
+			// seznam externích uživatelů
+			List<Uzivatel> listUzivatel = uzivatelServices.getList(null, null, null, null, true);
+
+			if (listUzivatel != null && listUzivatel.size() > 0) {
+				List<Wso2UzivatelExtDto> listWso2UzivatelExtDto = new ArrayList<Wso2UzivatelExtDto>();
+
+				for (Uzivatel uzivatel : listUzivatel) {
+					listWso2UzivatelExtDto.add(new Wso2UzivatelExtDto(uzivatel));
+				}
+
+				uzivatelServices.aktualizovatExterniUzivatele(listWso2UzivatelExtDto);
+			}
+
 		} catch (BaseException e) {
 			logger.error(e);
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());

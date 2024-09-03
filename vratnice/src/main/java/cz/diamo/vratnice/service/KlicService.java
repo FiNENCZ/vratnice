@@ -15,9 +15,12 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.KlicTyp;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
+import cz.diamo.vratnice.repository.HistorieVypujcekRepository;
 import cz.diamo.vratnice.repository.KlicRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -44,6 +47,9 @@ public class KlicService {
 
     @Autowired
     private UzivatelVratniceService uzivatelVratniceService;
+
+    @Autowired
+    private HistorieVypujcekRepository historieVypujcekRepository;
 
     public List<Klic> getAllKeys() {
         return klicRepository.findAll();
@@ -86,6 +92,8 @@ public class KlicService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
+            else
+                return null;
         
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();
@@ -168,6 +176,18 @@ public class KlicService {
         } catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 		}
+    }
+
+    public Boolean jeDostupny(String idKlic) {
+        HistorieVypujcekAkce vypujckaAkce = historieVypujcekRepository.findLastAkceByIdKlic(idKlic);
+
+        if (vypujckaAkce == null)
+            return true;
+
+        if (vypujckaAkce.getHistorieVypujcekAkceEnum() == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) 
+            return true;
+        else
+            return false;
     }
 
 }

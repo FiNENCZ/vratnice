@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.repository.NavstevaOsobaRepository;
 import jakarta.transaction.Transactional;
 
@@ -22,8 +23,14 @@ public class NavstevaOsobaService {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private SpolecnostService spolecnostService;
+
     @Transactional
     public NavstevaOsoba create(NavstevaOsoba navstevaOsoba) throws UniqueValueException, NoSuchMessageException {
+        Spolecnost savedSpolecnost = spolecnostService.save(navstevaOsoba.getSpolecnost());
+        navstevaOsoba.setSpolecnost((savedSpolecnost));
+
         if (navstevaOsoba.getIdNavstevaOsoba() == null || navstevaOsoba.getIdNavstevaOsoba().isEmpty()){
             if(navstevaOsobaRepository.existsByCisloOp(navstevaOsoba.getCisloOp())){
                 throw new UniqueValueException(

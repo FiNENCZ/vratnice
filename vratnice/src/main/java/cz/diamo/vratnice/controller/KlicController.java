@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,8 +50,8 @@ public class KlicController extends BaseController {
     @Autowired
     private UzivatelServices uzivatelServices;
 
-
     @PostMapping("/klic/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                 @RequestBody @Valid KlicDto klicDto) throws InterruptedException, ExecutionException, RecordNotFoundException, NoSuchMessageException {
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat 
@@ -84,6 +85,7 @@ public class KlicController extends BaseController {
     }
 
     @GetMapping("/klic/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<List<KlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
             @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean specialni) throws RecordNotFoundException, NoSuchMessageException {
         List<KlicDto> result = new ArrayList<KlicDto>();
@@ -100,6 +102,7 @@ public class KlicController extends BaseController {
 
 
     @GetMapping("/klic/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) {
         Klic key = klicService.getDetail(idKey);
         if (key == null) {
@@ -109,10 +112,9 @@ public class KlicController extends BaseController {
     }
 
     @GetMapping("/klic/typ")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicTypDto> typ(@RequestParam String idKlic) {
         KlicTyp klicTyp = klicService.getKlicTyp(idKlic);
         return ResponseEntity.ok(new KlicTypDto(klicTyp));
     }
-    
-    
 }

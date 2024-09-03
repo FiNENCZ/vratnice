@@ -1,7 +1,6 @@
 package cz.diamo.vratnice.rest.controller;
 
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.component.ResourcesComponent;
@@ -13,28 +12,24 @@ import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.share.services.LokalitaServices;
 import cz.diamo.share.services.ZavodServices;
-import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RidicDto;
-import cz.diamo.vratnice.dto.RzTypVozidlaDto;
+import cz.diamo.vratnice.dto.SpolecnostDto;
 import cz.diamo.vratnice.dto.StatDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
-import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.StatRepository;
-import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import cz.diamo.vratnice.service.RidicService;
+import cz.diamo.vratnice.service.SpolecnostService;
 import cz.diamo.vratnice.service.StatService;
 import cz.diamo.vratnice.service.VozidloTypService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +41,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,13 +66,13 @@ public class VratnicePublicRestController extends BaseRestController{
     private StatService statService;
 
     @Autowired
-    private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
-
-    @Autowired
     private StatRepository statRepository;
 
     @Autowired
     private RidicService ridicService;
+
+    @Autowired
+    private SpolecnostService spolecnostService;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -133,26 +127,9 @@ public class VratnicePublicRestController extends BaseRestController{
 
     @GetMapping("/vozidlo-typ/get-by-nazev")
     public ResponseEntity<VozidloTypDto> getVozidloTypByNazev(@RequestParam String nazev) {
-        logger.info("-------" + nazev);
         VozidloTyp vozidloTyp = vozidloTypService.getByNazev(nazev);
 
         return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
-    }
-
-    @PostMapping("/povoleni-vjezdu-vozidla/save")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
-        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
-        return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
-    }
-
-    @PostMapping(value = "/povoleni-vjezdu-vozidla/povoleni-csv", consumes = {"multipart/form-data"})
-    public ResponseEntity<Set<PovoleniVjezduVozidlaDto>> povoleniCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException, UniqueValueException, NoSuchMessageException {
-        return ResponseEntity.ok(povoleniVjezduVozidlaService.processPovoleniCsvData(file));
-    }
-
-    @PostMapping(value = "/povoleni-vjezdu-vozidla/rz-typ-vozidla-csv", consumes = {"multipart/form-data"})
-    public ResponseEntity<RzTypVozidlaDto> rzTypVozidlaCsv(@RequestPart("file")MultipartFile file) throws IOException, ParseException {
-        return ResponseEntity.ok(povoleniVjezduVozidlaService.processRzTypVozidlaCsvData(file));
     }
 
     @GetMapping("/stat/list")
@@ -196,6 +173,33 @@ public class VratnicePublicRestController extends BaseRestController{
     public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
+    }
+
+    @GetMapping("/spolecnost/list")
+    public ResponseEntity<List<SpolecnostDto>> spolecnostList() {
+        List<SpolecnostDto> result = new ArrayList<SpolecnostDto>();
+		List<Spolecnost> list = spolecnostService.getList();
+		
+		if (list != null && list.size() > 0) {
+			for (Spolecnost spolecnost : list) {
+				result.add(new SpolecnostDto(spolecnost));
+			}
+		}
+
+		return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/spolecnost/get-by-nazev")
+    public ResponseEntity<SpolecnostDto> getSpolecnostByNazev(@RequestParam String nazev) {
+        Spolecnost spolecnost = spolecnostService.getByNazev(nazev);
+        return ResponseEntity.ok(new SpolecnostDto(spolecnost));
+    }
+    
+    
+    @PostMapping("/spolecnost/save")
+    public ResponseEntity<SpolecnostDto> save(@RequestBody @Valid SpolecnostDto spolecnostDto) {
+        Spolecnost savedSpolecnost = spolecnostService.save(spolecnostDto.toEntity());
+        return ResponseEntity.ok(new SpolecnostDto(savedSpolecnost));
     }
 
 

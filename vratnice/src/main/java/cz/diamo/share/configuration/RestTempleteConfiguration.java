@@ -38,9 +38,13 @@ public class RestTempleteConfiguration {
     @Bean
     RestOperations restWso2(RestTemplateBuilder restTemplateBuilder, AppProperties appProperties) {
         if (!StringUtils.isBlank(appProperties.getWso2Url())) {
+            // List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            // interceptors.add(new HttpRequestInterceptor());
             return restTemplateBuilder
                     .uriTemplateHandler(new DefaultUriBuilderFactory(appProperties.getWso2Url()))
-                    .messageConverters(new MappingJackson2HttpMessageConverter()).build();
+                    .messageConverters(new MappingJackson2HttpMessageConverter())
+                    // .interceptors(interceptors)
+                    .build();
         } else
             return restTemplateBuilder.build();
 

@@ -24,6 +24,7 @@ import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.security.UserAuthentication;
 import cz.diamo.share.services.AuthServices;
+import cz.diamo.share.services.UzivatelServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,9 @@ public class AuthController {
 
     @Autowired
     private AuthServices authServices;
+
+    @Autowired
+    private UzivatelServices uzivatelServices;
 
     @GetMapping("/authenticate")
     @PreAuthorize("isFullyAuthenticated()")
@@ -66,6 +70,17 @@ public class AuthController {
         } catch (Exception ex) {
             logger.error(ex);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @GetMapping("/username-by-rfid")
+    public ResponseEntity<String> usernameByRfid(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam String rfid) {
+        try {
+            return ResponseEntity.ok().body(uzivatelServices.getUsername(rfid));
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
         }
     }
 

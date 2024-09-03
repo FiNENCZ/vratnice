@@ -70,6 +70,8 @@ public class VyjezdVozidlaService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
+            else
+                return null;
         
         @SuppressWarnings("unchecked")
         List<VyjezdVozidla> list = vysledek.getResultList();
@@ -81,10 +83,6 @@ public class VyjezdVozidlaService {
 
     public List<VyjezdVozidla> getByRzVozidla(String rzVozidla) {
         return vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
-    }
-
-    public List<VyjezdVozidla> getNevyporadaneVyjezdy(Boolean aktivita) {
-        return vyjezdVozidlaRepository.getNevyporadaneVyjezdy(aktivita);
     }
 
     public Optional<VyjezdVozidla> jeMozneVyjet(String rzVozidla) {

@@ -18,7 +18,6 @@ import cz.diamo.share.entity.KmenovaData;
 import cz.diamo.share.entity.PracovniPozice;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.entity.Zakazka;
-import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.repository.KmenovaDataRepository;
 import cz.diamo.share.repository.PracovniPoziceRepository;
@@ -55,7 +54,7 @@ public class KmenovaDataServicesNewTrans {
     private MessageSource messageSource;
 
     @TransactionalWriteTrans
-    public void aktualizaceZamestnance(KmenovaData kmenovaData) throws BaseException {
+    public void aktualizaceZamestnance(KmenovaData kmenovaData) throws Exception {
 
         // dohledání uživatele
         Uzivatel uzivatel = uzivatelRepository.getDetailBySapId(kmenovaData.getSapId());
@@ -70,7 +69,8 @@ public class KmenovaDataServicesNewTrans {
 
         if (StringUtils.isBlank(uzivatel.getIdUzivatel()) || StringUtils.isBlank(uzivatel.getIdUzivatel()))
             datumAktualizace = Utils.getMinDate();
-        uzivatel.setZavod(kmenovaData.getZavod());
+        // uzivatel.setZavod(kmenovaData.getZavod()); 2024-08-26 přesun do aktualizace
+        // udaju - změna ORG.STR, přesun na nový závod
 
         // aktualizace/založení uživatele
         if ((uzivatel.getPlatnostKeDni() == null || uzivatel.getPlatnostKeDni().compareTo(kmenovaData.getPlatnostKeDni()) == -1)) {
@@ -102,6 +102,11 @@ public class KmenovaDataServicesNewTrans {
     private boolean aktualizaceUdaju(Uzivatel uzivatel, KmenovaData kmenovaData) throws RecordNotFoundException, NoSuchMessageException {
         boolean zmena = false;
         boolean ukonceniPomeru = kmenovaData.getDatumUkonceniPracPomeru() != null;
+
+        if (uzivatel.getZavod() == null || !StringUtils.equals(kmenovaData.getZavod().getIdZavod(), uzivatel.getZavod().getIdZavod())) {
+            uzivatel.setZavod(kmenovaData.getZavod());
+            zmena = true;
+        }
 
         if (StringUtils.isBlank(uzivatel.getNazev())) {
             uzivatel.setNazev(kmenovaData.getJmeno() + " " + kmenovaData.getPrijmeni());

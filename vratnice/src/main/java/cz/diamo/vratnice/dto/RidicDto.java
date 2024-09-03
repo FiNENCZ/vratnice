@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import cz.diamo.vratnice.entity.Ridic;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -30,8 +31,8 @@ public class RidicDto implements Serializable {
     @Pattern(regexp = "\\d+", message = "{ridic.cisloOp.pattern}")
     private String cisloOp;
 
-    @Size(max = 120, message = "{ridic.firma.max.120}")
-    private String firma;
+    @Valid
+    private SpolecnostDto spolecnost;
 
     private Date datumPouceni;
 
@@ -45,7 +46,7 @@ public class RidicDto implements Serializable {
         this.jmeno = ridic.getJmeno();
         this.prijmeni = ridic.getPrijmeni();
         this.cisloOp = ridic.getCisloOp();
-        this.firma = ridic.getFirma();
+        this.spolecnost = new SpolecnostDto(ridic.getSpolecnost());
         this.datumPouceni = ridic.getDatumPouceni();
     }
 
@@ -56,7 +57,7 @@ public class RidicDto implements Serializable {
         ridic.setJmeno(this.jmeno);
         ridic.setPrijmeni(this.prijmeni);
         ridic.setCisloOp(this.cisloOp);
-        ridic.setFirma(this.firma);
+        ridic.setSpolecnost(getSpolecnost().toEntity());
         ridic.setDatumPouceni(this.datumPouceni);
 
         return ridic;

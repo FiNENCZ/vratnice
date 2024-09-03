@@ -76,6 +76,8 @@ public class VjezdVozidlaService {
         if (!maVsechnyVratnice)
             if (nastavenaVratnice != null)
                 vysledek.setParameter("vratnice", nastavenaVratnice);
+            else
+                return null;
         
         
         @SuppressWarnings("unchecked")
@@ -89,10 +91,6 @@ public class VjezdVozidlaService {
 
     public List<VjezdVozidla> getByRzVozidla(String rzVozidla) {
         return vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
-    }
-
-    public List<VjezdVozidla> getNevyporadaneVjezdy(Boolean aktivita) {
-        return vjezdVozidlaRepository.getNevyporadaneVjezdy(aktivita);
     }
 
     @Transactional

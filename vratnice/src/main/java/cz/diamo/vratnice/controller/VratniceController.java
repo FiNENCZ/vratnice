@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -33,12 +34,14 @@ public class VratniceController extends BaseController {
     private VratniceService vratniceService;
 
     @PostMapping("/vratnice/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNICE')")
     public ResponseEntity<VratniceDto> save(@RequestBody @Valid VratniceDto vratniceDto) {
         Vratnice vratnice = vratniceService.save(vratniceDto.toEntity());
         return ResponseEntity.ok(new VratniceDto(vratnice));
     }
     
     @GetMapping("/vratnice/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNICE')")
     public ResponseEntity<List<VratniceDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idLokalita) {
         List<VratniceDto> result = new ArrayList<VratniceDto>();
         List<Vratnice> list = vratniceService.getList(aktivni, idLokalita);
@@ -52,6 +55,7 @@ public class VratniceController extends BaseController {
     }
 
     @GetMapping("/vratnice/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNICE')")
     public ResponseEntity<VratniceDto> getDetail(@RequestParam String id) {
         Vratnice vratnice = vratniceService.getDetail(id);
         if (vratnice == null) {
@@ -61,6 +65,7 @@ public class VratniceController extends BaseController {
     }
 
     @GetMapping("/vratnice/vstupni-karty-typ")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRATNICE')")
     public ResponseEntity<NavstevniListekTypDto> vstupniKarty(@RequestParam String idVratnice) {
         NavstevniListekTyp vstupniKartyTyp = vratniceService.getVstupniKartyTyp(idVratnice);
         return ResponseEntity.ok(new NavstevniListekTypDto(vstupniKartyTyp));
