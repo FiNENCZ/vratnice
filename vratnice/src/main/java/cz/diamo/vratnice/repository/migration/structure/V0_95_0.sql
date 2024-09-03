@@ -20,4 +20,4 @@ ALTER TABLE vratnice.zadost_klic ADD CONSTRAINT fk_zadost_id_zadost_stav
 
 
 -- Verze DB
-update vratnice.databaze set verze_db = 0, sub_verze_db = 89, cas_zmn = now(), zmenu_provedl = 'pgadmin';
+update vratnice.databaze set verze_db = 0, sub_verze_db = 95, cas_zmn = now(), zmenu_provedl = 'pgadmin';
