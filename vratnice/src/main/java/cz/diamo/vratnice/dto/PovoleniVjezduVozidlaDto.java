@@ -2,10 +2,12 @@ package cz.diamo.vratnice.dto;
 
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -35,11 +37,14 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     @Size(max = 30, message = "{povoleni.vjezdu.vozidla.prijmeni_zadatele.max.30}")
     private String prijmeniZadatele;
 
-    @NotBlank(message = "{povoleni.vjezdu.vozidla.spolecnost_zadatele.require}")
-    @Size(max = 120, message = "{povoleni.vjezdu.vozidla.spolecnost_zadatele.max.120}")
-    private String spolecnostZadatele;
+    @Valid
+    private SpolecnostDto spolecnostZadatele;
 
     private String icoZadatele;
+
+    @Email(message = "{povoleni.vjezdu.vozidla.email.invalid}")
+    @NotBlank(message = "{povoleni.vjezdu.vozidla.email.require}")
+    private String emailZadatele;
 
     private String duvodZadosti;
 
@@ -56,7 +61,8 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     @Valid
     private RidicDto ridic;
 
-    private String spolecnostVozidla;
+    @Valid
+    private SpolecnostDto spolecnostVozidla;
 
     @NotNull(message = "{povoleni.vjezdu.vozidla.datum_od.require}")
     private Date datumOd;
@@ -65,7 +71,11 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
     private Date datumDo;
 
     @NotNull(message = "{povoleni.vjezdu.vozidla.zavod.require}")
-    private List<ZavodDto> zavod;
+    private ZavodDto zavod;
+
+    @NotNull(message = "{povoleni.vjezdu.vozidla.lokalita.require}")
+    @NotEmpty(message = "{povoleni.vjezdu.vozidla.lokalita.require}")
+    private List<LokalitaDto> lokality;
 
     private Boolean opakovanyVjezd = false;
 
@@ -81,8 +91,9 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         this.idPovoleniVjezduVozidla = povoleniVjezduVozidla.getIdPovoleniVjezduVozidla();
         this.jmenoZadatele = povoleniVjezduVozidla.getJmenoZadatele();
         this.prijmeniZadatele = povoleniVjezduVozidla.getPrijmeniZadatele();
-        this.spolecnostZadatele = povoleniVjezduVozidla.getSpolecnostZadatele();
+        this.spolecnostZadatele = new SpolecnostDto(povoleniVjezduVozidla.getSpolecnostZadatele());
         this.icoZadatele = povoleniVjezduVozidla.getIcoZadatele();
+        this.emailZadatele = povoleniVjezduVozidla.getEmailZadatele();
         this.duvodZadosti = povoleniVjezduVozidla.getDuvodZadosti();
 
         List<String> rzVozidla = new ArrayList<>();
@@ -103,17 +114,21 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
      
         this.zemeRegistraceVozidla = new StatDto(povoleniVjezduVozidla.getZemeRegistraceVozidla());
         this.ridic = new RidicDto(povoleniVjezduVozidla.getRidic());
-        this.spolecnostVozidla = povoleniVjezduVozidla.getSpolecnostVozidla();
+        this.spolecnostVozidla = new SpolecnostDto(povoleniVjezduVozidla.getSpolecnostVozidla());
         this.datumOd = povoleniVjezduVozidla.getDatumOd();
         this.datumDo = povoleniVjezduVozidla.getDatumDo();
 
-        List<ZavodDto> zavodDtos = new ArrayList<>();
+        this.zavod = new ZavodDto(povoleniVjezduVozidla.getZavod());
+
+        List<LokalitaDto> lokalitaDtos = new ArrayList<>();
         if (povoleniVjezduVozidla.getZavod() != null) {
-            for (Zavod zavod : povoleniVjezduVozidla.getZavod()) {
-                zavodDtos.add(new ZavodDto(zavod));
+            for (Lokalita lokalita : povoleniVjezduVozidla.getLokality()) {
+                lokalitaDtos.add(new LokalitaDto(lokalita));
             }
         }
-        this.setZavod(zavodDtos);
+        this.setLokality(lokalitaDtos);
+
+        
 
         this.opakovanyVjezd = povoleniVjezduVozidla.getOpakovanyVjezd();
         this.stav = povoleniVjezduVozidla.getStav();
@@ -125,8 +140,9 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         povoleniVjezduVozidla.setIdPovoleniVjezduVozidla(this.idPovoleniVjezduVozidla);
         povoleniVjezduVozidla.setJmenoZadatele(this.jmenoZadatele);
         povoleniVjezduVozidla.setPrijmeniZadatele(this.prijmeniZadatele);
-        povoleniVjezduVozidla.setSpolecnostZadatele(this.spolecnostZadatele);
+        povoleniVjezduVozidla.setSpolecnostZadatele(getSpolecnostZadatele().toEntity());
         povoleniVjezduVozidla.setIcoZadatele(this.icoZadatele);
+        povoleniVjezduVozidla.setEmailZadatele(this.emailZadatele);
         povoleniVjezduVozidla.setDuvodZadosti(this.duvodZadosti);
     
         List<String> rzVozidla = new ArrayList<>();
@@ -148,17 +164,20 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
 
         povoleniVjezduVozidla.setZemeRegistraceVozidla(getZemeRegistraceVozidla().toEntity());
         povoleniVjezduVozidla.setRidic(this.ridic != null ? this.ridic.toEntity() : null); // Pokud je ridic null, nastavíme null
-        povoleniVjezduVozidla.setSpolecnostVozidla(this.spolecnostVozidla);
+        povoleniVjezduVozidla.setSpolecnostVozidla(getSpolecnostVozidla().toEntity());
         povoleniVjezduVozidla.setDatumOd(this.datumOd);
         povoleniVjezduVozidla.setDatumDo(this.datumDo);
+
+        povoleniVjezduVozidla.setZavod(new Zavod(getZavod().getId()));
     
-        List<Zavod> zavody = new ArrayList<>();
+        List<Lokalita> lokality = new ArrayList<>();
         if (getZavod() != null) {
-            for (ZavodDto zavodDto : this.getZavod()) {
-                zavody.add(new Zavod(zavodDto.getId()));
+            for (LokalitaDto lokalitaDto : this.getLokality()) {
+                lokality.add(new Lokalita(lokalitaDto.getId()));
             }
         }
-        povoleniVjezduVozidla.setZavod(zavody);
+        povoleniVjezduVozidla.setLokality(lokality);
+        
     
         povoleniVjezduVozidla.setOpakovanyVjezd(this.opakovanyVjezd);
         povoleniVjezduVozidla.setStav(this.stav);
@@ -189,5 +208,33 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         }
         Set<String> uniqueRzVozidla = new HashSet<>(rzVozidla);
         return uniqueRzVozidla.size() == rzVozidla.size();
+    }
+
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.rz_vozidla.require}")
+    private boolean isRzVozidlaElementCompleted() {
+        if (rzVozidla == null) { 
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+        }
+
+        for (String element : rzVozidla) {
+            if (element == null || element.trim().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.lokalita.invalid}")
+    private boolean isLokalityHaveSameZavod() {
+        if (lokality == null || zavod == null) {
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+        }
+        for (LokalitaDto lokalita : lokality) {
+            if (!zavod.getId().equals(lokalita.getZavod().getId())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

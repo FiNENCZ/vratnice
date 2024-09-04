@@ -3,6 +3,7 @@ package cz.diamo.vratnice.service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaRepository;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
@@ -96,7 +98,7 @@ public class PovoleniVjezduVozidlaService {
             
         return povoleniVjezduVozidlaList.stream()
             .filter(povoleni -> isPovoleniPlatne(povoleni, currentDate))
-            .filter(povoleni -> obsahujeZavod(povoleni, zavodKameryVratnice.getIdZavod()))
+            .filter(povoleni -> obsahujeLokalitu(povoleni, zavodKameryVratnice.getIdZavod()))
             .findFirst();
     }
 
@@ -113,9 +115,9 @@ public class PovoleniVjezduVozidlaService {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
-    private boolean obsahujeZavod(PovoleniVjezduVozidla povoleni, String idZavodKameryVratnice) {
-        return povoleni.getZavod() != null && povoleni.getZavod().stream()
-            .anyMatch(zavod -> idZavodKameryVratnice.equals(zavod.getIdZavod()));
+    private boolean obsahujeLokalitu(PovoleniVjezduVozidla povoleni, String idZavodKameryVratnice) {
+        return povoleni.getLokality() != null && povoleni.getLokality().stream()
+            .anyMatch(lokalita -> idZavodKameryVratnice.equals(lokalita.getIdLokalita()));
     }
 
     @Transactional
@@ -136,6 +138,26 @@ public class PovoleniVjezduVozidlaService {
         
             povoleniVjezduVozidla.getZemeRegistraceVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleniVjezduVozidla.getZemeRegistraceVozidla().getNazevResx()));
             return povoleniVjezduVozidla.getZemeRegistraceVozidla();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
+    public List<VozidloTyp> getTypyVozidel(String idPovoleniVjezduVozidla) {
+        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
+        try {
+            if (povoleniVjezduVozidla == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+            List<VozidloTyp> typyVozidel = new ArrayList<VozidloTyp>();
+
+            for (VozidloTyp vozidloTyp : povoleniVjezduVozidla.getTypVozidla()){
+                vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vozidloTyp.getNazevResx()));
+                typyVozidel.add(vozidloTyp);
+            }
+
+            return typyVozidel;
+
         } catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 		}
