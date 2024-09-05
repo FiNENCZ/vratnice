@@ -16,11 +16,11 @@ public interface LokalitaRepository extends JpaRepository<Lokalita, String> {
     @Query(sqlSelect + "where s.idLokalita = :idLokalita")
     Lokalita getDetail(String idLokalita);
 
-	@Query(sqlSelect + "where s.idExterni = :idExterni")
-	Lokalita getDetailByIdExterni(String idExterni);
+	@Query(sqlSelect + "where s.kod = :kod")
+	Lokalita getDetailByKod(String kod);
 
-	@Query("select count(s) from Lokalita s where s.idExterni = :idExterni and s.idLokalita != :idLokalita")
-	Integer existsByIdExterni(String idExterni, String idLokalita);
+	@Query("select count(s) from Lokalita s where s.kod = :kod and s.idLokalita != :idLokalita")
+	Integer existsByKod(String kod, String idLokalita);
 
 	@Query(sqlSelect + "where zav.idZavod = :idZavod and s.aktivita = :aktivita order by s.nazev")
 	List<Lokalita> getList(String idZavod, Boolean aktivita);
@@ -36,4 +36,16 @@ public interface LokalitaRepository extends JpaRepository<Lokalita, String> {
 	@Modifying
 	@Query(value = "update " + Constants.SCHEMA  + ".lokalita set aktivita = :aktivita, cas_zmn = :casZmeny, zmenu_provedl = :zmenuProv where id_lokalita = :idLokalita", nativeQuery = true)
 	void zmenaAktivity(String idLokalita, Boolean aktivita, Timestamp casZmeny, String zmenuProv);
+
+    /**
+	 * Změna aktivity
+	 * 
+	 * @param idsLokalita
+	 * @param aktivita
+	 * @param casZmeny
+	 * @param zmenuProv
+	 */
+	@Modifying
+	@Query(value = "update " + Constants.SCHEMA  + ".lokalita set aktivita = :aktivita, cas_zmn = :casZmeny, zmenu_provedl = :zmenuProv where id_lokalita not in (:idsLokalita)", nativeQuery = true)
+	void zmenaAktivityHromadneNotIn(List<String> idsLokalita, Boolean aktivita, Timestamp casZmeny, String zmenuProv);
 }

@@ -31,7 +31,6 @@ public class BudovaDto implements Serializable {
 
     @NotNull(message = "{budova.lokalita.require}")
     private LokalitaDto lokalita;
-    
 
     public BudovaDto(Budova budova) {
         if (budova == null) {
@@ -39,6 +38,7 @@ public class BudovaDto implements Serializable {
         }
 
         setId(budova.getIdBudova());
+        setIdExterni(budova.getIdExterni());
         setNazev(budova.getNazev());
         setPoznamka(budova.getPoznamka());
         setAktivita(budova.getAktivita());

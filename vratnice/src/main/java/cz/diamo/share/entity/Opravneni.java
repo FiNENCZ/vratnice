@@ -38,6 +38,10 @@ public class Opravneni implements Serializable {
     @JoinColumn(name = "id_opravneni_typ_pristupu")
     private OpravneniTypPristupu opravneniTypPristupu;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_opravneni_typ_pristupu_budova")
+    private OpravneniTypPristupuBudova opravneniTypPristupuBudova;
+
     private String kod;
 
     private String nazev;
@@ -57,6 +61,9 @@ public class Opravneni implements Serializable {
 
     @Transient
     private List<PracovniPozicePrehled> pracovniPozice;
+
+    @Transient
+    private List<Budova> budovy;
 
     @Transient
     private List<Zavod> zavody;

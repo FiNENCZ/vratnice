@@ -28,7 +28,7 @@ public class Budova implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_budova")
     private String idBudova;
@@ -42,9 +42,9 @@ public class Budova implements Serializable {
     @JoinColumn(name = "id_lokalita")
     private Lokalita lokalita;
 
-    private String poznamka;
-
     private Boolean aktivita = true;
+
+    private String poznamka;
 
     @Column(name = "cas_zmn")
     private Timestamp casZmn;

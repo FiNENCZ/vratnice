@@ -16,7 +16,7 @@ public enum RoleEnum {
     ROLE_SPRAVA_JIDLA, ROLE_SPRAVA_SABLON_JIDELNICKU, ROLE_SPRAVA_OBJEDNAVKY, ROLE_SPRAVA_KLICU,
     ROLE_SPRAVA_ZADOSTI_KLICU, ROLE_SPRAVA_VYPUJCEK_KLICU, ROLE_ZADATEL_KLICE, ROLE_SPRAVA_OBJEDNAVKY_KOREKCE,
     ROLE_OBJEDNAVKY_ZASTUP, ROLE_SPRAVA_UZIVATELU_EXT,
-    ROLE_SPRAVA_LOKALIT, ROLE_SPRAVA_BUDOV;
+    ROLE_SPRAVA_LOKALIT, ROLE_SPRAVA_BUDOV, ROLE_SPRAVA_OBJEDNAVKY_NEVEREJNE;
 
     public static RoleEnum getRoleEnum(String value) {
         switch (value) {
@@ -106,16 +106,18 @@ public enum RoleEnum {
                 return RoleEnum.ROLE_SPRAVA_VYPUJCEK_KLICU;
             case "ROLE_ZADATEL_KLICE":
                 return RoleEnum.ROLE_ZADATEL_KLICE;
-            case "ROLE_SPRAVA_LOKALIT":
-                return RoleEnum.ROLE_SPRAVA_LOKALIT;
-            case "ROLE_SPRAVA_BUDOV":
-                return RoleEnum.ROLE_SPRAVA_BUDOV;
             case "ROLE_SPRAVA_OBJEDNAVKY_KOREKCE":
                 return ROLE_SPRAVA_OBJEDNAVKY_KOREKCE;
             case "ROLE_OBJEDNAVKY_ZASTUP":
                 return ROLE_OBJEDNAVKY_ZASTUP;
             case "ROLE_SPRAVA_UZIVATELU_EXT":
                 return ROLE_SPRAVA_UZIVATELU_EXT;
+            case "ROLE_SPRAVA_OBJEDNAVKY_NEVEREJNE":
+                return ROLE_SPRAVA_OBJEDNAVKY_NEVEREJNE;
+            case "ROLE_SPRAVA_LOKALIT":
+                return RoleEnum.ROLE_SPRAVA_LOKALIT;
+            case "ROLE_SPRAVA_BUDOV":
+                return RoleEnum.ROLE_SPRAVA_BUDOV;
             default:
                 return ROLE_ZAMESTNANEC;
         }

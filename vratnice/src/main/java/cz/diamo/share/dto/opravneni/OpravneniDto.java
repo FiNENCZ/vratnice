@@ -9,13 +9,16 @@ import org.springframework.context.MessageSource;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import cz.diamo.share.dto.OpravneniTypPristupuBudovaDto;
 import cz.diamo.share.dto.OpravneniTypPristupuDto;
 import cz.diamo.share.dto.PracovniPoziceDto;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.entity.Opravneni;
 import cz.diamo.share.entity.PracovniPozicePrehled;
 import cz.diamo.share.entity.Role;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.entity.Budova;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -38,8 +41,13 @@ public class OpravneniDto implements Serializable {
     @Size(max = Integer.MAX_VALUE, message = "*")
     private List<ZavodDto> zavody;
 
+    private List<BudovaDto> budovy;
+
     @NotNull(message = "{pristup.k.zamestnancum.require}")
     private OpravneniTypPristupuDto typPristupuKZamestnancum;
+
+    @NotNull(message = "{pristup.k.budovam.require}")
+    private OpravneniTypPristupuBudovaDto typPristupuKBudovam;
 
     @Size(max = 100, message = "{kod.max.100}")
     @NotBlank(message = "{kod.require}")
@@ -55,7 +63,7 @@ public class OpravneniDto implements Serializable {
     @NotNull(message = "{aktivita.require}")
     private Boolean aktivita;
 
-    public OpravneniDto(Opravneni opravneni, MessageSource messageSource, boolean zavody) {
+    public OpravneniDto(Opravneni opravneni, MessageSource messageSource, boolean zavody, boolean budovy) {
         if (opravneni == null)
             return;
 
@@ -64,6 +72,7 @@ public class OpravneniDto implements Serializable {
         setNazev(opravneni.getNazev());
         setPoznamka(opravneni.getPoznamka());
         setTypPristupuKZamestnancum(new OpravneniTypPristupuDto(opravneni.getOpravneniTypPristupu()));
+        setTypPristupuKBudovam(new OpravneniTypPristupuBudovaDto(opravneni.getOpravneniTypPristupuBudova()));
 
         if (opravneni.getRole() != null && opravneni.getRole().size() > 0) {
             setRole(new ArrayList<RoleDto>());
@@ -83,6 +92,13 @@ public class OpravneniDto implements Serializable {
             setZavody(new ArrayList<ZavodDto>());
             for (Zavod zavod : opravneni.getZavody()) {
                 getZavody().add(new ZavodDto(zavod));
+            }
+        }
+
+        if (budovy && opravneni.getBudovy() != null && opravneni.getBudovy().size() > 0) {
+            setBudovy(new ArrayList<BudovaDto>());
+            for (Budova budova : opravneni.getBudovy()) {
+                getBudovy().add(new BudovaDto(budova));
             }
         }
 
@@ -118,12 +134,20 @@ public class OpravneniDto implements Serializable {
                 }
             }
 
+            if (getBudovy() != null && getBudovy().size() > 0) {
+                opravneni.setBudovy(new ArrayList<Budova>());
+                for (BudovaDto budovaDto : getBudovy()) {
+                    opravneni.getBudovy().add(budovaDto.getBudova(null, true));
+                }
+            }
+
             opravneni.setKod(getKod());
             opravneni.setNazev(getNazev());
             opravneni.setPoznamka(getPoznamka());
             opravneni.setAktivita(getAktivita());
 
             opravneni.setOpravneniTypPristupu(getTypPristupuKZamestnancum().getOpravneniTypPristupu(null));
+            opravneni.setOpravneniTypPristupuBudova(getTypPristupuKBudovam().getOpravneniTypPristupuBudova(null));
         }
         return opravneni;
     }

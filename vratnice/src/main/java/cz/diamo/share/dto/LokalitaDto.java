@@ -19,7 +19,7 @@ public class LokalitaDto implements Serializable {
 
     private String id;
 
-    private String idExterni;
+    private String kod;
 
     @NotBlank(message = "{lokalita.nazev.require}")
     @Size(max = 80, message = "{lokalita.nazev.max.80}")
@@ -39,7 +39,7 @@ public class LokalitaDto implements Serializable {
         }
 
         setId(lokalita.getIdLokalita());
-        setIdExterni(lokalita.getIdExterni());
+        setKod(lokalita.getKod());
         setNazev(lokalita.getNazev());
         setPoznamka(lokalita.getPoznamka());
         setAktivita(lokalita.getAktivita());
@@ -52,7 +52,7 @@ public class LokalitaDto implements Serializable {
             lokalita = new Lokalita();
 
         lokalita.setIdLokalita(getId());
-        lokalita.setIdExterni(getIdExterni());
+        lokalita.setKod(getKod());
 
         if (!pouzeId) {
             lokalita.setNazev(getNazev());

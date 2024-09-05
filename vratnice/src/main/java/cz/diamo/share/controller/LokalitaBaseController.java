@@ -72,4 +72,15 @@ public class LokalitaBaseController extends BaseController {
 
 		return result;
 	}
+
+	@GetMapping("/update")
+    @PreAuthorize("isFullyAuthenticated()")
+	public void updateFromEdos(HttpServletRequest request, @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) {
+        try {
+            lokalitaServices.updateLokalitaFromEdos(request, appUserDto);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        }
+    }
 }

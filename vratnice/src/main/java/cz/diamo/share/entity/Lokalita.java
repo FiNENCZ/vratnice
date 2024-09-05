@@ -28,13 +28,13 @@ public class Lokalita implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
+    @GenericGenerator(name = "id", strategy = "cz.diamo.share.base.ShareIdentifierGenerator")
     @GeneratedValue(generator = "id")
     @Column(name = "id_lokalita")
     private String idLokalita;
     
-    @Column(name = "id_externi")
-    private String idExterni;
+    @Column(name = "kod")
+    private String kod;
 
     private String nazev;
 
