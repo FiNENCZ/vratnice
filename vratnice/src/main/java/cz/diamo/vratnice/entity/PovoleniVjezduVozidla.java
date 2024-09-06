@@ -46,11 +46,16 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "prijmeni_zadatele")
     private String prijmeniZadatele;
 
-    @Column(name = "spolecnost_zadatele")
-    private String spolecnostZadatele;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "spolecnost_zadatele")
+    private Spolecnost spolecnostZadatele;
 
     @Column(name = "ico_zadatele")
     private String icoZadatele;
+
+    @Column(name = "email_zadatele")
+    private String emailZadatele;
 
     @Column(name = "duvod_zadosti")
     private String duvodZadosti;
@@ -76,8 +81,9 @@ public class PovoleniVjezduVozidla implements Serializable{
     @JoinColumn(name = "id_ridic")
     private Ridic ridic;
 
-    @Column(name = "spolecnost_vozidla")
-    private String spolecnostVozidla;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "spolecnost_vozidla")
+    private Spolecnost spolecnostVozidla;
 
     @Column(name = "datum_od")
     private Date datumOd;
@@ -85,13 +91,17 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "datum_do")
     private Date datumDo;
 
+    @ManyToOne
+    @JoinColumn(name = "id_zavod")
+    private Zavod zavod;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "povoleni_vjezdu_vozidla_zavod",
+        name = "povoleni_vjezdu_vozidla_lokalita",
         joinColumns = @JoinColumn(name = "id_povoleni_vjezdu_vozidla"),
-        inverseJoinColumns = @JoinColumn(name = "id_zavod")
+        inverseJoinColumns = @JoinColumn(name = "id_lokalita")
     )
-    private List<Zavod> zavod;
+    private List<Lokalita> lokality;
 
     @Column(name = "opakovany_vjezd")
     private Boolean opakovanyVjezd = false;

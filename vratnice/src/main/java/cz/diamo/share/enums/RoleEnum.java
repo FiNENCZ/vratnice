@@ -118,6 +118,7 @@ public enum RoleEnum {
                 return RoleEnum.ROLE_SPRAVA_LOKALIT;
             case "ROLE_SPRAVA_BUDOV":
                 return RoleEnum.ROLE_SPRAVA_BUDOV;
+
             default:
                 return ROLE_ZAMESTNANEC;
         }

@@ -1,23 +1,65 @@
--- Tabulka stavu žádosti
-create table vratnice.zadost_stav (
-     id_zadost_stav INTEGER not null,
-     nazev_resx VARCHAR(100) not null,
-    constraint pk_zadost_stav primary key (id_zadost_stav)            
+-- Nejprve zrušíme indexy, které jsou spojeny s tabulkou
+DROP INDEX IF EXISTS vratnice.ix_povoleni_vjezdu_vozidla_zavod_id_povoleni_vjezdu_vozidla;
+DROP INDEX IF EXISTS vratnice.ix_povoleni_vjezdu_vozidla_zavod_id_zavod;
+
+-- Následně odstraníme tabulku, čímž se automaticky zruší i primární klíč a cizí klíče
+DROP TABLE IF EXISTS vratnice.povoleni_vjezdu_vozidla_zavod CASCADE;
+
+
+-- Vytvoření tabulky ManyToMany pro povoleni - lokalita
+CREATE TABLE IF NOT EXISTS vratnice.povoleni_vjezdu_vozidla_lokalita (
+    id_povoleni_vjezdu_vozidla VARCHAR(14) NOT NULL,
+    id_lokalita VARCHAR(14) NOT NULL,
+    CONSTRAINT pk_povoleni_vjezdu_vozidla_lokalita  PRIMARY KEY (id_povoleni_vjezdu_vozidla, id_lokalita),
+    CONSTRAINT fk_povoleni_vjezdu_vozidla_lokalita_id_povoleni_vjezdu_vozidla FOREIGN KEY (id_povoleni_vjezdu_vozidla) REFERENCES vratnice.povoleni_vjezdu_vozidla (id_povoleni_vjezdu_vozidla) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT fk_povoleni_vjezdu_vozidla_lokalita_id_lokalita FOREIGN KEY (id_lokalita) REFERENCES vratnice.lokalita (id_lokalita) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-insert into vratnice.zdrojovy_text (hash, text) values ('STAV_ZADOST_SCHVALENO','Schváleno');
-insert into vratnice.zadost_stav (id_zadost_stav, nazev_resx) values (1, 'STAV_ZADOST_SCHVALENO');
-insert into vratnice.zdrojovy_text (hash, text) values ('STAV_ZADOST_POZASTAVENO','Pozastaveno');
-insert into vratnice.zadost_stav (id_zadost_stav, nazev_resx) values (2, 'STAV_ZADOST_POZASTAVENO');
-insert into vratnice.zdrojovy_text (hash, text) values ('STAV_ZADOST_UKONCENO','Ukončeno');
-insert into vratnice.zadost_stav (id_zadost_stav, nazev_resx) values (3, 'STAV_ZADOST_UKONCENO');
-
-ALTER TABLE vratnice.zadost_klic RENAME COLUMN stav TO id_zadost_stav;
-ALTER TABLE vratnice.zadost_klic ALTER COLUMN id_zadost_stav TYPE integer USING id_zadost_stav::integer;
-
-ALTER TABLE vratnice.zadost_klic ADD CONSTRAINT fk_zadost_id_zadost_stav
-	FOREIGN KEY (id_zadost_stav) REFERENCES vratnice.zadost_stav (id_zadost_stav) ON DELETE No Action ON UPDATE No Action;
+CREATE INDEX ix_povoleni_vjezdu_vozidla_lokalita_id_povoleni_vjezdu_vozidla ON vratnice.povoleni_vjezdu_vozidla_lokalita (id_povoleni_vjezdu_vozidla);
+CREATE INDEX ix_povoleni_vjezdu_vozidla_lokalita_id_lokalita ON vratnice.povoleni_vjezdu_vozidla_lokalita (id_lokalita);
 
 
--- Verze DB
-update vratnice.databaze set verze_db = 0, sub_verze_db = 95, cas_zmn = now(), zmenu_provedl = 'pgadmin';
+-- Úprava společnosti žadatele
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla 
+    DROP COLUMN spolecnost_zadatele;
+
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla
+    ADD COLUMN spolecnost_zadatele VARCHAR(14);
+
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla ADD CONSTRAINT fk_povoleni_vjezdu_vozidla_spolecnost_zadatele
+	FOREIGN KEY (spolecnost_zadatele) REFERENCES vratnice.spolecnost (id_spolecnost) ON DELETE No Action ON UPDATE No Action;
+
+UPDATE vratnice.povoleni_vjezdu_vozidla
+    SET spolecnost_zadatele = 'TKSP0000000001';
+
+
+-- Úprava společnosti vozidla
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla 
+    DROP COLUMN spolecnost_vozidla;
+
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla
+    ADD COLUMN spolecnost_vozidla VARCHAR(14);
+
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla ADD CONSTRAINT fk_povoleni_vjezdu_vozidla_spolecnost_vozidla
+	FOREIGN KEY (spolecnost_vozidla) REFERENCES vratnice.spolecnost (id_spolecnost) ON DELETE No Action ON UPDATE No Action;
+
+UPDATE vratnice.povoleni_vjezdu_vozidla
+    SET spolecnost_vozidla = 'TKSP0000000001';
+
+-- Přidání sloupce email
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla
+    ADD COLUMN email_zadatele VARCHAR(255);
+
+UPDATE vratnice.povoleni_vjezdu_vozidla
+    SET email_zadatele = 'test@gmail.com';
+
+
+-- přidání sloupce id_zavod
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla
+    ADD COLUMN id_zavod VARCHAR(14);
+
+ALTER TABLE vratnice.povoleni_vjezdu_vozidla ADD CONSTRAINT fk_povoleni_vjezdu_vozidla_id_zavod
+	FOREIGN KEY (id_zavod) REFERENCES vratnice.zavod (id_zavod) ON DELETE No Action ON UPDATE No Action;
+
+UPDATE vratnice.povoleni_vjezdu_vozidla
+    SET id_zavod = 'XXZA0000000001';

@@ -25,8 +25,10 @@ import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
+import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Stat;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import jakarta.validation.Valid;
 
@@ -130,6 +132,22 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         Stat stat = povoleniVjezduVozidlaService.getZemeRegistraceVozidla(idPovoleniVjezduVozidla);
         return ResponseEntity.ok(new StatDto(stat));
     }
+
+    @GetMapping("povoleni-vjezdu-vozidla/typy-vozidel")
+    public ResponseEntity<List<VozidloTypDto>> typyVozidel(@RequestParam String idPovoleniVjezduVozidla) {
+        List<VozidloTypDto> result = new ArrayList<VozidloTypDto>();
+        List<VozidloTyp> typyVozidel = povoleniVjezduVozidlaService.getTypyVozidel(idPovoleniVjezduVozidla);
+
+        if (typyVozidel != null && typyVozidel.size() > 0) {
+            for (VozidloTyp vozidloTyp : typyVozidel) {
+                result.add(new VozidloTypDto(vozidloTyp));
+            }
+        }
+
+        return ResponseEntity.ok(result);
+
+    }
+    
 
     @GetMapping("/povoleni-vjezdu-vozidla/pocet-vjezdu")
     public ResponseEntity<Integer> pocetVjezdu(@RequestParam String idPovoleni) {
