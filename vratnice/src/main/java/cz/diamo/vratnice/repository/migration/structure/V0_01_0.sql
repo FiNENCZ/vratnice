@@ -1963,12 +1963,12 @@ ALTER TABLE vratnice.uzivatelske_nastaveni
     ADD CONSTRAINT uzivatelske_nastaveni_id_uzivatel_fkey FOREIGN KEY (id_uzivatel) REFERENCES vratnice.uzivatel(id_uzivatel);
 
 -- Nová role pro správu lokalit
-insert into zadosti.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_LOKALIT','Správce - lokalit');
-insert into zadosti.role (authority, nazev_resx) values ('ROLE_SPRAVA_LOKALIT', 'ROLE_SPRAVA_LOKALIT');
+insert into vratnice.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_LOKALIT','Správce - lokalit');
+insert into vratnice.role (authority, nazev_resx) values ('ROLE_SPRAVA_LOKALIT', 'ROLE_SPRAVA_LOKALIT');
 
 -- Nová role pro správu budov
-insert into zadosti.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_BUDOV','Správce - budov');
-insert into zadosti.role (authority, nazev_resx) values ('ROLE_SPRAVA_BUDOV', 'ROLE_SPRAVA_BUDOV');
+insert into vratnice.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_BUDOV','Správce - budov');
+insert into vratnice.role (authority, nazev_resx) values ('ROLE_SPRAVA_BUDOV', 'ROLE_SPRAVA_BUDOV');
 
 -- Verze DB
 update vratnice.databaze set verze_db = 0, sub_verze_db = 1, cas_zmn = now(), zmenu_provedl = 'pgadmin';
