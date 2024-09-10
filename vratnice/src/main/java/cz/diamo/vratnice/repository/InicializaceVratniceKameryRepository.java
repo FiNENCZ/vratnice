@@ -14,5 +14,7 @@ public interface InicializaceVratniceKameryRepository extends JpaRepository<Inic
 
     Boolean existsByIpAdresa(String ipAdresa);
 
+    @Query(sqlSelect + "where s.idInicializaceVratniceKamery = :idInicializaceVratniceKamery")
+    InicializaceVratniceKamery getDetail(String idInicializaceVratniceKamery);
 
 }

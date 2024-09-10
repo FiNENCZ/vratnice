@@ -30,8 +30,16 @@ public class InicializaceVratniceKameryService {
         return vratniceKameryRepository.getByIpAdresa(ipAdresa);
     }
 
+    public InicializaceVratniceKamery getDetail(String id) {
+        return vratniceKameryRepository.getDetail(id);
+    }
+
     public List<InicializaceVratniceKamery> list() {
         return vratniceKameryRepository.findAll();
+    }
+
+    public void delete(String id) {
+        vratniceKameryRepository.deleteById(id);
     }
 
 }

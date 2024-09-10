@@ -71,7 +71,10 @@ public class KlicDto implements Serializable {
         setMistnost(key.getMistnost());
         setVratnice(new VratniceDto(key.getVratnice()));
         setLokalita(new LokalitaDto(key.getLokalita()));
-        setTyp(new KlicTypDto(key.getTyp()));
+
+        if (key.getTyp() != null)
+            setTyp(new KlicTypDto(key.getTyp()));
+        
         setAktivita(key.getAktivita());
 
         if (key.getBudova() != null)
