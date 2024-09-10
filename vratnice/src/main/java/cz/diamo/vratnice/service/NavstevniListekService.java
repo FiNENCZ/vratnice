@@ -25,6 +25,7 @@ import cz.diamo.vratnice.entity.NavstevniListek;
 import cz.diamo.vratnice.entity.NavstevniListekTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.NavstevniListekTypEnum;
+import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
 import cz.diamo.vratnice.repository.NavstevniListekTypRepository;
 import cz.diamo.vratnice.repository.UzivatelNavstevniListekTypRepository;
@@ -56,12 +57,6 @@ public class NavstevniListekService {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Autowired
-    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
-
-    @Autowired
-    private UzivatelVratniceService uzivatelVratniceService;
 
     @Transactional
     public NavstevniListek create(NavstevniListekDto navstevniListekDto, Vratnice vratnice) {
@@ -112,33 +107,26 @@ public class NavstevniListekService {
     }
 
     public List<NavstevniListek> getList(Boolean aktivita, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
-        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+        String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
 
-        queryString.append("select s from NavstevniListek s");
-        queryString.append(" where 1 = 1");
+        queryString.append("SELECT s FROM NavstevniListek s ");
+        queryString.append("WHERE 1 = 1 ");
 
         if (aktivita != null)
-            queryString.append(" and s.aktivita = :aktivita");
+            queryString.append("AND s.aktivita = :aktivita ");
 
         
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null) 
-                queryString.append(" and s.vratnice = :vratnice");
-
+        queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.vratnice.idVratnice"));
         
         Query vysledek = entityManager.createQuery(queryString.toString());
+
+        vysledek.setParameter("idUzivatel", idUzivatel);
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
 
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null)
-                vysledek.setParameter("vratnice", nastavenaVratnice);
-            else
-                return null;
         
         @SuppressWarnings("unchecked")
         List<NavstevniListek> list = vysledek.getResultList();

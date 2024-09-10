@@ -27,8 +27,8 @@ import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.OznameniServices;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.SpecialniKlicOznameniVypujcky;
-import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
+import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.SpecialniKlicOznameniVypujckyRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,12 +45,6 @@ public class SpecialniKlicOznameniVypujckyService {
     private SpecialniKlicOznameniVypujckyRepository specialniKlicOznameniVypujckyRepository;
 
     @Autowired
-    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
-
-    @Autowired
-    private UzivatelVratniceService uzivatelVratniceService;
-
-    @Autowired
     private OznameniServices oznameniServices;
 
     @Autowired
@@ -64,31 +58,25 @@ public class SpecialniKlicOznameniVypujckyService {
 
 
      public List<SpecialniKlicOznameniVypujcky> getList(Boolean aktivita, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
-        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+        String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
 
-        queryString.append("select s from SpecialniKlicOznameniVypujcky s");
-        queryString.append(" where 1 = 1");
+        queryString.append("SELECT s FROM SpecialniKlicOznameniVypujcky s ");
+        queryString.append("WHERE 1 = 1 ");
 
         if (aktivita != null)
-            queryString.append(" and s.aktivita = :aktivita");
+            queryString.append("AND s.aktivita = :aktivita ");
         
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null) 
-                queryString.append(" and s.klic.vratnice = :vratnice");
+        queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.klic.vratnice.idVratnice"));
 
         Query vysledek = entityManager.createQuery(queryString.toString());
+
+        vysledek.setParameter("idUzivatel", idUzivatel);
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
 
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null)
-                vysledek.setParameter("vratnice", nastavenaVratnice);
-            else
-                return null;
         
         @SuppressWarnings("unchecked")
         List<SpecialniKlicOznameniVypujcky> list = vysledek.getResultList();

@@ -19,9 +19,11 @@ import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.HistorieVypujcekDto;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
+import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.service.HistorieVypujcekService;
 import cz.diamo.vratnice.service.KlicService;
@@ -113,5 +115,25 @@ public class HistorieVypujcekController extends BaseController {
         return ResponseEntity.ok(historieVypujcekDtos);
     }
 
+    @GetMapping("historie-vypujcek/list-nevracene-klice")
+    public ResponseEntity<List<HistorieVypujcekDto>> listNevraceneKlice(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) {
+        List<HistorieVypujcekDto> result = new ArrayList<HistorieVypujcekDto>();
+        List<HistorieVypujcek> list = historieVypujcekService.listNevraceneKlice(appUserDto);
+
+        if (list != null && list.size() > 0) {
+            for (HistorieVypujcek vypujcka : list) {
+                vypujcka.setAkce(historieVypujcekService.getHistorieVypujcekAkce(vypujcka.getIdHistorieVypujcek()));
+                result.add(new HistorieVypujcekDto(vypujcka));
+            }
+        }
+
+        return ResponseEntity.ok(result);
+    }
+    
+
+    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+        ZadostStav stav = zadostKlicService.getZadostStav(idZadostKlic);
+        return ResponseEntity.ok(new ZadostStavDto(stav));
+    }
     
 }

@@ -113,9 +113,11 @@ public class ZadostKlicController extends BaseController{
     
 
     @GetMapping("/zadosti-klic/list")
-    public ResponseEntity<List<ZadostKlicDto>> list(@RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) {
+    public ResponseEntity<List<ZadostKlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+        @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) {
+
         List<ZadostKlicDto> result = new ArrayList<ZadostKlicDto>();
-        List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel);
+        List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel, appUserDto);
 
         if (list != null && list.size() > 0) {
             for (ZadostKlic zadostKlic : list) {

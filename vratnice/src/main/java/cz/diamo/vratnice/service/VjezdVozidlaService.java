@@ -17,6 +17,7 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -38,47 +39,32 @@ public class VjezdVozidlaService {
     @Autowired
     private ResourcesComponent resourcesComponent;
 
-    @Autowired
-    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
-
-    @Autowired
-    private UzivatelVratniceService uzivatelVratniceService;
-
     public List<VjezdVozidla> getList(Boolean aktivita, Boolean nevyporadaneVjezdy, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
-        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
-
+        String idUzivatel = appUserDto.getIdUzivatel();
+        
         StringBuilder queryString = new StringBuilder();
 
-        queryString.append("select s from VjezdVozidla s");
-        queryString.append(" where 1 = 1");
+        queryString.append("SELECT s FROM VjezdVozidla s ");
+        queryString.append("WHERE 1 = 1 ");
 
         if (aktivita != null)
-            queryString.append(" and s.aktivita = :aktivita");
-
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null) 
-                queryString.append(" and s.vratnice = :vratnice");
+            queryString.append("AND s.aktivita = :aktivita ");
 
         if (nevyporadaneVjezdy != null) {
             if (!nevyporadaneVjezdy) {
-                queryString.append(" AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL)");
+                queryString.append("AND (s.zmenuProvedl <> 'kamery' AND s.zmenuProvedl IS NOT NULL) ");
             } else {
-                queryString.append(" AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL)");
+                queryString.append("AND (s.zmenuProvedl = 'kamery' OR s.zmenuProvedl IS NULL) ");
             }
         }
 
+        queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.vratnice.idVratnice"));
+
         Query vysledek = entityManager.createQuery(queryString.toString());
+        vysledek.setParameter("idUzivatel", idUzivatel);
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
-
-        if (!maVsechnyVratnice)
-            if (nastavenaVratnice != null)
-                vysledek.setParameter("vratnice", nastavenaVratnice);
-            else
-                return null;
-        
         
         @SuppressWarnings("unchecked")
         List<VjezdVozidla> list = vysledek.getResultList();

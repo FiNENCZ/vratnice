@@ -5,6 +5,8 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -23,6 +25,7 @@ import cz.diamo.vratnice.entity.HistorieVypujcek;
 import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
+import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.HistorieVypujcekRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -33,6 +36,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class HistorieVypujcekService {
 
+    final static Logger logger = LogManager.getLogger(HistorieVypujcekService.class);
     @Autowired
     private HistorieVypujcekRepository historieVypujcekRepository;
 
@@ -72,6 +76,10 @@ public class HistorieVypujcekService {
                         throws NoSuchMessageException, BaseException {
 
         HistorieVypujcek posledniVypujcka = historieVypujcekRepository.findLaskVypujckaByKodCipu(rfid);
+        logger.info("----------");
+        logger.info(rfid);
+        logger.info(posledniVypujcka);
+        
 
         if (posledniVypujcka == null || posledniVypujcka.getAkce().getHistorieVypujcekAkceEnum() != HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN)
             throw new RecordNotFoundException(
@@ -81,19 +89,24 @@ public class HistorieVypujcekService {
     }
 
     public List<HistorieVypujcek> getList(String idKlic, String idZadostKlic, AppUserDto appUserDto) {
-                StringBuilder queryString = new StringBuilder();
+        String idUzivatel = appUserDto.getIdUzivatel();
+        
+        StringBuilder queryString = new StringBuilder();
 
-        queryString.append("select s from HistorieVypujcek s");
-        queryString.append(" where 1 = 1");
+        queryString.append("SELECT s FROM HistorieVypujcek s ");
+        queryString.append("WHERE 1 = 1 ");
 
         if (idKlic != null)
-            queryString.append(" and s.zadostKlic.klic.idKlic = :idKlic");
+            queryString.append("AND s.zadostKlic.klic.idKlic = :idKlic ");
 
         if (idZadostKlic != null)
-            queryString.append(" and s.zadostKlic.idZadostKlic = :idZadostKlic");
+            queryString.append("AND s.zadostKlic.idZadostKlic = :idZadostKlic ");
 
-        
+        queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.zadostKlic.klic.vratnice.idVratnice"));
+
         Query vysledek = entityManager.createQuery(queryString.toString());
+
+        vysledek.setParameter("idUzivatel", idUzivatel);
 
         if (idKlic != null)
             vysledek.setParameter("idKlic", idKlic);
@@ -122,6 +135,28 @@ public class HistorieVypujcekService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
         }
+    }
+
+    public List<HistorieVypujcek> listNevraceneKlice(AppUserDto appUserDto) {
+        String idUzivatel = appUserDto.getIdUzivatel();
+
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("SELECT s FROM HistorieVypujcek s ");
+        queryString.append("WHERE s.akce.idHistorieVypujcekAkce = 1 ");
+        queryString.append("AND s.datum = (SELECT MAX(hv2.datum) ");
+        queryString.append("FROM HistorieVypujcek hv2 ");
+        queryString.append("WHERE hv2.zadostKlic.klic.idKlic = s.zadostKlic.klic.idKlic) ");
+
+        queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.zadostKlic.klic.vratnice.idVratnice"));
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        vysledek.setParameter("idUzivatel", idUzivatel);
+
+        @SuppressWarnings("unchecked")
+        List<HistorieVypujcek> list = vysledek.getResultList();
+        return list;
     }
 
 }
