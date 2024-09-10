@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
@@ -24,7 +25,10 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
+import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.entity.ZadostStav;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -59,37 +63,52 @@ public class ZadostKlicController extends BaseController{
 
 
     @PostMapping("/zadost-klic/save")
-    public ResponseEntity<?> saveKey(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
-        // kontrola zda nebylo přesaženo max počtu výpůjček
-        ZadostKlic zadostKlicEntity = zadostKlicDto.toEntity();
-        Uzivatel uzivatel = zadostKlicEntity.getUzivatel();
-        long pocetVypujcek = zadostKlicService.countByUzivatel(uzivatel);
-        int dostupnychVypujcek = MAX_POCET_VYPUJCEK - (int) pocetVypujcek;
+    public ResponseEntity<?> save(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
+        try {
+            // kontrola zda nebylo přesaženo max počtu výpůjček
+            ZadostKlic zadostKlicEntity = zadostKlicDto.toEntity();
+            Uzivatel uzivatel = zadostKlicEntity.getUzivatel();
+            long pocetVypujcek = zadostKlicService.countByUzivatel(uzivatel);
+            int dostupnychVypujcek = MAX_POCET_VYPUJCEK - (int) pocetVypujcek;
 
-        // úprava existující žádosti
-        String idZadostiKey = zadostKlicDto.getIdZadostiKey();
-        if (idZadostiKey != null && !idZadostiKey.isEmpty()) {
-            ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicEntity);
-            return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
-        }
+            // úprava existující žádosti
+            String idZadostiKey = zadostKlicDto.getId();
+            if (idZadostiKey != null && !idZadostiKey.isEmpty()) {
+                ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicEntity);
+                return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+            }
 
-        // nová žádost
-        if(dostupnychVypujcek > 0) {
-            //vytvoření záznamu žádosti klíče
-            ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicEntity);
-            return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body("Žádost nelze provést, protože bylo dosaženo maximálního počtu žádostí o klíče.");
-        }
+            // nová žádost
+            if(dostupnychVypujcek > 0) {
+                //vytvoření záznamu žádosti klíče
+                ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicEntity);
+                return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Žádost nelze provést, protože bylo dosaženo maximálního počtu žádostí o klíče.");
+            }
+		} catch (ResponseStatusException re) {
+			logger.error(re);
+			throw re;
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
     }
 
     @PostMapping("/zadost-klic/zmena-stavu")
-    public ResponseEntity<ZadostKlicDto> zmenaStavuZadosti(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam String stav) {
-
-        zadostKlicDto.setStav(stav);
-        ZadostKlic newZadostKlic = zadostKlicService.create(zadostKlicDto.toEntity());
-        return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
+    public ZadostKlicDto zmenaStavuZadosti(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam ZadostStavEnum stav) {
+        try {
+            zadostKlicDto.setStav(new ZadostStavDto(new ZadostStav(stav)));
+            ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicDto.toEntity());
+            return new ZadostKlicDto(newZadostKlic);
+        } catch (ResponseStatusException re) {
+            logger.error(re);
+            throw re;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        }
     }
     
 
@@ -122,8 +141,8 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/zadosti-dle-stavu")
-    public  ResponseEntity<List<ZadostKlicDto>> getZadostiByKlic(@RequestParam String stav) {
-        List<ZadostKlicDto> zadostiKlic = zadostKlicService.getZadostiByStav(stav).stream()
+    public  ResponseEntity<List<ZadostKlicDto>> getZadostiByKlic(@RequestParam ZadostStavEnum zadostStavEnum) {
+        List<ZadostKlicDto> zadostiKlic = zadostKlicService.getZadostiByStav(zadostStavEnum.getValue()).stream()
             .map(ZadostKlicDto::new)
             .collect(Collectors.toList());
         return ResponseEntity.ok(zadostiKlic);

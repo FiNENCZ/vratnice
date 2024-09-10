@@ -11,12 +11,11 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 @Configuration
 public class RestTempleteConfiguration {
 
-    // @Bean
-    // public RestTemplate getRestTemplate() {
-
-    // RestTemplate restTemplate = new RestTemplate();
-    // return restTemplate;
-    // }
+    @Bean
+    RestOperations restEdos(RestTemplateBuilder restTemplateBuilder, AppProperties appProperties) {
+        return restTemplateBuilder.uriTemplateHandler(new DefaultUriBuilderFactory(appProperties.getEdosApiUrl()))
+                .messageConverters(new MappingJackson2HttpMessageConverter()).build();
+    }
 
     @Bean
     RestOperations restKeyCloak(RestTemplateBuilder restTemplateBuilder, AppProperties appProperties) {

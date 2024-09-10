@@ -46,7 +46,7 @@ public class HistorieVypujcekDto implements Serializable {
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
 
         historieVypujcek.setIdHistorieVypujcek(this.idHistorieVypujcek);
-        historieVypujcek.setZadostKlic(new ZadostKlic(getZadostKlic().getIdZadostiKey()));
+        historieVypujcek.setZadostKlic(new ZadostKlic(getZadostKlic().getId()));
 
         if (getAkce() != null )
             historieVypujcek.setAkce(getAkce().toEntity());

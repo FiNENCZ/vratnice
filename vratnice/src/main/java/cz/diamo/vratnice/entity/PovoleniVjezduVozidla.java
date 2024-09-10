@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.GenericGenerator;
 
 import cz.diamo.share.constants.Constants;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;

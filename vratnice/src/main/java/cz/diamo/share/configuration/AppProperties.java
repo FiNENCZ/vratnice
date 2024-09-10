@@ -34,6 +34,8 @@ public class AppProperties {
 
     private String evozApiUrl;
 
+    private String vratniceApiUrl;
+
     private String zadostiApiUrl;
 
     private String wso2Url;

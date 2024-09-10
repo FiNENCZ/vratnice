@@ -52,7 +52,7 @@ public class SpecialniKlicOznameniVypujckyDto implements Serializable{
         SpecialniKlicOznameniVypujcky specialniKlicOznameniVypujcky = new SpecialniKlicOznameniVypujcky();
 
         specialniKlicOznameniVypujcky.setIdSpecialniKlicOznameniVypujcky(this.id);
-        specialniKlicOznameniVypujcky.setKlic(new Klic(getKlic().getIdKlic()));
+        specialniKlicOznameniVypujcky.setKlic(new Klic(getKlic().getId()));
 
         List<Uzivatel> uzivatele = new ArrayList<>();
         if (getUzivatele() != null) {

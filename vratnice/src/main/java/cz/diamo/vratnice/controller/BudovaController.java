@@ -1,53 +1,99 @@
 package cz.diamo.vratnice.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.web.bind.annotation.RestController;
-
-import cz.diamo.share.controller.BaseController;
-import cz.diamo.vratnice.dto.BudovaDto;
-import cz.diamo.vratnice.entity.Budova;
-import cz.diamo.vratnice.service.BudovaService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import cz.diamo.share.controller.BudovaBaseController;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.dto.BudovaDto;
+import cz.diamo.share.entity.Budova;
+import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.services.BudovaServices;
+import cz.diamo.vratnice.zadosti.services.ZadostiServices;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
-public class BudovaController extends BaseController {
+@RequestMapping("api/budova")
+public class BudovaController extends BudovaBaseController {
 
-    final static Logger logger = LogManager.getLogger(BudovaController.class);
+	final static Logger logger = LogManager.getLogger(BudovaController.class);
 
-    @Autowired
-    private BudovaService budovaService;
+	@Autowired
+	private BudovaServices budovaServices;
 
-    @GetMapping("/budova/list")
-    public ResponseEntity<List<BudovaDto>> list(@RequestParam @Nullable String idLokalita) {
-        List<BudovaDto> result = new ArrayList<BudovaDto>();
-        List<Budova> list = budovaService.getList(idLokalita);
+	@Autowired
+	private ZadostiServices zadostiServices;
 
-        if (list != null && list.size() > 0) {
-            for (Budova budova : list) {
-                result.add(new BudovaDto(budova));
-            }
-        }
+	@PersistenceContext
+	private EntityManager entityManager;
 
-        return ResponseEntity.ok(result);
-    }
+	@PostMapping("/save")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+	public BudovaDto save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, HttpServletRequest request,
+			@RequestBody @Valid BudovaDto detail) {
+		try {
+			Budova budova = budovaServices.save(detail.getBudova(null, false));
+            zadostiServices.saveBudova(new BudovaDto(budova), request, appUserDto);
 
-    @GetMapping("/budova/detail")
-    public ResponseEntity<BudovaDto> detail(@RequestParam String idBudova) {
-        Budova budova = budovaService.detail(idBudova);
-        return ResponseEntity.ok(new BudovaDto(budova));
-    }
-    
+			entityManager.detach(budova);
+			budova = budovaServices.getDetail(budova.getIdBudova());
+			return new BudovaDto(budova);
+		} catch (BaseException e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+	}
 
+	/**
+	 * Odstranění záznamu
+	 * 
+	 * @param appUserDto Uživatel
+	 * @param idLokalita   id záznamu
+	 */
+	@PostMapping("/delete")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+	public void delete(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+			@RequestParam String idLokalita) {
+		try {
+			budovaServices.odstranit(idLokalita);
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+	}
 
-
+	/**
+	 * Obnovení záznamu
+	 * 
+	 * @param appUserDto Uživatel
+	 * @param idLokalita   id záznamu
+	 */
+	@PostMapping("/restore")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+	public void restore(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+			@RequestParam String idLokalita) {
+		try {
+			budovaServices.obnovit(idLokalita);
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+	}
 }

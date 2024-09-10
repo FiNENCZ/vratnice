@@ -4,9 +4,11 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import cz.diamo.vratnice.entity.Budova;
+import cz.diamo.share.dto.BudovaDto;
+import cz.diamo.share.dto.LokalitaDto;
+import cz.diamo.share.entity.Budova;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.vratnice.entity.Klic;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.Poschodi;
 import cz.diamo.vratnice.entity.Vratnice;
 import jakarta.validation.constraints.AssertTrue;
@@ -22,7 +24,7 @@ public class KlicDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String idKlic;
+    private String id;
 
     @NotNull(message = "{klic.specialni.require}")
     private Boolean specialni = false;
@@ -61,26 +63,28 @@ public class KlicDto implements Serializable {
         if (key == null) {
             return;
         }
-        this.idKlic = key.getIdKlic();
-        this.specialni = key.isSpecialni();
-        this.nazev = key.getNazev();
-        this.kodCipu = key.getKodCipu();
-        this.vratnice = new VratniceDto(key.getVratnice());
-        this.lokalita = new LokalitaDto(key.getLokalita());
-        this.budova = new BudovaDto(key.getBudova());
-        this.poschodi = new PoschodiDto(key.getPoschodi());
-        this.mistnost = key.getMistnost();
 
-        if (key.getTyp() != null)
-            this.typ = new KlicTypDto(key.getTyp());
+        setId(key.getIdKlic());
+        setSpecialni(key.isSpecialni());
+        setNazev(key.getNazev());
+        setKodCipu(key.getKodCipu());
+        setMistnost(key.getMistnost());
+        setVratnice(new VratniceDto(key.getVratnice()));
+        setLokalita(new LokalitaDto(key.getLokalita()));
+        setTyp(new KlicTypDto(key.getTyp()));
+        setAktivita(key.getAktivita());
 
-        this.aktivita = key.getAktivita();
+        if (key.getBudova() != null)
+            setBudova(new BudovaDto(key.getBudova()));
+
+        if (key.getPoschodi() != null)    
+            setPoschodi(new PoschodiDto(key.getPoschodi()));
     }
 
     @JsonIgnore
     public Klic toEntity() {
         Klic key = new Klic();
-        key.setIdKlic(this.idKlic);
+        key.setIdKlic(this.id);
         key.setSpecialni(this.specialni);
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
@@ -94,6 +98,15 @@ public class KlicDto implements Serializable {
             key.setTyp(getTyp().toEntity());
             
         key.setAktivita(this.aktivita);
+
+        key.setLokalita(new Lokalita(getLokalita().getId()));
+
+        if (getBudova() != null)
+            key.setBudova(new Budova(getBudova().getId()));
+
+        if (getPoschodi() != null)
+            key.setPoschodi(new Poschodi(getPoschodi().getId()));
+
         return key;
     }
 

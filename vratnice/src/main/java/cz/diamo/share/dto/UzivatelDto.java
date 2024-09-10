@@ -128,7 +128,7 @@ public class UzivatelDto implements Serializable {
         List<OpravneniDto> opravneniDtos = new ArrayList<>();
         if (uzivatel.getOpravneni() != null) {
             for (Opravneni opravneni : uzivatel.getOpravneni()) {
-                opravneniDtos.add(new OpravneniDto(opravneni, null, true));
+                opravneniDtos.add(new OpravneniDto(opravneni, null, true, false));
             }
         }
         setOpravneni(opravneniDtos);

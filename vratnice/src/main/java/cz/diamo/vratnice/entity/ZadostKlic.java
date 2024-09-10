@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "zadost_klic", schema = Constants.SCHEMA)
-@NamedQuery(name = "ZadostKlic.findAll", query = "SELECT s from Uzivatel s")
+@NamedQuery(name = "ZadostKlic.findAll", query = "SELECT s from ZadostKlic s")
 public class ZadostKlic implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -44,9 +44,9 @@ public class ZadostKlic implements Serializable {
     @JoinColumn(name = "id_uzivatel")
     private Uzivatel uzivatel;
 
-    @Column(name = "stav")
-    private String stav = "vyžádáno"; // vyžádán/schválen
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_zadost_stav")
+    private ZadostStav zadostStav;
     
     @Column(name = "trvala")
     private Boolean trvala = true;

@@ -56,8 +56,8 @@ public class KlicController extends BaseController {
                 @RequestBody @Valid KlicDto klicDto) throws InterruptedException, ExecutionException, RecordNotFoundException, NoSuchMessageException {
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat 
             CompletableFuture<Klic> oldKlicFuture = CompletableFuture.supplyAsync(() -> {
-                if (klicDto.getIdKlic() != null) {
-                    return klicService.getDetail(klicDto.getIdKlic());
+                if (klicDto.getId() != null) {
+                    return klicService.getDetail(klicDto.getId());
                 } else {
                     return new Klic();
                 }

@@ -2,9 +2,10 @@ package cz.diamo.vratnice.dto;
 
 import java.io.Serializable;
 
+import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.Vratnice;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

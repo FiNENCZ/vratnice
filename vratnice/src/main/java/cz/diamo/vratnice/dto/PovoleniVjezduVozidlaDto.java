@@ -1,8 +1,9 @@
 package cz.diamo.vratnice.dto;
 
+import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
-import cz.diamo.vratnice.entity.Lokalita;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import jakarta.validation.Valid;

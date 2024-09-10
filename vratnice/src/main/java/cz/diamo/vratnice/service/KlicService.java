@@ -1,6 +1,8 @@
 package cz.diamo.vratnice.service;
 
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -93,6 +95,53 @@ public class KlicService {
             else
                 return null;
         
+        @SuppressWarnings("unchecked")
+        List<Klic> list = vysledek.getResultList();
+        return list;
+
+    }
+
+    public List<Klic> getList(String idLokalita, String idBudova, String idPoschodi, Boolean aktivita, Boolean specialni) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("select s from Klic s");
+        queryString.append(" left join fetch s.lokalita lok");
+        queryString.append(" left join fetch s.budova bud");
+        queryString.append(" left join fetch s.poschodi pos");
+        queryString.append(" where 1 = 1");
+
+        if (aktivita != null)
+            queryString.append(" and s.aktivita = :aktivita");
+
+        if (specialni != null)
+            queryString.append(" and s.specialni = :specialni");
+
+        if (StringUtils.isNotBlank(idLokalita))
+            queryString.append(" and lok.idLokalita = :idLokalita");
+            
+        if (StringUtils.isNotBlank(idBudova))
+            queryString.append(" and bud.idBudova = :idBudova");
+            
+        if (StringUtils.isNotBlank(idPoschodi))
+            queryString.append(" and pos.idPoschodi = :idPoschodi");
+            
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+        
+        if (specialni != null)
+            vysledek.setParameter("specialni", specialni);
+
+        if (StringUtils.isNotBlank(idLokalita))
+            vysledek.setParameter("idLokalita", idLokalita);
+            
+        if (StringUtils.isNotBlank(idBudova))
+            vysledek.setParameter("idBudova", idBudova);
+            
+        if (StringUtils.isNotBlank(idPoschodi))
+            vysledek.setParameter("idPoschodi", idPoschodi);
+            
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();
         return list;
