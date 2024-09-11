@@ -122,7 +122,7 @@ public class ZadostKlicController extends BaseController{
         if (list != null && list.size() > 0) {
             for (ZadostKlic zadostKlic : list) {
                 
-                Boolean dostupny = klicService.jeDostupny(zadostKlic.getKlic().getIdKlic());
+                Boolean dostupny = klicService.jeDostupny(zadostKlic);
                 ZadostKlicDto zadostKlicDto = new ZadostKlicDto(zadostKlic);
                 zadostKlicDto.setJeKlicDostupny(dostupny);
 
@@ -190,7 +190,12 @@ public class ZadostKlicController extends BaseController{
 
         return ResponseEntity.ok(new UzivatelDto(uzivatel));
     }
-    
+
+    @GetMapping("/zadost-klic/stav")
+    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+        ZadostStav stav = zadostKlicService.getZadostStav(idZadostKlic);
+        return ResponseEntity.ok(new ZadostStavDto(stav));
+    }
     
     
 

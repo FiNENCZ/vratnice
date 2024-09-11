@@ -20,10 +20,13 @@ public class ZadostKlicDto implements Serializable {
 
     private String id;
 
+    @NotNull(message = "{zadost_klic.klic.require}")
     private KlicDto klic;
 
+    @NotNull(message = "{zadost_klic.uzivatel.require}")
     private UzivatelDto uzivatel;
 
+    @NotNull(message = "{zadost_klic.zadost_stav.require}")
     private ZadostStavDto stav;
 
     private Boolean trvala = true;

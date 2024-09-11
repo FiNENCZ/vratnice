@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.service;
 
 import java.util.List;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,9 @@ import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.KlicTyp;
+import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.HistorieVypujcekRepository;
 import cz.diamo.vratnice.repository.KlicRepository;
@@ -163,16 +166,50 @@ public class KlicService {
 		}
     }
 
-    public Boolean jeDostupny(String idKlic) {
-        HistorieVypujcekAkce vypujckaAkce = historieVypujcekRepository.findLastAkceByIdKlic(idKlic);
+    public Boolean jeDostupny(ZadostKlic zadost) {
 
-        if (vypujckaAkce == null)
-            return true;
 
-        if (vypujckaAkce.getHistorieVypujcekAkceEnum() == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) 
+        HistorieVypujcekAkce vypujckaAkce = historieVypujcekRepository.findLastAkceByIdKlic(zadost.getKlic().getIdKlic());
+
+        //Pokud byl klíč vypůjčen je ho možné vrátit
+        if (vypujckaAkce != null){
+            if (vypujckaAkce.getHistorieVypujcekAkceEnum() == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
+                return false;
+            }
+        }
+
+
+        // Zkontroluj, zda je žádost schválená
+        if (zadost.getZadostStav().getZadostStavEnum() != ZadostStavEnum.SCHVALENO) {
+            return null;
+        }
+
+        // Zkontroluj, zda žádost a klíč jsou aktivní
+        if (!zadost.getAktivita() || !zadost.getKlic().getAktivita()) {
+            return null;
+        }
+
+        // Pokud není žádost trvalá, zkontroluj platnost výpůjčky
+        if (!zadost.getTrvala()) {
+            Date currentDate = new Date();
+            if (zadost.getDatumOd() != null && zadost.getDatumDo() != null &&
+                (currentDate.before(zadost.getDatumOd()) || currentDate.after(zadost.getDatumDo()))) {
+                return null;
+            }
+        }
+
+        // Zkontroluj, zda byl klíč vrácen nebo je stále vypůjčen
+        if (vypujckaAkce == null || vypujckaAkce.getHistorieVypujcekAkceEnum() == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
             return true;
-        else
-            return false;
+        }
+
+        return null;
+
+        /* Return STATEMENTS
+        false - je možné vrátit klíč (poslední akce byla vypůjčení)
+        true - je možné klíč vypůjčit
+        null - není možné klíč vypůjčit, ani vrátit (neaktivita, platnost vypršela, atd...)
+         */
     }
 
-}
+} 

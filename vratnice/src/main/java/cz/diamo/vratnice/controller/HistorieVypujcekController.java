@@ -19,11 +19,9 @@ import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.HistorieVypujcekDto;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
-import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.HistorieVypujcek;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.service.HistorieVypujcekService;
 import cz.diamo.vratnice.service.KlicService;
@@ -53,13 +51,12 @@ public class HistorieVypujcekController extends BaseController {
     @Autowired
     private KlicService klicService;
 
-
     @PostMapping("/historie-vypujcek/save")
     public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                                 @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
                                 @RequestParam HistorieVypujcekAkceEnum akce,
                                 HttpServletRequest request) throws NoSuchMessageException, BaseException {  
-    
+
         HistorieVypujcek newHistorieVypujcek = historieVypujcekService.create(zadostKlicDto.toEntity(), appUserDto, akce, request);
         return ResponseEntity.ok(new HistorieVypujcekDto(newHistorieVypujcek));
     }
@@ -129,11 +126,4 @@ public class HistorieVypujcekController extends BaseController {
 
         return ResponseEntity.ok(result);
     }
-    
-
-    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
-        ZadostStav stav = zadostKlicService.getZadostStav(idZadostKlic);
-        return ResponseEntity.ok(new ZadostStavDto(stav));
-    }
-    
 }

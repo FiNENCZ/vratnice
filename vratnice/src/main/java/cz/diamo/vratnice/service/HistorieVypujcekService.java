@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,11 +54,32 @@ public class HistorieVypujcekService {
     private SpecialniKlicOznameniVypujckyService specialniKlicOznameniVypujckyService;
 
     @Autowired
+    private KlicService klicService;
+
+    @Autowired
     private ResourcesComponent resourcesComponent;
 
     @Transactional
     public HistorieVypujcek create(ZadostKlic zadostKlic, AppUserDto appUserDto, HistorieVypujcekAkceEnum akce, HttpServletRequest request)
                      throws NoSuchMessageException, BaseException {
+        
+        // Kontrola, zda je možné klíč vypůjčit
+        Boolean jeKlicDostupny = klicService.jeDostupny(zadostKlic);
+        zkontrolujDostupnostKlice(jeKlicDostupny, akce);
+
+        if (jeKlicDostupny == null) 
+            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.null", 
+            null,LocaleContextHolder.getLocale())));
+
+        if (jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) //Je dostupný, ale uživatel ho chce vrátit
+            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vratit", 
+                null,LocaleContextHolder.getLocale())));
+
+        if (!jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) //Je nedostupný, ale uživatel ho chce půjčit
+            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.false", 
+            null,LocaleContextHolder.getLocale())));
+
+
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
 
@@ -71,15 +93,27 @@ public class HistorieVypujcekService {
         return historieVypujcekRepository.save(historieVypujcek);
     }
 
+    private void zkontrolujDostupnostKlice(Boolean jeKlicDostupny, HistorieVypujcekAkceEnum akce) throws BaseException, NoSuchMessageException {
+        Locale locale = LocaleContextHolder.getLocale();
+        
+        if (jeKlicDostupny == null) {
+            throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.null", null, locale));
+        }
+    
+        if (jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
+            throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vratit", null, locale));
+        }
+    
+        if (!jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
+            throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.false", null, locale));
+        }
+    }
+
     @Transactional
     public HistorieVypujcek vratitKlicByRfid(String rfid, AppUserDto appUserDto, HttpServletRequest request) 
                         throws NoSuchMessageException, BaseException {
 
         HistorieVypujcek posledniVypujcka = historieVypujcekRepository.findLaskVypujckaByKodCipu(rfid);
-        logger.info("----------");
-        logger.info(rfid);
-        logger.info(posledniVypujcka);
-        
 
         if (posledniVypujcka == null || posledniVypujcka.getAkce().getHistorieVypujcekAkceEnum() != HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN)
             throw new RecordNotFoundException(
