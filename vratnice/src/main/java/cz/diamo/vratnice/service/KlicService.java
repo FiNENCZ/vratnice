@@ -6,6 +6,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.KlicTyp;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
@@ -46,15 +49,38 @@ public class KlicService {
     @Autowired
     private HistorieVypujcekRepository historieVypujcekRepository;
 
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
+    @Autowired
+    private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
+
     public List<Klic> getAllKeys() {
         return klicRepository.findAll();
     }
 
     @Transactional
-    public Klic createKey(Klic klic) {
+    public Klic createKey(Klic klic, AppUserDto appUserDto) throws NoSuchMessageException, BaseException {
+        maUzivatelPristupKeKlici(klic, appUserDto);
+
         klic.setCasZmn(Utils.getCasZmn());
         klic.setZmenuProvedl(Utils.getZmenuProv());
         return klicRepository.save(klic);
+    }
+
+    //TODO: Implementovat funkci pro zjištění přístupu klic.vratnice pro daného uživatele
+    public void maUzivatelPristupKeKlici(Klic klic, AppUserDto appUserDto) throws NoSuchMessageException, BaseException {
+        Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
+        if (!maVsechnyVratnice) {
+            if (nastavenaVratnice != null) {
+                if (klic.getVratnice() != nastavenaVratnice){
+                    throw new BaseException(messageSource.getMessage("klic.save.no_access", null, LocaleContextHolder.getLocale()));
+                }
+            }
+        }
+        
     }
 
     public List<Klic> getList(Boolean aktivita, Boolean specialni, AppUserDto appUserDto)  {

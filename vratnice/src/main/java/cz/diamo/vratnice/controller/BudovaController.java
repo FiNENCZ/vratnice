@@ -1,11 +1,18 @@
 package cz.diamo.vratnice.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +23,15 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.controller.BudovaBaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.BudovaDto;
+import cz.diamo.share.dto.opravneni.OpravneniDto;
 import cz.diamo.share.entity.Budova;
+import cz.diamo.share.entity.Opravneni;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.repository.OpravneniBudovaRepository;
+import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.services.BudovaServices;
+import cz.diamo.vratnice.dto.SluzebniVozidloDto;
+import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityManager;
@@ -38,8 +51,17 @@ public class BudovaController extends BudovaBaseController {
 	@Autowired
 	private ZadostiServices zadostiServices;
 
+	@Autowired
+	private UzivatelOpravneniRepository uzivatelOpravneniRepository;
+
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	@Autowired
+	private OpravneniBudovaRepository opravneniBudovaRepository;
+
+	@Autowired
+	private MessageSource messageSource;
 
 	@PostMapping("/save")
 	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
@@ -95,5 +117,31 @@ public class BudovaController extends BudovaBaseController {
 			logger.error(e);
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
 		}
+	}
+
+	@GetMapping("/list-dle-pristupu") //TODO : dodělat listování budov dle oprávnění
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+	public ResponseEntity<List<BudovaDto>> listDlePristupu(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String idUzivatel) {
+		List<BudovaDto> resultBudovy = new ArrayList<BudovaDto>();
+		List<OpravneniDto> result = new ArrayList<OpravneniDto>();
+		List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, true);
+
+		if (opravneniUzivatele != null && opravneniUzivatele.size() > 0) {
+            for (Opravneni opravneni : opravneniUzivatele) {
+                //result.add(new OpravneniDto(opravneni, messageSource, true, true));
+				opravneni.setBudovy(opravneniBudovaRepository.listBudova(opravneni.getIdOpravneni()));
+				if (opravneni.getBudovy() != null) {
+					for ( Budova budova : opravneni.getBudovy()) {
+
+						resultBudovy.add(new BudovaDto(budova));
+					}
+					return ResponseEntity.ok(resultBudovy);
+				} 
+            }
+        }
+
+
+		return ResponseEntity.ok(resultBudovy);
+
 	}
 }

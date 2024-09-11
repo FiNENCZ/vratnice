@@ -65,7 +65,7 @@ public class KlicController extends BaseController {
     
             CompletableFuture<Klic> newKlicFuture = oldKlicFuture.thenApplyAsync(oldKlic -> {
                 try {
-                    return klicService.createKey(klicDto.toEntity());
+                    return klicService.createKey(klicDto.toEntity(), appUserDto);
                     
                 } catch (Exception e) {
                     throw new CompletionException(e);
