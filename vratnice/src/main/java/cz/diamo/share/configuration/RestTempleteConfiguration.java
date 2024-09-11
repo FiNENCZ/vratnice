@@ -13,8 +13,11 @@ public class RestTempleteConfiguration {
 
     @Bean
     RestOperations restEdos(RestTemplateBuilder restTemplateBuilder, AppProperties appProperties) {
-        return restTemplateBuilder.uriTemplateHandler(new DefaultUriBuilderFactory(appProperties.getEdosApiUrl()))
-                .messageConverters(new MappingJackson2HttpMessageConverter()).build();
+        if (!StringUtils.isBlank(appProperties.getEdosApiUrl()))
+            return restTemplateBuilder.uriTemplateHandler(new DefaultUriBuilderFactory(appProperties.getEdosApiUrl()))
+                    .messageConverters(new MappingJackson2HttpMessageConverter()).build();
+        else
+            return restTemplateBuilder.build();
     }
 
     @Bean

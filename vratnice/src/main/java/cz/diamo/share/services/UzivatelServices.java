@@ -92,6 +92,18 @@ public class UzivatelServices {
     }
 
     @TransactionalROE
+    public String getUsernameByRfidUid(String rfidUid) throws RecordNotFoundException, NoSuchMessageException {
+        Uzivatel uzivatel = uzivatelRepository.getDetailByRfidUid(rfidUid);
+
+        if (uzivatel == null)
+            throw new RecordNotFoundException(
+                    messageSource.getMessage("uzivatel.by.rfid.not.found", null, LocaleContextHolder.getLocale()),
+                    rfidUid, true);
+
+        return String.format("%s-%s", uzivatel.getZavod().getSapId(), uzivatel.getSapId());
+    }
+
+    @TransactionalROE
     public Uzivatel getDetail(String idUzivatel, boolean preklady)
             throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelRepository.getDetail(idUzivatel);

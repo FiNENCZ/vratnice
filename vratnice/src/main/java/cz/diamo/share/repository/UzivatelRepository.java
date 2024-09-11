@@ -22,6 +22,10 @@ public interface UzivatelRepository extends JpaRepository<Uzivatel, String> {
             + "where s.aktivita = true and (upper(s.cip1) = upper(:rfid) or upper(s.cip2) = upper(:rfid)) order by s.idUzivatel DESC limit 1")
     Uzivatel getDetailByRfid(String rfid);
 
+    @Query(sqlSelect
+            + "where s.aktivita = true and (upper(substring(s.cip1, 3, 7)) like upper(:rfidUid) or upper(substring(s.cip2, 3, 7)) = upper(:rfidUid)) order by s.idUzivatel DESC limit 1")
+    Uzivatel getDetailByRfidUid(String rfidUid);
+
     @Query("select s.sapId from Uzivatel s where s.idUzivatel = :idUzivatel")
     String getSapId(String idUzivatel);
 

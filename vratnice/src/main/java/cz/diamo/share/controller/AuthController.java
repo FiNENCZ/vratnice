@@ -2,9 +2,12 @@ package cz.diamo.share.controller;
 
 import java.net.URI;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.security.UserAuthentication;
 import cz.diamo.share.services.AuthServices;
 import cz.diamo.share.services.UzivatelServices;
@@ -40,6 +44,9 @@ public class AuthController {
 
     @Autowired
     private UzivatelServices uzivatelServices;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @GetMapping("/authenticate")
     @PreAuthorize("isFullyAuthenticated()")
@@ -78,6 +85,21 @@ public class AuthController {
             @RequestParam String rfid) {
         try {
             return ResponseEntity.ok().body(uzivatelServices.getUsername(rfid));
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+        }
+    }
+
+    @GetMapping("/username-by-rfid-uid")
+    public ResponseEntity<String> usernameByRfidUid(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam String rfid) {
+        try {
+            if (StringUtils.isBlank(rfid) || rfid.length() != 7)
+                throw new ValidationException(
+                        messageSource.getMessage("rfid.uid.spatny.format", null,
+                                LocaleContextHolder.getLocale()));
+            return ResponseEntity.ok().body(uzivatelServices.getUsernameByRfidUid(rfid));
         } catch (Exception e) {
             logger.error(e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
