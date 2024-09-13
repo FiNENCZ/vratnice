@@ -15,9 +15,11 @@ import cz.diamo.share.dto.PracovniPoziceDto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.entity.Opravneni;
+import cz.diamo.share.entity.OpravneniTypPristupuBudova;
 import cz.diamo.share.entity.PracovniPozicePrehled;
 import cz.diamo.share.entity.Role;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.enums.OpravneniTypPristupuBudovaEnum;
 import cz.diamo.share.entity.Budova;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,7 +48,7 @@ public class OpravneniDto implements Serializable {
     @NotNull(message = "{pristup.k.zamestnancum.require}")
     private OpravneniTypPristupuDto typPristupuKZamestnancum;
 
-    @NotNull(message = "{pristup.k.budovam.require}")
+    // @NotNull(message = "{pristup.k.budovam.require}")
     private OpravneniTypPristupuBudovaDto typPristupuKBudovam;
 
     @Size(max = 100, message = "{kod.max.100}")
@@ -147,7 +149,11 @@ public class OpravneniDto implements Serializable {
             opravneni.setAktivita(getAktivita());
 
             opravneni.setOpravneniTypPristupu(getTypPristupuKZamestnancum().getOpravneniTypPristupu(null));
-            opravneni.setOpravneniTypPristupuBudova(getTypPristupuKBudovam().getOpravneniTypPristupuBudova(null));
+
+            if (getTypPristupuKBudovam() != null)
+                opravneni.setOpravneniTypPristupuBudova(getTypPristupuKBudovam().getOpravneniTypPristupuBudova(null));
+            else 
+                opravneni.setOpravneniTypPristupuBudova(new OpravneniTypPristupuBudova(OpravneniTypPristupuBudovaEnum.TYP_PRIST_BUDOVA_OPR_BEZ_PRISTUPU));
         }
         return opravneni;
     }

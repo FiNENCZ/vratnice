@@ -288,6 +288,9 @@ public class OpravneniServices {
         List<Budova> budovy = opravneni.getBudovy();
         List<Zavod> zavody = opravneni.getZavody();
 
+        if (opravneni.getOpravneniTypPristupuBudova() == null)
+            opravneni.setOpravneniTypPristupuBudova(new OpravneniTypPristupuBudova(OpravneniTypPristupuBudovaEnum.TYP_PRIST_BUDOVA_OPR_BEZ_PRISTUPU));
+
         if ((pracovniPozice == null || pracovniPozice.size() == 0)
                 && opravneni.getOpravneniTypPristupu().getOpravneniTypPristupuEnum() == OpravneniTypPristupuEnum.TYP_PRIST_OPR_VYBER) {
             opravneni.setOpravneniTypPristupu(new OpravneniTypPristupu(OpravneniTypPristupuEnum.TYP_PRIST_OPR_BEZ_PRISTUPU));
