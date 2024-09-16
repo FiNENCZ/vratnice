@@ -1,6 +1,7 @@
 package cz.diamo.vratnice.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,19 +21,26 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import cz.diamo.share.component.ResourcesComponent;
-import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RidicDto;
+import cz.diamo.vratnice.dto.SpolecnostDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
+import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.entity.ZadostStav;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaRepository;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -59,8 +67,29 @@ public class PovoleniVjezduVozidlaService {
     @Autowired
     private VjezdVozidlaRepository vjezdVozidlaRepository;
 
-    public List<PovoleniVjezduVozidla> getAll() {
-        return povoleniVjezduVozidlaRepository.findAll();
+    @Autowired
+    private SpolecnostService spolecnostService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public List<PovoleniVjezduVozidla> getList(Boolean aktivita) {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append("SELECT s FROM PovoleniVjezduVozidla s ");
+        queryString.append("WHERE 1 = 1 ");
+
+        if (aktivita != null)
+            queryString.append("AND s.aktivita = :aktivita ");
+        
+        Query vysledek = entityManager.createQuery(queryString.toString());
+
+        if (aktivita != null)
+            vysledek.setParameter("aktivita", aktivita);
+
+        @SuppressWarnings("unchecked")
+        List<PovoleniVjezduVozidla> list = vysledek.getResultList();
+        return list;
     }
 
     public PovoleniVjezduVozidla getDetail(String idPovoleniVjezduVozidla) {
@@ -83,7 +112,7 @@ public class PovoleniVjezduVozidlaService {
                 String.format(messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
         
 
-        Zavod zavodKameryVratnice = vratniceKamery.getZavod();
+        Lokalita zavodKameryLokalita = vratniceKamery.getLokalita();
 
 
         List<PovoleniVjezduVozidla> povoleniVjezduVozidlaList = getByRzVozidla(rzVozidla);
@@ -97,8 +126,10 @@ public class PovoleniVjezduVozidlaService {
         logger.info(currentDate);
             
         return povoleniVjezduVozidlaList.stream()
+            .filter(povoleni -> povoleni.getAktivita()) // Filtrovat pouze povolení s aktivita == true
+            .filter(povoleni -> povoleni.getStav().getZadostStavEnum() == ZadostStavEnum.SCHVALENO) // Filtrovat pouze povolení s stav == SCHVALENO
             .filter(povoleni -> isPovoleniPlatne(povoleni, currentDate))
-            .filter(povoleni -> obsahujeLokalitu(povoleni, zavodKameryVratnice.getIdZavod()))
+            .filter(povoleni -> obsahujeLokalitu(povoleni, zavodKameryLokalita.getIdLokalita()))
             .findFirst();
     }
 
@@ -127,7 +158,27 @@ public class PovoleniVjezduVozidlaService {
             povoleniVjezduVozidlaDto.setRidic(new RidicDto(savedRidic));
         }
 
+        Spolecnost savedSpolecnostZadatele = spolecnostService.save(povoleniVjezduVozidlaDto.getSpolecnostZadatele().toEntity());
+        Spolecnost savedSpolecnostVozidla = spolecnostService.save(povoleniVjezduVozidlaDto.getSpolecnostVozidla().toEntity());
+
+        povoleniVjezduVozidlaDto.setSpolecnostZadatele(new SpolecnostDto(savedSpolecnostZadatele));
+        povoleniVjezduVozidlaDto.setSpolecnostVozidla(new SpolecnostDto(savedSpolecnostVozidla));
+
         return povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidlaDto.toEntity());
+    }
+
+    @Transactional
+    public List<PovoleniVjezduVozidla> zneplatnitPovoleni(List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws UniqueValueException, NoSuchMessageException {
+        List<PovoleniVjezduVozidla> result = new ArrayList<PovoleniVjezduVozidla>();
+
+        for (PovoleniVjezduVozidlaDto povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
+            // Nastavení stavu na POZASTAVENO
+            povoleniVjezduVozidla.setAktivita(false);
+
+            result.add(create(povoleniVjezduVozidla));
+        }
+
+        return result;
     }
 
     public Stat getZemeRegistraceVozidla(String idPovoleniVjezduVozidla) {
@@ -163,6 +214,20 @@ public class PovoleniVjezduVozidlaService {
 		}
     }
 
+    public ZadostStav getZadostStav(String idPovoleniVjezduVozidla) {
+        PovoleniVjezduVozidla povoleni = getDetail(idPovoleniVjezduVozidla);
+
+        try {
+            if (povoleni == null)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        
+                povoleni.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getStav().getNazevResx()));
+            return povoleni.getStav();
+        } catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+		}
+    }
+
     public Integer pocetVjezdu(String idPovoleniVjezduVozidla) {
         PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
 
@@ -186,12 +251,13 @@ public class PovoleniVjezduVozidlaService {
     }
 
     private Integer pocetVjezduProInterval(List<String> rzVozidla, Date datumOd, Date datumDo) {
-        ZonedDateTime datumOdZoned = ZonedDateTime.ofInstant(datumOd.toInstant(), ZoneId.systemDefault());
-        ZonedDateTime datumDoZoned = ZonedDateTime.ofInstant(datumDo.toInstant(), ZoneId.systemDefault());
+        // Nastavení datumOd na začátek dne (00:00:00)
+        ZonedDateTime datumOdZoned = ZonedDateTime.ofInstant(datumOd.toInstant(), ZoneId.systemDefault())
+                                                .with(LocalTime.MIN);
 
-        logger.info("---------------------------");
-        logger.info(datumOdZoned);
-        logger.info(datumDoZoned);
+        // Nastavení datumDo na konec dne (23:59:59)
+        ZonedDateTime datumDoZoned = ZonedDateTime.ofInstant(datumDo.toInstant(), ZoneId.systemDefault())
+                                                .with(LocalTime.MAX);
 
         int pocetVjezdu = 0;
 

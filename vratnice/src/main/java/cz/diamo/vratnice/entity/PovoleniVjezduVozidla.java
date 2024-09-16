@@ -3,6 +3,7 @@ package cz.diamo.vratnice.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.sql.Timestamp;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -107,7 +108,19 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "opakovany_vjezd")
     private Boolean opakovanyVjezd = false;
 
-    private String stav = "vyžádáno";
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_zadost_stav")
+    private ZadostStav stav;
+
+    private String poznamka;
+
+    private Boolean aktivita = true;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
     public PovoleniVjezduVozidla(String idPovoleniVjezduVozidla) {
         setIdPovoleniVjezduVozidla(idPovoleniVjezduVozidla);

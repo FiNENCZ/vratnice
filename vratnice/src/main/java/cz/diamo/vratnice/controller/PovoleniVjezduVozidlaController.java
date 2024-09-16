@@ -26,9 +26,11 @@ import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
+import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import jakarta.validation.Valid;
 
@@ -60,6 +62,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     public ResponseEntity<List<PovoleniVjezduVozidlaDto>> list(
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumOd,
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumDo,
+                        @RequestParam @Nullable Boolean aktivita,
                         @RequestParam @Nullable Integer minimalniPocetVjezdu) {
 
 
@@ -67,7 +70,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         if (datumOd != null && datumDo != null && minimalniPocetVjezdu != null) {
             
             List<PovoleniVjezduVozidlaDto> result = new ArrayList<>();
-            List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getAll();
+            List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getList(aktivita);
     
             if (list != null && !list.isEmpty()) {
                 for (PovoleniVjezduVozidla povoleniVjezduVozidla : list) {
@@ -90,7 +93,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         } 
         // pokud není žádný parametr vyplněn
         if (datumOd == null && datumDo == null && minimalniPocetVjezdu == null) {
-            List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getAll().stream()
+            List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getList(aktivita).stream()
                 .map(PovoleniVjezduVozidlaDto::new)
                 .collect(Collectors.toList());
             return ResponseEntity.ok(povoleniVjezduVozidel);
@@ -156,10 +159,22 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
 
     @PostMapping("/povoleni-vjezdu-vozidla/zneplatnit-povoleni")
-    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) {
-        //TODO: dodělat logiku zneplatnění povolení vjezdu vozidla
+    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) throws UniqueValueException, NoSuchMessageException {
+        List<PovoleniVjezduVozidla> povoleniList = povoleniVjezduVozidlaService.zneplatnitPovoleni(povoleni);
         
-        return ResponseEntity.ok(povoleni);
+        // Převod entit zpět na DTO
+        List<PovoleniVjezduVozidlaDto> updatedPovoleniDtos = povoleniList.stream()
+        .map(PovoleniVjezduVozidlaDto::new)
+        .collect(Collectors.toList());
+
+        return ResponseEntity.ok(updatedPovoleniDtos);
+    }
+
+
+    @GetMapping("/povoleni-vjezdu-vozidla/stav")
+    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+        ZadostStav stav = povoleniVjezduVozidlaService.getZadostStav(idZadostKlic);
+        return ResponseEntity.ok(new ZadostStavDto(stav));
     }
     
 }

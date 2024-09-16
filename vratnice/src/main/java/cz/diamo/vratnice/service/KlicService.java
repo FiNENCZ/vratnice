@@ -68,16 +68,19 @@ public class KlicService {
         return klicRepository.save(klic);
     }
 
-    //TODO: Implementovat funkci pro zjištění přístupu klic.vratnice pro daného uživatele
+
     public void maUzivatelPristupKeKlici(Klic klic, AppUserDto appUserDto) throws NoSuchMessageException, BaseException {
         Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
         Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
 
         if (!maVsechnyVratnice) {
             if (nastavenaVratnice != null) {
-                if (klic.getVratnice() != nastavenaVratnice){
+                if (!klic.getVratnice().getIdVratnice().equals(nastavenaVratnice.getIdVratnice())){
                     throw new BaseException(messageSource.getMessage("klic.save.no_access", null, LocaleContextHolder.getLocale()));
                 }
+            }
+            else {
+                throw new BaseException(messageSource.getMessage("klic.save.no_access", null, LocaleContextHolder.getLocale()));
             }
         }
         

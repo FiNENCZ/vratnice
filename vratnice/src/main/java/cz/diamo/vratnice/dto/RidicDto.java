@@ -46,7 +46,10 @@ public class RidicDto implements Serializable {
         this.jmeno = ridic.getJmeno();
         this.prijmeni = ridic.getPrijmeni();
         this.cisloOp = ridic.getCisloOp();
-        this.spolecnost = new SpolecnostDto(ridic.getSpolecnost());
+
+        if (ridic.getSpolecnost() != null)
+            this.spolecnost = new SpolecnostDto(ridic.getSpolecnost());
+
         this.datumPouceni = ridic.getDatumPouceni();
     }
 
@@ -57,7 +60,10 @@ public class RidicDto implements Serializable {
         ridic.setJmeno(this.jmeno);
         ridic.setPrijmeni(this.prijmeni);
         ridic.setCisloOp(this.cisloOp);
-        ridic.setSpolecnost(getSpolecnost().toEntity());
+
+        if (getSpolecnost() != null)
+            ridic.setSpolecnost(getSpolecnost().toEntity());
+
         ridic.setDatumPouceni(this.datumPouceni);
 
         return ridic;

@@ -6,6 +6,7 @@ import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
+import cz.diamo.vratnice.entity.ZadostStav;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
@@ -80,9 +81,13 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
 
     private Boolean opakovanyVjezd = false;
 
-    private String stav = "vyžádáno";
+    @NotNull(message = "{zadost_klic.zadost_stav.require}")
+    private ZadostStavDto stav;
 
     private Integer pocetVjezdu;
+
+    @NotNull(message = "{aktivita.require}")
+    private Boolean aktivita = true;
 
     public PovoleniVjezduVozidlaDto(PovoleniVjezduVozidla povoleniVjezduVozidla) {
         if (povoleniVjezduVozidla == null) {
@@ -132,7 +137,8 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         
 
         this.opakovanyVjezd = povoleniVjezduVozidla.getOpakovanyVjezd();
-        this.stav = povoleniVjezduVozidla.getStav();
+        this.stav = new ZadostStavDto(povoleniVjezduVozidla.getStav());
+        this.aktivita = povoleniVjezduVozidla.getAktivita();
     }
 
     public PovoleniVjezduVozidla toEntity() {
@@ -181,7 +187,8 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         
     
         povoleniVjezduVozidla.setOpakovanyVjezd(this.opakovanyVjezd);
-        povoleniVjezduVozidla.setStav(this.stav);
+        povoleniVjezduVozidla.setStav(new ZadostStav(getStav().getStavEnum()));
+        povoleniVjezduVozidla.setAktivita(getAktivita());
     
         return povoleniVjezduVozidla;
     }
