@@ -1,15 +1,15 @@
 package cz.diamo.vratnice.controller;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.context.MessageSourceAutoConfiguration;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,15 +23,15 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.controller.BudovaBaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.BudovaDto;
-import cz.diamo.share.dto.opravneni.OpravneniDto;
 import cz.diamo.share.entity.Budova;
 import cz.diamo.share.entity.Opravneni;
+import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.enums.OpravneniTypPristupuBudovaEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.repository.OpravneniBudovaRepository;
+import cz.diamo.share.repository.OpravneniZavodRepository;
 import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.services.BudovaServices;
-import cz.diamo.vratnice.dto.SluzebniVozidloDto;
-import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityManager;
@@ -61,7 +61,7 @@ public class BudovaController extends BudovaBaseController {
 	private OpravneniBudovaRepository opravneniBudovaRepository;
 
 	@Autowired
-	private MessageSource messageSource;
+	private OpravneniZavodRepository opravneniZavodRepository;
 
 	@PostMapping("/save")
 	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
@@ -119,29 +119,72 @@ public class BudovaController extends BudovaBaseController {
 		}
 	}
 
-	@GetMapping("/list-dle-pristupu") //TODO : dodělat listování budov dle oprávnění
+	@GetMapping("/list-dle-pristupu")
 	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
-	public ResponseEntity<List<BudovaDto>> listDlePristupu(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String idUzivatel) {
-		List<BudovaDto> resultBudovy = new ArrayList<BudovaDto>();
-		List<OpravneniDto> result = new ArrayList<OpravneniDto>();
-		List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, true);
+	public ResponseEntity<Set<BudovaDto>> listDlePristupu(
+			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+			@RequestParam @Nullable Boolean aktivita,
+			@RequestParam @Nullable String idLokalita) {
 
-		if (opravneniUzivatele != null && opravneniUzivatele.size() > 0) {
-            for (Opravneni opravneni : opravneniUzivatele) {
-                //result.add(new OpravneniDto(opravneni, messageSource, true, true));
-				opravneni.setBudovy(opravneniBudovaRepository.listBudova(opravneni.getIdOpravneni()));
-				if (opravneni.getBudovy() != null) {
-					for ( Budova budova : opravneni.getBudovy()) {
+		String idUzivatel = appUserDto.getIdUzivatel();
 
-						resultBudovy.add(new BudovaDto(budova));
-					}
-					return ResponseEntity.ok(resultBudovy);
-				} 
-            }
-        }
-
-
+		Set<BudovaDto> resultBudovy = new HashSet<>();
+		List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, aktivita);
+	
+		if (opravneniUzivatele == null || opravneniUzivatele.isEmpty()) {
+			return ResponseEntity.ok(resultBudovy);  // pokud uživatel nemá oprávnění, vracíme prázdný set
+		}
+	
+		for (Opravneni opravneni : opravneniUzivatele) {
+			OpravneniTypPristupuBudovaEnum typPristupu = opravneni.getOpravneniTypPristupuBudova().getOpravneniTypPristupuBudovaEnum();
+	
+			switch (typPristupu) {
+				case TYP_PRIST_BUDOVA_OPR_VSE:
+					listVsechnyBudovy(resultBudovy, aktivita, idLokalita);
+					break;
+	
+				case TYP_PRIST_BUDOVA_OPR_ZAVOD:
+					listBudovyZavodu(resultBudovy, opravneni, aktivita, idLokalita);
+					break;
+	
+				case TYP_PRIST_BUDOVA_OPR_VYBER:
+					listVybraneBudovy(resultBudovy, opravneni, aktivita, idLokalita);
+					break;
+	
+				default:
+					break;
+			}
+		}
+	
 		return ResponseEntity.ok(resultBudovy);
+	}
 
+	private void listVsechnyBudovy(Set<BudovaDto> resultBudovy, Boolean aktivita, String idLokalita) {
+		List<Budova> vsechnyBudovy = budovaServices.getList(null, idLokalita, aktivita);
+		for (Budova budova : vsechnyBudovy) {
+			resultBudovy.add(new BudovaDto(budova));
+		}
+	}
+	
+	private void listBudovyZavodu(Set<BudovaDto> resultBudovy, Opravneni opravneni, Boolean aktivita, String idLokalita) {
+		List<Zavod> zavodyDleOpravneni = opravneniZavodRepository.listZavod(opravneni.getIdOpravneni());
+		for (Zavod zavod : zavodyDleOpravneni) {
+			List<Budova> budovyZavodu = budovaServices.getList(zavod.getIdZavod(), idLokalita, aktivita);
+			for (Budova budova : budovyZavodu) {
+				resultBudovy.add(new BudovaDto(budova));
+			}
+		}
+	}
+	
+	private void listVybraneBudovy(Set<BudovaDto> resultBudovy, Opravneni opravneni, Boolean aktivita, String idLokalita) {
+		List<Budova> vybraneBudovy = opravneniBudovaRepository.listBudova(opravneni.getIdOpravneni());
+		if (vybraneBudovy != null) {
+			for (Budova budova : vybraneBudovy) {
+				if (aktivita != null) {
+					if (budova.getAktivita().equals(aktivita) && budova.getLokalita().getIdLokalita().equals(idLokalita))
+					resultBudovy.add(new BudovaDto(budova));
+				}
+			}
+		}
 	}
 }
