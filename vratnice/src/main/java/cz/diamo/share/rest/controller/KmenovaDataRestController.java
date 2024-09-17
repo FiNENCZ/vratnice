@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
+import cz.diamo.share.dto.AktualizacePristupovychKaretResponseDto;
 import cz.diamo.share.dto.Ws02ZastupDto;
 import cz.diamo.share.dto.Wso2UzivatelExtDto;
+import cz.diamo.share.edos.services.PristupovaKartaEdosServices;
 import cz.diamo.share.entity.KmenovaData;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.exceptions.ValidationException;
@@ -51,6 +53,9 @@ public class KmenovaDataRestController extends BaseRestController {
 
 	@Autowired
 	private UzivatelServices uzivatelServices;
+
+	@Autowired
+	private PristupovaKartaEdosServices pristupovaKartaEdosServices;
 
 	/**
 	 * Uložení údajů o zaměstnanci
@@ -166,6 +171,20 @@ public class KmenovaDataRestController extends BaseRestController {
 			}
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
 
+		} catch (ResponseStatusException re) {
+			throw re;
+		} catch (Exception e) {
+			logger.error(e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+		}
+	}
+
+	@PostMapping("/kmenova-data/rfid-edos/synchronizace")
+	@PreAuthorize("hasAnyAuthority('ROLE_PERSONALISTIKA')")
+	public AktualizacePristupovychKaretResponseDto rfidEdosSynchronizace(HttpServletRequest request) {
+
+		try {
+			return pristupovaKartaEdosServices.aktualizacePristupovychKaret(null);
 		} catch (ResponseStatusException re) {
 			throw re;
 		} catch (Exception e) {

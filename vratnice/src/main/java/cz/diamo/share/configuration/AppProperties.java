@@ -32,6 +32,10 @@ public class AppProperties {
 
     private String edosApiUrl;
 
+    private String edosApiJmeno;
+
+    private String edosApiHeslo;
+
     private String evozApiUrl;
 
     private String vratniceApiUrl;

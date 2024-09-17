@@ -28,6 +28,7 @@
 		<jjwt.version>0.9.1</jjwt.version>
 		<jaxb-api.version>2.4.0-b180830.0359</jaxb-api.version>
 		<keycloak-authz-client.version>22.0.1</keycloak-authz-client.version>
+		<org.json.version>20231013</org.json.version>
 	</properties>
 	<profiles>
 		<profile>
@@ -226,6 +227,11 @@
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${org.json.version}</version>
 		</dependency>
 	</dependencies>
 
