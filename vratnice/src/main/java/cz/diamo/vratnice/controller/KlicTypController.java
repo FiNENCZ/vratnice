@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,7 @@ public class KlicTypController extends BaseController {
     private KlicTypRepository klicTypRepository;
 
     @GetMapping("/klic-typ/list")
+	@PreAuthorize("isFullyAuthenticated()")
     public List<KlicTypDto> list(HttpServletRequest request) {
         List<KlicTypDto> result = new ArrayList<KlicTypDto>();
 

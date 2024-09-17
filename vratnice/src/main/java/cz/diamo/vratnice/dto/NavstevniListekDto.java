@@ -83,7 +83,7 @@ public class NavstevniListekDto implements Serializable{
         List<NavstevaOsoba> navstevaOsobas = new ArrayList<>();
         if (this.getNavstevaOsoba() != null) {
             for (NavstevaOsobaDto navstevaOsobaDto : this.getNavstevaOsoba()) {
-                navstevaOsobas.add(new NavstevaOsoba(navstevaOsobaDto.getIdNavstevaOsoba()));
+                navstevaOsobas.add(navstevaOsobaDto.toEntity());
             }
         }
         navstevniListek.setNavstevaOsoba(navstevaOsobas);

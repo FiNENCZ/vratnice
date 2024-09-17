@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -30,6 +31,7 @@ public class VratniceKonfiguraceController extends BaseController {
     private VratniceProperties vratniceProperties;
 
     @GetMapping("/vratnice-konfigurace")
+    @PreAuthorize("isFullyAuthenticated()")
     public VratniceKonfiguraceDto detail(HttpServletRequest request) {
         VratniceKonfiguraceDto vratniceKonfiguraceDto = new VratniceKonfiguraceDto();
 
@@ -43,7 +45,8 @@ public class VratniceKonfiguraceController extends BaseController {
         return vratniceKonfiguraceDto;
     }
 
-@PostMapping("/vratnice-konfigurace/is-datum-pouceni-valid")
+    @PostMapping("/vratnice-konfigurace/is-datum-pouceni-valid")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Boolean> isDatumPouceniValid(
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date datumPouceni) {
         

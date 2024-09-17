@@ -64,6 +64,7 @@ public class UzivatelVratniceController extends BaseController {
     }
 
     @GetMapping("/uzivatel-vratnice/list-vratnice-by-uzivatel")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<UzivatelVratniceDto>> listVratniceByUzivatel(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
 
         List<UzivatelVratniceDto> result = new ArrayList<UzivatelVratniceDto>();
@@ -90,6 +91,7 @@ public class UzivatelVratniceController extends BaseController {
     }
 
     @PostMapping("/uzivatel-vratnice/nastav-vratnici")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UzivatelVratniceDto> nastavVratnici(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody VratniceDto vratniceDto) throws RecordNotFoundException, NoSuchMessageException, UniqueValueException {
         UzivatelVratnice uzivatelVratnice = uzivatelVratniceService.getByUzivatel(appUserDto);
         uzivatelVratnice.setNastavenaVratnice(vratniceDto.toEntity());
@@ -100,18 +102,21 @@ public class UzivatelVratniceController extends BaseController {
     }
 
     @GetMapping("/uzivatel-vratnice/je-nastavena-vratnice-vjezdova")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Boolean> jeNastavenaVratniceVjezdova(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Boolean jeVjezdova = uzivatelVratniceService.jeVjezdova(appUserDto);
         return ResponseEntity.ok(jeVjezdova);
     }
 
     @GetMapping("/uzivatel-vratnice/je-nastavena-vratnice-osobni")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Boolean> jeNastavenaVratniceOsobni(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Boolean jeOsobni = uzivatelVratniceService.jeOsobni(appUserDto);
         return ResponseEntity.ok(jeOsobni);
     }
 
     @GetMapping("/uzivatel-vratnice/je-nastavena-vratnice-navstevni")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Boolean> jeNastavenaVratniceNavstevni(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         Boolean jeNavstevni = uzivatelVratniceService.jeNavstevni(appUserDto);
         return ResponseEntity.ok(jeNavstevni);

@@ -8,7 +8,6 @@ import java.util.List;
 import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Lokalita;
-import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.enums.SluzebniVozidloKategorieEnum;
 import cz.diamo.vratnice.enums.SluzebniVozidloStavEnum;
@@ -90,22 +89,24 @@ public class SluzebniVozidloDto implements Serializable {
         sluzebniVozidlo.setRz(this.rz);
         sluzebniVozidlo.setTyp(getTyp().toEntity());
         sluzebniVozidlo.setKategorie(getKategorie().toEntity());
-        
-        if (getFunkce() != null) 
-            sluzebniVozidlo.setFunkce(getFunkce().toEntity());
 
+        if (getKategorie().getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)) {
+            if (getFunkce() != null) 
+                sluzebniVozidlo.setFunkce(getFunkce().toEntity());
+                
+        } else {
+            if (getZavod()!= null)
+                sluzebniVozidlo.setZavod(getZavod().getZavod(null, false ));
 
-        if (getZavod()!= null)
-            sluzebniVozidlo.setZavod(new Zavod(getZavod().getId()));
-
-        List<Lokalita> lokality = new ArrayList<>();
-        if (getLokality() != null) {
-            for (LokalitaDto lokalitaDto : this.getLokality()) {
-                lokality.add(new Lokalita(lokalitaDto.getId()));
+            List<Lokalita> lokality = new ArrayList<>();
+            if (getLokality() != null) {
+                for (LokalitaDto lokalitaDto : this.getLokality()) {
+                    lokality.add(new Lokalita(lokalitaDto.getId()));
+                }
             }
+            sluzebniVozidlo.setLokality(lokality);
         }
-        sluzebniVozidlo.setLokality(lokality);
-        
+       
         sluzebniVozidlo.setStav(getStav().toEntity());
         sluzebniVozidlo.setDatumOd(this.datumOd);
         sluzebniVozidlo.setAktivita(this.aktivita);

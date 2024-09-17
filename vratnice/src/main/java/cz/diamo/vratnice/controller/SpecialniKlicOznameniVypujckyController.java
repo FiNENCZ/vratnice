@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,12 +40,14 @@ public class SpecialniKlicOznameniVypujckyController extends BaseController {
     private SpecialniKlicOznameniVypujckyService specialniKlicOznameniVypujckyService;
 
     @PostMapping("/specialni-klic-oznameni-vypujcky/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<SpecialniKlicOznameniVypujckyDto> save(@RequestBody @Valid SpecialniKlicOznameniVypujckyDto oznameni) throws NoSuchMessageException, BaseException {
         SpecialniKlicOznameniVypujcky specialniKlicOznameniVypujcky = specialniKlicOznameniVypujckyService.save(oznameni.toEntity());
         return ResponseEntity.ok(new SpecialniKlicOznameniVypujckyDto(specialniKlicOznameniVypujcky));
     }
 
     @GetMapping("/specialni-klic-oznameni-vypujcky/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<List<SpecialniKlicOznameniVypujckyDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
                 @RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
         List<SpecialniKlicOznameniVypujckyDto> result = new ArrayList<SpecialniKlicOznameniVypujckyDto>();
@@ -60,6 +63,7 @@ public class SpecialniKlicOznameniVypujckyController extends BaseController {
     }
 
     @GetMapping("/specialni-klic-oznameni-vypujcky/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<SpecialniKlicOznameniVypujckyDto> detail(@RequestParam String idOznameni) {
         SpecialniKlicOznameniVypujcky oznameni = specialniKlicOznameniVypujckyService.getDetail(idOznameni);
         if (oznameni == null) {

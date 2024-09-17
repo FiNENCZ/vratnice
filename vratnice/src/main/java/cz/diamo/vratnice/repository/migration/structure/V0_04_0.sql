@@ -1,0 +1,2 @@
+insert into vratnice.zdrojovy_text (hash, text) values ('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA','Správa povolení vjezdu vozidel');
+insert into vratnice.role (authority, nazev_resx) values ('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA', 'ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA');

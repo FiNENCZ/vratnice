@@ -4,10 +4,7 @@ import java.io.Serializable;
 import java.sql.Date;
 
 import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.share.entity.Uzivatel;
-import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import cz.diamo.vratnice.entity.ZadostStav;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -62,9 +59,9 @@ public class ZadostKlicDto implements Serializable {
         ZadostKlic zadostKlic = new ZadostKlic();
         
         zadostKlic.setIdZadostKlic(getId());
-        zadostKlic.setKlic(new Klic(getKlic().getId()));
-        zadostKlic.setUzivatel(new Uzivatel(getUzivatel().getId()));
-        zadostKlic.setZadostStav(new ZadostStav(getStav().getStavEnum()));
+        zadostKlic.setKlic(getKlic().toEntity());
+        zadostKlic.setUzivatel(getUzivatel().getUzivatel(null, false));
+        zadostKlic.setZadostStav(getStav().getZadostStav()); 
         zadostKlic.setTrvala(getTrvala());
         zadostKlic.setDatumOd(getDatumOd());
         zadostKlic.setDatumDo(getDatumDo());

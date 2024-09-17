@@ -34,7 +34,7 @@ public class RzVozidlaDetektorService {
         if (result.isPresent()) {
             return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
         } else {
-            if (sluzebniVozidloService.isSluzebniVozidlo(rzVozidla)) {
+            if (sluzebniVozidloService.muzeSluzebniVozidloProjetVratnici(rzVozidla, idVratnice)) {
                 return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, vjezd);
             } else {
                 return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);

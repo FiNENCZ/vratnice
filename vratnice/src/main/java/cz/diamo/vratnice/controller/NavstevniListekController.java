@@ -106,12 +106,14 @@ public class NavstevniListekController extends BaseController {
     }
 
     @GetMapping("/navstevni-listek/typ")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<NavstevniListekTypDto> navstevniListekTyp(@RequestParam String idNavstevniListek) {
         NavstevniListekTyp navstevniListekTyp = navstevniListekService.getNavstevniListekTyp(idNavstevniListek);
         return ResponseEntity.ok(new NavstevniListekTypDto(navstevniListekTyp));
     }
 
     @GetMapping("/navstevni-listek/typ-by-uzivatel")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<NavstevniListekTypDto> typByUzivatele(@RequestParam String idUzivatele) {
         NavstevniListekTyp navstevniListekTypUzivatele = navstevniListekService.getNavstevniListekTypByUzivatel(idUzivatele);
         return ResponseEntity.ok(new NavstevniListekTypDto(navstevniListekTypUzivatele));

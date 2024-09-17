@@ -16,6 +16,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -53,12 +54,14 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     private MessageSource messageSource;
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/list")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<PovoleniVjezduVozidlaDto>> list(
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumOd,
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumDo,
@@ -105,6 +108,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<PovoleniVjezduVozidlaDto> getDetail(@RequestParam String idPovoleniVjezduVozidla) {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.getDetail(idPovoleniVjezduVozidla);
         if (povoleniVjezduVozidla == null) {
@@ -115,6 +119,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     
 
     @GetMapping("/povoleni-vjezdu-vozidla/get-by-stav")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<List<PovoleniVjezduVozidlaDto>> getByStav(@RequestParam String stav) {
         List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getByStav(stav).stream()
             .map(PovoleniVjezduVozidlaDto::new)
@@ -123,6 +128,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/je-rz-vozidla-povolena")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla, @RequestParam String idVratnice) throws RecordNotFoundException, NoSuchMessageException {
         Optional<PovoleniVjezduVozidla> povoleniVjezduVozidla = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla, idVratnice);
         Optional<PovoleniVjezduVozidlaDto> optionalPovoleniVjezduVozidlaDto = povoleniVjezduVozidla.map(PovoleniVjezduVozidlaDto::new);
@@ -131,12 +137,14 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     
     
     @GetMapping("/povoleni-vjezdu-vozidla/zeme-registrace-vozidla")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<StatDto> zemeRegistracePuvodu(@RequestParam String idPovoleniVjezduVozidla) {
         Stat stat = povoleniVjezduVozidlaService.getZemeRegistraceVozidla(idPovoleniVjezduVozidla);
         return ResponseEntity.ok(new StatDto(stat));
     }
 
     @GetMapping("povoleni-vjezdu-vozidla/typy-vozidel")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<VozidloTypDto>> typyVozidel(@RequestParam String idPovoleniVjezduVozidla) {
         List<VozidloTypDto> result = new ArrayList<VozidloTypDto>();
         List<VozidloTyp> typyVozidel = povoleniVjezduVozidlaService.getTypyVozidel(idPovoleniVjezduVozidla);
@@ -150,15 +158,17 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         return ResponseEntity.ok(result);
 
     }
-    
 
-    @GetMapping("/povoleni-vjezdu-vozidla/pocet-vjezdu")
-    public ResponseEntity<Integer> pocetVjezdu(@RequestParam String idPovoleni) {
-        return ResponseEntity.ok(povoleniVjezduVozidlaService.pocetVjezdu(idPovoleni));
+    @GetMapping("/povoleni-vjezdu-vozidla/stav")
+    @PreAuthorize("isFullyAuthenticated()")
+    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+        ZadostStav stav = povoleniVjezduVozidlaService.getZadostStav(idZadostKlic);
+        return ResponseEntity.ok(new ZadostStavDto(stav));
     }
 
 
     @PostMapping("/povoleni-vjezdu-vozidla/zneplatnit-povoleni")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) throws UniqueValueException, NoSuchMessageException {
         List<PovoleniVjezduVozidla> povoleniList = povoleniVjezduVozidlaService.zneplatnitPovoleni(povoleni);
         
@@ -168,13 +178,6 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         .collect(Collectors.toList());
 
         return ResponseEntity.ok(updatedPovoleniDtos);
-    }
-
-
-    @GetMapping("/povoleni-vjezdu-vozidla/stav")
-    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
-        ZadostStav stav = povoleniVjezduVozidlaService.getZadostStav(idZadostKlic);
-        return ResponseEntity.ok(new ZadostStavDto(stav));
     }
     
 }

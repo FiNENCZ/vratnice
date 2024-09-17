@@ -13,6 +13,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +22,7 @@ import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.services.UzivatelServices;
@@ -63,7 +65,8 @@ public class ZadostKlicController extends BaseController{
 
 
     @PostMapping("/zadost-klic/save")
-    public ResponseEntity<?> save(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_ZADOSTI_KLICU')")
+    public ResponseEntity<ZadostKlicDto> save(@RequestBody @Valid ZadostKlicDto zadostKlicDto) {
         try {
             // kontrola zda nebylo přesaženo max počtu výpůjček
             ZadostKlic zadostKlicEntity = zadostKlicDto.toEntity();
@@ -84,8 +87,8 @@ public class ZadostKlicController extends BaseController{
                 ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicEntity);
                 return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Žádost nelze provést, protože bylo dosaženo maximálního počtu žádostí o klíče.");
+                throw new BaseException(messageSource.getMessage("zadost_klic.max_vypujcek_exceeded", 
+                    null, LocaleContextHolder.getLocale()));
             }
 		} catch (ResponseStatusException re) {
 			logger.error(re);
@@ -96,23 +99,8 @@ public class ZadostKlicController extends BaseController{
 		}
     }
 
-    @PostMapping("/zadost-klic/zmena-stavu")
-    public ZadostKlicDto zmenaStavuZadosti(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestBody @Valid ZadostKlicDto zadostKlicDto, @RequestParam ZadostStavEnum stav) {
-        try {
-            zadostKlicDto.setStav(new ZadostStavDto(new ZadostStav(stav)));
-            ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicDto.toEntity());
-            return new ZadostKlicDto(newZadostKlic);
-        } catch (ResponseStatusException re) {
-            logger.error(re);
-            throw re;
-        } catch (Exception e) {
-            logger.error(e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-        }
-    }
-    
-
     @GetMapping("/zadosti-klic/list")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<ZadostKlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
         @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) {
 
@@ -134,6 +122,7 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadosti-klic/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_ZADOSTI_KLICU')")
     public ResponseEntity<ZadostKlicDto> getDetail(@RequestParam String idZadostKey) {
         ZadostKlic zadostKlic = zadostKlicService.getDetail(idZadostKey);
         if (zadostKlic == null) {
@@ -143,6 +132,7 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/zadosti-dle-stavu")
+    @PreAuthorize("isFullyAuthenticated()")
     public  ResponseEntity<List<ZadostKlicDto>> getZadostiByKlic(@RequestParam ZadostStavEnum zadostStavEnum) {
         List<ZadostKlicDto> zadostiKlic = zadostKlicService.getZadostiByStav(zadostStavEnum.getValue()).stream()
             .map(ZadostKlicDto::new)
@@ -151,6 +141,7 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/list-by-id-uzivatel")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<ZadostKlicDto>> listByIdUzivatel(@RequestParam String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelServices.getDetail(idUzivatel);
 
@@ -166,6 +157,7 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/vypujcek-k-dispozici")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Integer> getPocetVypujcekByUzivatel(@RequestParam String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelServices.getDetail(idUzivatel);
         if (uzivatel == null) {
@@ -180,6 +172,7 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/get-uzivatel-by-rfid")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UzivatelDto> getUzivatelByRfid(@RequestParam String rfid) throws RecordNotFoundException, NoSuchMessageException {
         Uzivatel uzivatel = uzivatelRepository.getDetailByRfid(rfid);
 
@@ -192,7 +185,8 @@ public class ZadostKlicController extends BaseController{
     }
 
     @GetMapping("/zadost-klic/stav")
-    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+    @PreAuthorize("isFullyAuthenticated()")
+    public ResponseEntity<ZadostStavDto> stav(@RequestParam String idZadostKlic) {
         ZadostStav stav = zadostKlicService.getZadostStav(idZadostKlic);
         return ResponseEntity.ok(new ZadostStavDto(stav));
     }

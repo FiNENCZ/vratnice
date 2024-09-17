@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
-import cz.diamo.share.entity.Lokalita;
-import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.Vratnice;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -70,8 +68,8 @@ public class VratniceDto implements Serializable {
 
         vratnice.setIdVratnice(this.id);
         vratnice.setNazev(this.nazev);
-        vratnice.setZavod(new Zavod(getZavod().getId()));
-        vratnice.setLokalita(new Lokalita(getLokalita().getId()));
+        vratnice.setZavod(getZavod().getZavod(null, false));
+        vratnice.setLokalita(getLokalita().getLokalita(null, false));
         vratnice.setOsobni(this.osobni);
         vratnice.setNavstevni(this.navstevni);
         vratnice.setVjezdova(this.vjezdova);

@@ -35,7 +35,7 @@ public class HistorieKlicAkceController extends BaseController {
     private HistorieKlicAkceService historieKlicAkceService;
 
     @GetMapping("/historie-klic-akce/list")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<HistorieKlicAkceDto>> list(@RequestParam(defaultValue = "true") @Nullable Boolean uzivatelskeAkce) {
         List<HistorieKlicAkceDto> result = new ArrayList<HistorieKlicAkceDto>();
         List<HistorieKlicAkce> list = historieKlicAkceService.getList(uzivatelskeAkce);

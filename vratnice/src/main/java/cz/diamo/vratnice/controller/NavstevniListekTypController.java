@@ -32,7 +32,7 @@ public class NavstevniListekTypController  extends BaseController {
     private NavstevniListekTypRepository navstevniListekTypRepository;
 
     @GetMapping("/navstevni-listek-typ/list")
-	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
+	@PreAuthorize("isFullyAuthenticated()")
     public List<NavstevniListekTypDto> list(HttpServletRequest request) {
         List<NavstevniListekTypDto> result = new ArrayList<NavstevniListekTypDto>();
 

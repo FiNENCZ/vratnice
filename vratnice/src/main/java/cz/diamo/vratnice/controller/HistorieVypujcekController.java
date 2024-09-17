@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,6 +53,7 @@ public class HistorieVypujcekController extends BaseController {
     private KlicService klicService;
 
     @PostMapping("/historie-vypujcek/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<HistorieVypujcekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                                 @RequestBody @Valid ZadostKlicDto zadostKlicDto, 
                                 @RequestParam HistorieVypujcekAkceEnum akce,
@@ -62,6 +64,7 @@ public class HistorieVypujcekController extends BaseController {
     }
 
     @PostMapping("/historie-vypujcek/vratit-klic-by-rfid")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<HistorieVypujcekDto> vratitKlicByRfid(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                         @RequestParam String rfid,
                         HttpServletRequest request) throws NoSuchMessageException, BaseException {

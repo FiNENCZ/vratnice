@@ -62,16 +62,4 @@ public class NajemnikNavstevnickaKartaController extends BaseController {
         }
         return ResponseEntity.ok(new NajemnikNavstevnickaKartaDto(najemnikNavstevnickaKarta));
     }
-
-    @GetMapping("/najemnik-navstevnicka-karta/list-by-cislo-op")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAJEMNICI_KARTY')")
-    public ResponseEntity<NajemnikNavstevnickaKartaDto> getByCisloOp(@RequestParam String cisloOp) {
-        NajemnikNavstevnickaKarta najemnikNavstevnickaKarta = najemnikNavstevnickaKartaService.getByCisloOp(cisloOp);
-        if (najemnikNavstevnickaKarta == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(new NajemnikNavstevnickaKartaDto(najemnikNavstevnickaKarta));
-    }
-
-
 }

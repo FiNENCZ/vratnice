@@ -6,11 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.dto.LokalitaDto;
-import cz.diamo.share.entity.Budova;
-import cz.diamo.share.entity.Lokalita;
 import cz.diamo.vratnice.entity.Klic;
-import cz.diamo.vratnice.entity.Poschodi;
-import cz.diamo.vratnice.entity.Vratnice;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -91,10 +87,7 @@ public class KlicDto implements Serializable {
         key.setSpecialni(this.specialni);
         key.setNazev(this.nazev);
         key.setKodCipu(this.kodCipu);
-        key.setVratnice(new Vratnice(getVratnice().getId()));
-        key.setLokalita(new Lokalita(getLokalita().getId()));
-        key.setBudova(new Budova(getBudova().getId()));
-        key.setPoschodi(new Poschodi(getPoschodi().getId()));
+        key.setVratnice(getVratnice().toEntity());
         key.setMistnost(this.mistnost);
 
         if (getTyp() != null)
@@ -102,13 +95,13 @@ public class KlicDto implements Serializable {
             
         key.setAktivita(this.aktivita);
 
-        key.setLokalita(new Lokalita(getLokalita().getId()));
+        key.setLokalita(getLokalita().getLokalita(null, false));
 
         if (getBudova() != null)
-            key.setBudova(new Budova(getBudova().getId()));
+            key.setBudova(getBudova().getBudova(null, false));
 
         if (getPoschodi() != null)
-            key.setPoschodi(new Poschodi(getPoschodi().getId()));
+            key.setPoschodi(getPoschodi().getPoschodi(null, false));
 
         return key;
     }
