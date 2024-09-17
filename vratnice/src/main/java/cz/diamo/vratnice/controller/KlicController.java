@@ -51,7 +51,7 @@ public class KlicController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/klic/save")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
     public ResponseEntity<KlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                 @RequestBody @Valid KlicDto klicDto) throws InterruptedException, ExecutionException, RecordNotFoundException, NoSuchMessageException {
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat 
@@ -85,7 +85,7 @@ public class KlicController extends BaseController {
     }
 
     @GetMapping("/klic/list")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<KlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
             @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable Boolean specialni) throws RecordNotFoundException, NoSuchMessageException {
         List<KlicDto> result = new ArrayList<KlicDto>();
@@ -102,7 +102,7 @@ public class KlicController extends BaseController {
 
 
     @GetMapping("/klic/detail")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
     public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) {
         Klic key = klicService.getDetail(idKey);
         if (key == null) {
@@ -112,7 +112,7 @@ public class KlicController extends BaseController {
     }
 
     @GetMapping("/klic/typ")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<KlicTypDto> typ(@RequestParam String idKlic) {
         KlicTyp klicTyp = klicService.getKlicTyp(idKlic);
         return ResponseEntity.ok(new KlicTypDto(klicTyp));

@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
@@ -55,6 +56,9 @@ public class KlicService {
     @Autowired
     private UzivatelVsechnyVratniceService uzivatelVsechnyVratniceService;
 
+    @Autowired
+    private BudovaVratniceService budovaVratniceService;
+
     public List<Klic> getAllKeys() {
         return klicRepository.findAll();
     }
@@ -62,6 +66,10 @@ public class KlicService {
     @Transactional
     public Klic createKey(Klic klic, AppUserDto appUserDto) throws NoSuchMessageException, BaseException {
         maUzivatelPristupKeKlici(klic, appUserDto);
+
+        Boolean maUzivatelPristupKBudove = budovaVratniceService.maUzivatelPristupKBudove(klic.getBudova(), appUserDto);
+        if (!maUzivatelPristupKBudove)
+            throw new AccessDeniedException(messageSource.getMessage("klic.save.no_access_budova", null, LocaleContextHolder.getLocale()));
 
         klic.setCasZmn(Utils.getCasZmn());
         klic.setZmenuProvedl(Utils.getZmenuProv());
@@ -73,17 +81,9 @@ public class KlicService {
         Boolean maVsechnyVratnice = uzivatelVsechnyVratniceService.jeNastavena(appUserDto);
         Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
 
-        if (!maVsechnyVratnice) {
-            if (nastavenaVratnice != null) {
-                if (!klic.getVratnice().getIdVratnice().equals(nastavenaVratnice.getIdVratnice())){
-                    throw new BaseException(messageSource.getMessage("klic.save.no_access", null, LocaleContextHolder.getLocale()));
-                }
-            }
-            else {
-                throw new BaseException(messageSource.getMessage("klic.save.no_access", null, LocaleContextHolder.getLocale()));
-            }
+        if (!maVsechnyVratnice && (nastavenaVratnice == null || !klic.getVratnice().getIdVratnice().equals(nastavenaVratnice.getIdVratnice()))) {
+            throw new AccessDeniedException(messageSource.getMessage("klic.save.no_access_vratnice", null, LocaleContextHolder.getLocale()));
         }
-        
     }
 
     public List<Klic> getList(Boolean aktivita, Boolean specialni, AppUserDto appUserDto)  {

@@ -25,13 +25,11 @@ import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.BudovaDto;
 import cz.diamo.share.entity.Budova;
 import cz.diamo.share.entity.Opravneni;
-import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.OpravneniTypPristupuBudovaEnum;
 import cz.diamo.share.exceptions.BaseException;
-import cz.diamo.share.repository.OpravneniBudovaRepository;
-import cz.diamo.share.repository.OpravneniZavodRepository;
 import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.services.BudovaServices;
+import cz.diamo.vratnice.service.BudovaVratniceService;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityManager;
@@ -58,10 +56,7 @@ public class BudovaController extends BudovaBaseController {
 	private EntityManager entityManager;
 
 	@Autowired
-	private OpravneniBudovaRepository opravneniBudovaRepository;
-
-	@Autowired
-	private OpravneniZavodRepository opravneniZavodRepository;
+	private BudovaVratniceService budovaVratniceService;
 
 	@PostMapping("/save")
 	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
@@ -140,15 +135,15 @@ public class BudovaController extends BudovaBaseController {
 	
 			switch (typPristupu) {
 				case TYP_PRIST_BUDOVA_OPR_VSE:
-					listVsechnyBudovy(resultBudovy, aktivita, idLokalita);
+					resultBudovy.addAll(budovaVratniceService.listVsechnyBudovy(aktivita, idLokalita));
 					break;
 	
 				case TYP_PRIST_BUDOVA_OPR_ZAVOD:
-					listBudovyZavodu(resultBudovy, opravneni, aktivita, idLokalita);
+					resultBudovy.addAll(budovaVratniceService.listBudovyZavodu(opravneni, aktivita, idLokalita));
 					break;
 	
 				case TYP_PRIST_BUDOVA_OPR_VYBER:
-					listVybraneBudovy(resultBudovy, opravneni, aktivita, idLokalita);
+					resultBudovy.addAll(budovaVratniceService.listVybraneBudovy(opravneni, aktivita, idLokalita));
 					break;
 	
 				default:
@@ -159,32 +154,5 @@ public class BudovaController extends BudovaBaseController {
 		return ResponseEntity.ok(resultBudovy);
 	}
 
-	private void listVsechnyBudovy(Set<BudovaDto> resultBudovy, Boolean aktivita, String idLokalita) {
-		List<Budova> vsechnyBudovy = budovaServices.getList(null, idLokalita, aktivita);
-		for (Budova budova : vsechnyBudovy) {
-			resultBudovy.add(new BudovaDto(budova));
-		}
-	}
 	
-	private void listBudovyZavodu(Set<BudovaDto> resultBudovy, Opravneni opravneni, Boolean aktivita, String idLokalita) {
-		List<Zavod> zavodyDleOpravneni = opravneniZavodRepository.listZavod(opravneni.getIdOpravneni());
-		for (Zavod zavod : zavodyDleOpravneni) {
-			List<Budova> budovyZavodu = budovaServices.getList(zavod.getIdZavod(), idLokalita, aktivita);
-			for (Budova budova : budovyZavodu) {
-				resultBudovy.add(new BudovaDto(budova));
-			}
-		}
-	}
-	
-	private void listVybraneBudovy(Set<BudovaDto> resultBudovy, Opravneni opravneni, Boolean aktivita, String idLokalita) {
-		List<Budova> vybraneBudovy = opravneniBudovaRepository.listBudova(opravneni.getIdOpravneni());
-		if (vybraneBudovy != null) {
-			for (Budova budova : vybraneBudovy) {
-				if (aktivita != null) {
-					if (budova.getAktivita().equals(aktivita) && budova.getLokalita().getIdLokalita().equals(idLokalita))
-					resultBudovy.add(new BudovaDto(budova));
-				}
-			}
-		}
-	}
 }
