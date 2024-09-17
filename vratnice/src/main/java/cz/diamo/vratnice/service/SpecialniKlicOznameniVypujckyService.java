@@ -1,7 +1,5 @@
 package cz.diamo.vratnice.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +23,8 @@ import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.OznameniServices;
+import cz.diamo.share.services.UzivatelServices;
+import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.SpecialniKlicOznameniVypujcky;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
@@ -49,6 +49,9 @@ public class SpecialniKlicOznameniVypujckyService {
 
     @Autowired
     private KlicService klicService;
+
+    @Autowired
+    private UzivatelServices uzivatelServices;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -115,64 +118,31 @@ public class SpecialniKlicOznameniVypujckyService {
     }
 
     @TransactionalRO
-    public void oznamitVypujcku(String idKlic, HistorieVypujcekAkceEnum akceEnum,HttpServletRequest request) throws NoSuchMessageException, BaseException {
+    public void oznamitVypujcku(String idKlic, String idUzivatel, HistorieVypujcekAkceEnum akceEnum, HttpServletRequest request) throws NoSuchMessageException, BaseException {
         Klic klic = klicService.getDetail(idKlic);
         if (!klic.isSpecialni()) {
             return;
         }
 
-        logger.info(klic);
-
         SpecialniKlicOznameniVypujcky oznameniVypujcky = specialniKlicOznameniVypujckyRepository.getByKlic(klic);
-
         if (oznameniVypujcky == null) {
             return;
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
-        String formattedNow = now.format(formatter);
+        Uzivatel uzivatelVypujcky = uzivatelServices.getDetail(idUzivatel);
 
         AvizaceRequestDto avizaceRequestDto = new AvizaceRequestDto();
         String predmet = messageSource.getMessage("avizace.specialni_klic_oznameni_vypujcky.predmet", null, LocaleContextHolder.getLocale());
-        String oznameniText = new String();
-
-        if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
-            oznameniText = String.format(
-                "Nová výpůjčka speciálního klíče.\n" +
-                "Klíč: <strong>%s</strong> - %s (%s)\n" +
-                "Uživatel: <strong>TEST</strong>\n" +
-                "Datum výpůjčky: <strong>%s</strong>",
-                klic.getNazev(),
-                klic.getLokalita().getNazev(), klic.getBudova().getNazev(),
-                formattedNow
-            );
-        } 
-
-        if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
-            oznameniText = String.format(
-                "Speciální klíč byl vrácen.\n" +
-                "Klíč: <strong>%s</strong> - %s (%s)\n" +
-                "Uživatel: <strong>TEST</strong>\n" +
-                "Datum vrácení: <strong>%s</strong>",
-                klic.getNazev(),
-                klic.getLokalita().getNazev(), klic.getBudova().getNazev(),
-                formattedNow
-            );
-        }
-
-
+        String oznameniText = vytvorObsahOznameni(klic, uzivatelVypujcky, akceEnum);
         String telo = String.format("Dobrý den, \n") + oznameniText;
 
-        TypOznameniEnum typOznameni = TypOznameniEnum.DULEZITE_INFO;
-
         avizaceRequestDto.setEmail(new AvizaceEmailRequestDto(predmet, telo, null));
-        avizaceRequestDto.setOznameni(new AvizaceOznameniRequestDto(typOznameni, predmet, oznameniText, null));
+        avizaceRequestDto.setOznameni(new AvizaceOznameniRequestDto(TypOznameniEnum.DULEZITE_INFO, predmet, oznameniText, null));
 
-        //TODO: dodělat kdo si klíč vypůjčil
-        for (Uzivatel uzivatel: oznameniVypujcky.getUzivatele()) {
-            String email = uzivatel.getEmail();
-            String sapId = uzivatel.getSapId();
+        //Přidat příjemce
+        for (Uzivatel uzivatelOznameni: oznameniVypujcky.getUzivatele()) {
+            String email = uzivatelOznameni.getEmail();
+            String sapId = uzivatelOznameni.getSapId();
             AvizacePrijemceRequestDto prijemnce = new AvizacePrijemceRequestDto();
             
             if (sapId != null) 
@@ -185,5 +155,39 @@ public class SpecialniKlicOznameniVypujckyService {
         }
 
         oznameniServices.save(avizaceRequestDto, request);
+    }
+
+    private String vytvorObsahOznameni(Klic klic, Uzivatel uzivatelVypujcky, HistorieVypujcekAkceEnum akceEnum) throws NoSuchMessageException, BaseException {
+        String formattedNow = VratniceUtils.getCurrentFormattedDateTime();
+        if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
+            return String.format(
+                "Nová výpůjčka speciálního klíče.\n" +
+                "Klíč: <strong>%s</strong> - %s (%s)\n" +
+                "Uživatel: <strong> %s </strong> (%s)\n" +
+                "Datum výpůjčky: <strong>%s</strong>",
+                klic.getNazev(),
+                klic.getLokalita().getNazev(),
+                klic.getBudova().getNazev(),
+                uzivatelVypujcky.getNazev(),
+                uzivatelVypujcky.getSapId(),
+                formattedNow
+            );
+        } else if (akceEnum == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
+            return String.format(
+                "Speciální klíč byl vrácen.\n" +
+                "Klíč: <strong>%s</strong> - %s (%s)\n" +
+                "Uživatel: <strong> %s </strong> (%s)\n" +
+                "Datum vrácení: <strong>%s</strong>",
+                klic.getNazev(),
+                klic.getLokalita().getNazev(),
+                klic.getBudova().getNazev(),
+                uzivatelVypujcky.getNazev(),
+                uzivatelVypujcky.getSapId(),
+                formattedNow
+            );
+        } else {   
+            throw new BaseException(messageSource.getMessage("specialni_klic_oznameni_vypujcky.obsah_oznameni_error", 
+                    null, LocaleContextHolder.getLocale()));
+        }
     }
 }

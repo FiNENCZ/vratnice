@@ -67,19 +67,6 @@ public class HistorieVypujcekService {
         Boolean jeKlicDostupny = klicService.jeDostupny(zadostKlic);
         zkontrolujDostupnostKlice(jeKlicDostupny, akce);
 
-        if (jeKlicDostupny == null) 
-            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.null", 
-            null,LocaleContextHolder.getLocale())));
-
-        if (jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) //Je dostupný, ale uživatel ho chce vrátit
-            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vratit", 
-                null,LocaleContextHolder.getLocale())));
-
-        if (!jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) //Je nedostupný, ale uživatel ho chce půjčit
-            throw new BaseException(String.format(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.false", 
-            null,LocaleContextHolder.getLocale())));
-
-
         HistorieVypujcek historieVypujcek = new HistorieVypujcek();
         Uzivatel vratny = uzivatelServices.getDetail(appUserDto.getIdUzivatel());
 
@@ -88,7 +75,7 @@ public class HistorieVypujcekService {
         historieVypujcek.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         historieVypujcek.setVratny(vratny);
 
-        specialniKlicOznameniVypujckyService.oznamitVypujcku(zadostKlic.getKlic().getIdKlic(), akce, request);
+        specialniKlicOznameniVypujckyService.oznamitVypujcku(zadostKlic.getKlic().getIdKlic(), zadostKlic.getUzivatel().getIdUzivatel(), akce, request);
 
         return historieVypujcekRepository.save(historieVypujcek);
     }
@@ -100,11 +87,11 @@ public class HistorieVypujcekService {
             throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.null", null, locale));
         }
     
-        if (jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) {
+        if (jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN) { //Je dostupný, ale uživatel ho chce vrátit
             throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vratit", null, locale));
         }
     
-        if (!jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) {
+        if (!jeKlicDostupny && akce == HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VYPUJCEN) { //Je nedostupný, ale uživatel ho chce půjčit
             throw new BaseException(messageSource.getMessage("historie_vypujcek.klic_nelze_vypujcit.false", null, locale));
         }
     }

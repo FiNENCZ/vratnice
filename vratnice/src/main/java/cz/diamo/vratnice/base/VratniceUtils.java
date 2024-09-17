@@ -1,7 +1,9 @@
 package cz.diamo.vratnice.base;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class VratniceUtils {
@@ -26,6 +28,13 @@ public class VratniceUtils {
 
         // Kontrola, zda je datumOd starsi nez intervalDo a datumDo novejsi nez intervalOd
         return datumOdDate.isBefore(intervalDoDate) && datumDoDate.isAfter(intervalOdDate);
+    }
+
+    // Funkce pro získání aktuálního času ve formátu "HH:mm dd.MM.yyyy"
+    public static String getCurrentFormattedDateTime() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+        return now.format(formatter);
     }
 
 }

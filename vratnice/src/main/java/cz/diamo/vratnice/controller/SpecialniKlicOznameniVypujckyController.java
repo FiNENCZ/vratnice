@@ -18,10 +18,8 @@ import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.SpecialniKlicOznameniVypujckyDto;
 import cz.diamo.vratnice.entity.SpecialniKlicOznameniVypujcky;
-import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
 import cz.diamo.vratnice.service.SpecialniKlicOznameniVypujckyService;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,14 +68,4 @@ public class SpecialniKlicOznameniVypujckyController extends BaseController {
 
         return ResponseEntity.ok(new SpecialniKlicOznameniVypujckyDto(oznameni));
     }
-    
-
-    @GetMapping("/specialni-klic-oznameni-vypujcky/oznamit")
-    public void oznamit(@RequestParam String idKlic, @RequestParam HistorieVypujcekAkceEnum akce, HttpServletRequest request) throws NoSuchMessageException, BaseException {
-        specialniKlicOznameniVypujckyService.oznamitVypujcku(idKlic, akce, request);
-
-    }
-    
-    
-    
 }
