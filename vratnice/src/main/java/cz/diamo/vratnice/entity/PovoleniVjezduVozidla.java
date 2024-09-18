@@ -93,6 +93,9 @@ public class PovoleniVjezduVozidla implements Serializable{
     @Column(name = "datum_do")
     private Date datumDo;
 
+    @Column(name = "datum_vytvoreni")
+    private Date datumVytvoreni;
+
     @ManyToOne
     @JoinColumn(name = "id_zavod")
     private Zavod zavod;

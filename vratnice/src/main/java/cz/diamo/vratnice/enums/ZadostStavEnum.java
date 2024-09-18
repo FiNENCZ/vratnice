@@ -3,7 +3,7 @@ package cz.diamo.vratnice.enums;
 import cz.diamo.vratnice.entity.ZadostStav;
 
 public enum ZadostStavEnum {
-    SCHVALENO(1), POZASTAVENO(2), UKONCENO(3);
+    SCHVALENO(1), POZASTAVENO(2), UKONCENO(3), PRIPRAVENO(4), ZAMITNUTO(5);
 
     private Integer value;
 
@@ -27,6 +27,10 @@ public enum ZadostStavEnum {
                 return POZASTAVENO;
             case 3:
                 return UKONCENO;
+            case 4:
+                return PRIPRAVENO;
+            case 5:
+                return ZAMITNUTO;
             default:
                 return SCHVALENO;
         }

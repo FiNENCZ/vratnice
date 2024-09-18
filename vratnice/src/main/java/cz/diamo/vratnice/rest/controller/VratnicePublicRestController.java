@@ -8,19 +8,23 @@ import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.rest.controller.BaseRestController;
 import cz.diamo.share.services.LokalitaServices;
 import cz.diamo.share.services.ZavodServices;
+import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.SpolecnostDto;
 import cz.diamo.vratnice.dto.StatDto;
 import cz.diamo.vratnice.dto.VozidloTypDto;
+import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.repository.StatRepository;
+import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import cz.diamo.vratnice.service.RidicService;
 import cz.diamo.vratnice.service.SpolecnostService;
 import cz.diamo.vratnice.service.StatService;
@@ -76,6 +80,9 @@ public class VratnicePublicRestController extends BaseRestController{
 
     @Autowired
     private ResourcesComponent resourcesComponent;
+
+    @Autowired
+    private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
 
     @GetMapping("/lokalita/list")
     public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
@@ -163,9 +170,6 @@ public class VratnicePublicRestController extends BaseRestController{
     @GetMapping("/ridic/get-by-cislo-op")
     public ResponseEntity<RidicDto> getRidicByCisloOp(@RequestParam String cisloOp) {
         Ridic ridic = ridicService.getRidicByCisloOp(cisloOp);
-        if (ridic == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(new RidicDto(ridic));
     }
 
@@ -202,5 +206,11 @@ public class VratnicePublicRestController extends BaseRestController{
         return ResponseEntity.ok(new SpolecnostDto(savedSpolecnost));
     }
 
+
+    @PostMapping("/povoleni-vjezdu-vozidla/save")
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
+        PovoleniVjezduVozidla savedPovoleni = povoleniVjezduVozidlaService.createFromPublic(povoleniVjezduVozidlaDto);
+        return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(savedPovoleni));
+    }
 
 }

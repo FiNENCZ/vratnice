@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -19,14 +20,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
+import cz.diamo.share.annotation.TransactionalRO;
+import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
+import cz.diamo.share.services.Wso2Services;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
-import cz.diamo.vratnice.dto.RidicDto;
-import cz.diamo.vratnice.dto.SpolecnostDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Spolecnost;
@@ -69,6 +72,9 @@ public class PovoleniVjezduVozidlaService {
 
     @Autowired
     private SpolecnostService spolecnostService;
+
+    @Autowired
+    private Wso2Services wso2Services;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -152,19 +158,38 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @Transactional
-    public PovoleniVjezduVozidla create(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
-        if (povoleniVjezduVozidlaDto.getRidic() != null) {
-            Ridic savedRidic =  ridicService.create(povoleniVjezduVozidlaDto.getRidic().toEntity());
-            povoleniVjezduVozidlaDto.setRidic(new RidicDto(savedRidic));
+    public PovoleniVjezduVozidla create(PovoleniVjezduVozidla povoleniVjezduVozidla) throws UniqueValueException, NoSuchMessageException {
+        if (povoleniVjezduVozidla.getRidic() != null) {
+            Ridic savedRidic =  ridicService.create(povoleniVjezduVozidla.getRidic());
+            povoleniVjezduVozidla.setRidic(savedRidic);
         }
 
-        Spolecnost savedSpolecnostZadatele = spolecnostService.save(povoleniVjezduVozidlaDto.getSpolecnostZadatele().toEntity());
-        Spolecnost savedSpolecnostVozidla = spolecnostService.save(povoleniVjezduVozidlaDto.getSpolecnostVozidla().toEntity());
+        Spolecnost savedSpolecnostZadatele = spolecnostService.save(povoleniVjezduVozidla.getSpolecnostZadatele());
+        Spolecnost savedSpolecnostVozidla = spolecnostService.save(povoleniVjezduVozidla.getSpolecnostVozidla());
 
-        povoleniVjezduVozidlaDto.setSpolecnostZadatele(new SpolecnostDto(savedSpolecnostZadatele));
-        povoleniVjezduVozidlaDto.setSpolecnostVozidla(new SpolecnostDto(savedSpolecnostVozidla));
+        povoleniVjezduVozidla.setSpolecnostZadatele(savedSpolecnostZadatele);
+        povoleniVjezduVozidla.setSpolecnostVozidla(savedSpolecnostVozidla);
 
-        return povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidlaDto.toEntity());
+        povoleniVjezduVozidla.setCasZmn(Utils.getCasZmn());
+        povoleniVjezduVozidla.setZmenuProvedl(Utils.getZmenuProv());
+
+        // Pokud se jedná o novou žádost, tak se zapíše datumVytvoreni
+        if (povoleniVjezduVozidla.getIdPovoleniVjezduVozidla() == null) 
+            povoleniVjezduVozidla.setDatumVytvoreni(new Date());
+
+        return povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
+    }
+
+    @Transactional
+    public PovoleniVjezduVozidla createFromPublic(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
+        PovoleniVjezduVozidla povoleniEntity = povoleniVjezduVozidlaDto.toEntity();
+        povoleniEntity.setStav(new ZadostStav(ZadostStavEnum.PRIPRAVENO));
+        PovoleniVjezduVozidla savedPovoleni = create(povoleniEntity);
+
+        zaslatEmailVytvoreniZadosti(savedPovoleni);
+
+
+        return savedPovoleni;
     }
 
     @Transactional
@@ -172,10 +197,9 @@ public class PovoleniVjezduVozidlaService {
         List<PovoleniVjezduVozidla> result = new ArrayList<PovoleniVjezduVozidla>();
 
         for (PovoleniVjezduVozidlaDto povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
-            // Nastavení stavu na POZASTAVENO
             povoleniVjezduVozidla.setAktivita(false);
 
-            result.add(create(povoleniVjezduVozidla));
+            result.add(create(povoleniVjezduVozidla.toEntity()));
         }
 
         return result;
@@ -270,5 +294,56 @@ public class PovoleniVjezduVozidlaService {
 
         return pocetVjezdu;
     }
+
+    public String generateEmailObsahVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder emailBuilder = new StringBuilder();
+        
+        emailBuilder.append("Vážený/á pane/paní ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append(",\n\n")
+            .append("rádi bychom Vás informovali, že Vaše žádost o povolení vjezdu vozidla byla úspěšně vytvořena \n")
+            .append("dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> a je v procesu schvalování. Níže naleznete podrobnosti k Vaší žádosti:\n\n")
+            .append("<strong>Žadatel</strong>:\n")
+            .append("Jméno: ").append(povoleniVjezduVozidla.getJmenoZadatele()).append("\n")
+            .append("Příjmení: ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append("\n\n")
+            .append("<strong>Registrační značky vozidel</strong>:\n");
+        
+        List<String> rzVozidla = povoleniVjezduVozidla.getRzVozidla();
+        if (rzVozidla != null && !rzVozidla.isEmpty()) {
+            for (String rz : rzVozidla) {
+                emailBuilder.append(rz).append("\n");
+            }
+        } 
+        
+        emailBuilder.append("\n<strong>Závod</strong>:\n")
+            .append(povoleniVjezduVozidla.getZavod().getNazev()).append("\n\n")
+            .append("<strong>Lokality:</strong>:\n");
+        
+        List<Lokalita> lokality = povoleniVjezduVozidla.getLokality();
+        if (lokality != null && !lokality.isEmpty()) {
+            for (Lokalita lokalita : lokality) {
+                emailBuilder.append(lokalita.getNazev()).append("\n");
+            }
+        }
+
+        emailBuilder.append("\n<strong>Období povolení vjezdu</strong>:\n")
+            .append("Od: ").append(dateFormat.format(povoleniVjezduVozidla.getDatumOd())).append("\n")
+            .append("Do: ").append(dateFormat.format(povoleniVjezduVozidla.getDatumDo())).append("\n\n");
+
+        return emailBuilder.toString();
+    }
+
+    @TransactionalRO
+    public void zaslatEmailVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
+        String predmet = messageSource.getMessage("avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet", null, LocaleContextHolder.getLocale());
+        String telo = generateEmailObsahVytvoreniZadosti(povoleniVjezduVozidla);
+        String prijemce = povoleniVjezduVozidla.getEmailZadatele();
+        String odesilatel = "noreply@diamo.cz";
+
+        Ws02EmailDto email = new Ws02EmailDto(prijemce, odesilatel, predmet, telo);
+
+        wso2Services.poslatEmail(email);
+    }
+
+
 
 }

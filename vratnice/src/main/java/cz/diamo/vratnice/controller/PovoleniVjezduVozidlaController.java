@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.base.VratniceUtils;
@@ -56,7 +57,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     @PostMapping("/povoleni-vjezdu-vozidla/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
-        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto);
+        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto.toEntity());
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
 
@@ -161,7 +162,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @GetMapping("/povoleni-vjezdu-vozidla/stav")
     @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<ZadostStavDto> stav (@RequestParam String idZadostKlic) {
+    public ResponseEntity<ZadostStavDto> stav(@RequestParam String idZadostKlic) {
         ZadostStav stav = povoleniVjezduVozidlaService.getZadostStav(idZadostKlic);
         return ResponseEntity.ok(new ZadostStavDto(stav));
     }
@@ -180,4 +181,12 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         return ResponseEntity.ok(updatedPovoleniDtos);
     }
     
+    @GetMapping("/povoleni-vjezdu-vozidla/ukazka-mailu")
+    @PreAuthorize("isFullyAuthenticated()")
+    public ResponseEntity<String> ukazkaMailu(@RequestParam String idPovoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
+        PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaService.getDetail(idPovoleniVjezduVozidla);
+        povoleniVjezduVozidlaService.zaslatEmailVytvoreniZadosti(povoleni);
+        return ResponseEntity.ok("");
+    }
+
 }
