@@ -79,7 +79,7 @@ public class PovoleniVjezduVozidlaService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<PovoleniVjezduVozidla> getList(Boolean aktivita) {
+    public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum) {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("SELECT s FROM PovoleniVjezduVozidla s ");
@@ -88,10 +88,19 @@ public class PovoleniVjezduVozidlaService {
         if (aktivita != null)
             queryString.append("AND s.aktivita = :aktivita ");
         
+        if (stavEnum != null) {
+            queryString.append("AND s.stav.idZadostStav = :stav ");
+        }
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
-        if (aktivita != null)
+        if (aktivita != null) {
             vysledek.setParameter("aktivita", aktivita);
+        }
+
+        if (stavEnum != null) {
+            vysledek.setParameter("stav", stavEnum.getValue());
+        }
 
         @SuppressWarnings("unchecked")
         List<PovoleniVjezduVozidla> list = vysledek.getResultList();
@@ -295,13 +304,24 @@ public class PovoleniVjezduVozidlaService {
         return pocetVjezdu;
     }
 
-    public String generateEmailObsahVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+    public String generateEmailStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         StringBuilder emailBuilder = new StringBuilder();
         
         emailBuilder.append("Vážený/á pane/paní ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append(",\n\n")
             .append("rádi bychom Vás informovali, že Vaše žádost o povolení vjezdu vozidla byla úspěšně vytvořena \n")
-            .append("dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> a je v procesu schvalování. Níže naleznete podrobnosti k Vaší žádosti:\n\n")
+            .append("dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> a je v procesu schvalování. ");
+        
+        emailBuilder.append(generateEmailDetailZadosti(povoleniVjezduVozidla));
+
+        return emailBuilder.toString();
+    }
+
+    public String generateEmailDetailZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder detailBuilder = new StringBuilder();
+
+        detailBuilder.append("Níže naleznete podrobnosti k Vaší žádosti:\n\n")
             .append("<strong>Žadatel</strong>:\n")
             .append("Jméno: ").append(povoleniVjezduVozidla.getJmenoZadatele()).append("\n")
             .append("Příjmení: ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append("\n\n")
@@ -310,32 +330,71 @@ public class PovoleniVjezduVozidlaService {
         List<String> rzVozidla = povoleniVjezduVozidla.getRzVozidla();
         if (rzVozidla != null && !rzVozidla.isEmpty()) {
             for (String rz : rzVozidla) {
-                emailBuilder.append(rz).append("\n");
+                detailBuilder.append(rz).append("\n");
             }
         } 
         
-        emailBuilder.append("\n<strong>Závod</strong>:\n")
+        detailBuilder.append("\n<strong>Závod</strong>:\n")
             .append(povoleniVjezduVozidla.getZavod().getNazev()).append("\n\n")
-            .append("<strong>Lokality:</strong>:\n");
+            .append("<strong>Lokality</strong>:\n");
         
         List<Lokalita> lokality = povoleniVjezduVozidla.getLokality();
         if (lokality != null && !lokality.isEmpty()) {
             for (Lokalita lokalita : lokality) {
-                emailBuilder.append(lokalita.getNazev()).append("\n");
+                detailBuilder.append(lokalita.getNazev()).append("\n");
             }
         }
 
-        emailBuilder.append("\n<strong>Období povolení vjezdu</strong>:\n")
+        detailBuilder.append("\n<strong>Období povolení vjezdu</strong>:\n")
             .append("Od: ").append(dateFormat.format(povoleniVjezduVozidla.getDatumOd())).append("\n")
             .append("Do: ").append(dateFormat.format(povoleniVjezduVozidla.getDatumDo())).append("\n\n");
 
-        return emailBuilder.toString();
+        return detailBuilder.toString();
+    }
+
+
+
+    public String generateJadroEmailuZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        StringBuilder oznameniBuilder = new StringBuilder();
+
+        ZadostStavEnum stavZadostiEnum = povoleniVjezduVozidla.getStav().getZadostStavEnum();
+
+        oznameniBuilder.append("Vážený/á pane/paní ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append(",\n\n")
+            .append("Vaše žádost o povolení vjezdu vozidla ze dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> byla ").append(generateOznameniStavuZadosti(stavZadostiEnum));
+
+
+        return oznameniBuilder.toString();
+    }
+
+    public String generateOznameniStavuZadosti(ZadostStavEnum novyStav) {
+        String stavPopis = null;
+
+        switch (novyStav) {
+            case SCHVALENO:
+                stavPopis = "schválena. ";
+                break;
+            case POZASTAVENO:
+                stavPopis = "pozastavena. ";
+                break;
+            case UKONCENO:
+                stavPopis = "ukončena. ";
+                break;
+            case ZAMITNUTO:
+                stavPopis = "zamítnuta. ";
+                break;
+            default:
+                break;
+        }
+
+        return stavPopis;
+
     }
 
     @TransactionalRO
     public void zaslatEmailVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
         String predmet = messageSource.getMessage("avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet", null, LocaleContextHolder.getLocale());
-        String telo = generateEmailObsahVytvoreniZadosti(povoleniVjezduVozidla);
+        String telo = generateEmailStavZadosti(povoleniVjezduVozidla);
         String prijemce = povoleniVjezduVozidla.getEmailZadatele();
         String odesilatel = "noreply@diamo.cz";
 
@@ -344,6 +403,10 @@ public class PovoleniVjezduVozidlaService {
         wso2Services.poslatEmail(email);
     }
 
+    public PovoleniVjezduVozidla zmenitStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, ZadostStavEnum stavEnum) throws UniqueValueException, NoSuchMessageException {
+        povoleniVjezduVozidla.setStav(new ZadostStav(stavEnum));
+        PovoleniVjezduVozidla savedPovoleni = create(povoleniVjezduVozidla);
 
-
+        return savedPovoleni;
+    }
 }

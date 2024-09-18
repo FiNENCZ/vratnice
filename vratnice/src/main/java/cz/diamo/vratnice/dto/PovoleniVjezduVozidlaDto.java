@@ -3,7 +3,6 @@ package cz.diamo.vratnice.dto;
 import cz.diamo.share.dto.LokalitaDto;
 import cz.diamo.share.dto.ZavodDto;
 import cz.diamo.share.entity.Lokalita;
-import cz.diamo.share.entity.Zavod;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.ZadostStav;
@@ -175,12 +174,12 @@ public class PovoleniVjezduVozidlaDto implements Serializable {
         povoleniVjezduVozidla.setDatumOd(this.datumOd);
         povoleniVjezduVozidla.setDatumDo(this.datumDo);
 
-        povoleniVjezduVozidla.setZavod(new Zavod(getZavod().getId()));
+        povoleniVjezduVozidla.setZavod(getZavod().getZavod(null, false));
     
         List<Lokalita> lokality = new ArrayList<>();
         if (getZavod() != null) {
             for (LokalitaDto lokalitaDto : this.getLokality()) {
-                lokality.add(new Lokalita(lokalitaDto.getId()));
+                lokality.add(lokalitaDto.getLokalita(null, false));
             }
         }
         povoleniVjezduVozidla.setLokality(lokality);
