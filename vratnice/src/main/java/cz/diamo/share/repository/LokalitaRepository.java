@@ -26,6 +26,18 @@ public interface LokalitaRepository extends JpaRepository<Lokalita, String> {
 	List<Lokalita> getList(String idZavod, Boolean aktivita);
 
     /**
+	 * Změna veřejné
+	 * 
+	 * @param idLokalita
+	 * @param verejne
+	 * @param casZmeny
+	 * @param zmenuProv
+	 */
+	@Modifying
+	@Query(value = "update " + Constants.SCHEMA  + ".lokalita set verejne = :verejne, cas_zmn = :casZmeny, zmenu_provedl = :zmenuProv where id_lokalita = :idLokalita", nativeQuery = true)
+	void zmenaVerejne(String idLokalita, Boolean verejne, Timestamp casZmeny, String zmenuProv);
+
+    /**
 	 * Změna aktivity
 	 * 
 	 * @param idLokalita

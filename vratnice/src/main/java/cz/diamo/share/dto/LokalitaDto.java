@@ -29,6 +29,8 @@ public class LokalitaDto implements Serializable {
 
     private Boolean aktivita;
 
+    private Boolean verejne;
+
     @NotNull(message = "{lokalita.zavod.require}")
     private ZavodDto zavod;
     
@@ -43,6 +45,7 @@ public class LokalitaDto implements Serializable {
         setNazev(lokalita.getNazev());
         setPoznamka(lokalita.getPoznamka());
         setAktivita(lokalita.getAktivita());
+        setVerejne(lokalita.getVerejne());
         setZavod(new ZavodDto(lokalita.getZavod()));
     }
 
@@ -58,6 +61,7 @@ public class LokalitaDto implements Serializable {
             lokalita.setNazev(getNazev());
             lokalita.setPoznamka(getPoznamka());
             lokalita.setAktivita(getAktivita());
+            lokalita.setVerejne(getVerejne());
             lokalita.setZavod(new Zavod(getZavod().getId()));
         }
 

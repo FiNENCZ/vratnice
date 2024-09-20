@@ -75,6 +75,7 @@ public class HistorieVypujcekController extends BaseController {
     }
     
     @GetMapping("/historie-vypujcek/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<List<HistorieVypujcekDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
             @RequestParam @Nullable String idKlic, @RequestParam @Nullable String idZadostKlic) throws RecordNotFoundException, NoSuchMessageException {
         List<HistorieVypujcekDto> result = new ArrayList<HistorieVypujcekDto>();
@@ -93,6 +94,7 @@ public class HistorieVypujcekController extends BaseController {
 
 
     @GetMapping("/historie-vypujcek/list-by-zadost")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<List<HistorieVypujcekDto>> listByZadost(@RequestParam String idZadostiKlic) {
         ZadostKlic zadostKlicEntity = zadostKlicService.getDetail(idZadostiKlic);
         List<HistorieVypujcekDto> historieVypujcekDtos = historieVypujcekService.findByZadostKlic(zadostKlicEntity).stream()
@@ -103,6 +105,7 @@ public class HistorieVypujcekController extends BaseController {
     }
 
     @GetMapping("historie-vypujcek/list-by-id-klic")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<List<HistorieVypujcekDto>> listByIdKlic(@RequestParam String idKlic) {
         Klic klic = klicService.getDetail(idKlic);
         List<ZadostKlic> zadostKlicList = zadostKlicService.findByKlic(klic);
@@ -116,6 +119,7 @@ public class HistorieVypujcekController extends BaseController {
     }
 
     @GetMapping("historie-vypujcek/list-nevracene-klice")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
     public ResponseEntity<List<HistorieVypujcekDto>> listNevraceneKlice(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) {
         List<HistorieVypujcekDto> result = new ArrayList<HistorieVypujcekDto>();
         List<HistorieVypujcek> list = historieVypujcekService.listNevraceneKlice(appUserDto);

@@ -46,6 +46,8 @@ public class Lokalita implements Serializable {
 
     private Boolean aktivita = true;
 
+    private Boolean verejne = true;
+
     @Column(name = "cas_zmn")
     private Timestamp casZmn;
 

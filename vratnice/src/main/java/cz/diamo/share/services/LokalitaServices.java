@@ -63,7 +63,7 @@ public class LokalitaServices {
         return lokalitaRepository.getDetailByKod(kod);
     }
 
-    public List<Lokalita> getList(String idZavod, Boolean aktivita) {
+    public List<Lokalita> getList(String idZavod, Boolean aktivita, Boolean verejne) {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Lokalita s");
@@ -75,6 +75,11 @@ public class LokalitaServices {
 
         if (aktivita != null)
             queryString.append(" and s.aktivita = :aktivita");
+
+        if (verejne != null)
+            queryString.append(" and s.verejne = :verejne");
+
+        queryString.append(" order by zavod.sapId, s.nazev");
             
         Query vysledek = entityManager.createQuery(queryString.toString());
 
@@ -83,6 +88,9 @@ public class LokalitaServices {
         
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
+        
+        if (verejne != null)
+            vysledek.setParameter("verejne", verejne);
         
         @SuppressWarnings("unchecked")
         List<Lokalita> list = vysledek.getResultList();
@@ -125,6 +133,26 @@ public class LokalitaServices {
     @TransactionalWrite
     public void obnovit(String idLokalita) {
         lokalitaRepository.zmenaAktivity(idLokalita, true, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
+
+    /**
+     * Skrytí zázmamu
+     * 
+     * @param idLokalita
+     */
+    @TransactionalWrite
+    public void zviditelnit(String idLokalita) {
+        lokalitaRepository.zmenaVerejne(idLokalita, true, Utils.getCasZmn(), Utils.getZmenuProv());
+    }
+
+    /**
+     * Zveřejnění záznamu
+     * 
+     * @param idLokalita
+     */
+    @TransactionalWrite
+    public void skryt(String idLokalita) {
+        lokalitaRepository.zmenaVerejne(idLokalita, false, Utils.getCasZmn(), Utils.getZmenuProv());
     }
 
     @TransactionalWrite

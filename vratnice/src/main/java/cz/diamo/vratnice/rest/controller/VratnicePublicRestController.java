@@ -80,7 +80,7 @@ public class VratnicePublicRestController extends BaseRestController{
     @GetMapping("/lokalita/list")
     public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
         List<LokalitaDto> result = new ArrayList<LokalitaDto>();
-        List<Lokalita> list = lokalitaService.getList(idZavod, true);
+        List<Lokalita> list = lokalitaService.getList(idZavod, true, true);
 
         if (list != null && list.size() > 0) {
             for (Lokalita lokalita : list) {
