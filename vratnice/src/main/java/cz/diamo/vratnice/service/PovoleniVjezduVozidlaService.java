@@ -31,6 +31,7 @@ import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.Wso2Services;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
+import cz.diamo.vratnice.entity.PovoleniVjezduVozidlaZmenaStavu;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Spolecnost;
 import cz.diamo.vratnice.entity.Stat;
@@ -40,6 +41,7 @@ import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaRepository;
+import cz.diamo.vratnice.repository.PovoleniVjezduVozidlaZmenaStavuRepository;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -72,6 +74,9 @@ public class PovoleniVjezduVozidlaService {
 
     @Autowired
     private SpolecnostService spolecnostService;
+
+    @Autowired
+    private PovoleniVjezduVozidlaZmenaStavuRepository povoleniVjezduVozidlaZmenaStavuRepository;
 
     @Autowired
     private Wso2Services wso2Services;
@@ -186,7 +191,11 @@ public class PovoleniVjezduVozidlaService {
         if (povoleniVjezduVozidla.getIdPovoleniVjezduVozidla() == null) 
             povoleniVjezduVozidla.setDatumVytvoreni(new Date());
 
-        return povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
+        PovoleniVjezduVozidla savedPovoleni =  povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
+        zkontrolujZmenuStavuAktivity(savedPovoleni);
+
+    
+        return savedPovoleni;
     }
 
     @Transactional
@@ -197,10 +206,36 @@ public class PovoleniVjezduVozidlaService {
 
         zaslatEmailVytvoreniZadosti(savedPovoleni);
 
-
         return savedPovoleni;
     }
 
+    public void zkontrolujZmenuStavuAktivity(PovoleniVjezduVozidla povoleni) {
+        PovoleniVjezduVozidlaZmenaStavu povoleniHistorie = povoleniVjezduVozidlaZmenaStavuRepository.findLatestById(povoleni.getIdPovoleniVjezduVozidla());
+
+        if (povoleniHistorie == null) 
+            return;
+            
+        // Zkontrolujeme, zda aktualizace povolení se týkalo změny aktivity nebo stavu
+        if (!povoleniHistorie.getCas().equals(povoleni.getCasZmn())) 
+            return;
+        
+        if (!povoleniHistorie.getAktivitaNovy().equals(povoleniHistorie.getAktivitaPuvodni()))
+            oznamOArchivaciPovoleni();
+        
+        if (!povoleniHistorie.getStavNovy().equals(povoleniHistorie.getStavPuvodni()))
+            oznamOZmeneStavuPovoleni();
+
+        //TODO: implementuj mechanismus oznamánení o změně stavu nebo aktivity povolení
+
+    }
+
+    public void oznamOArchivaciPovoleni() {
+
+    }
+
+    public void oznamOZmeneStavuPovoleni() {
+
+    }
     @Transactional
     public List<PovoleniVjezduVozidla> zneplatnitPovoleni(List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws UniqueValueException, NoSuchMessageException {
         List<PovoleniVjezduVozidla> result = new ArrayList<PovoleniVjezduVozidla>();

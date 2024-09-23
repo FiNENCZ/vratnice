@@ -185,11 +185,10 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @PostMapping("/povoleni-vjezdu-vozidla/zmenit-stav-zadosti")
     @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> zmenitStavZadosti(@RequestParam String idPovoleniVjezduVozidla, 
+    public ResponseEntity<PovoleniVjezduVozidlaDto> zmenitStavZadosti(@RequestParam PovoleniVjezduVozidla povoleniVjezduVozidla, 
                     @RequestParam ZadostStavEnum zadostStavEnum) throws UniqueValueException, NoSuchMessageException {
-        
-        PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaService.getDetail(idPovoleniVjezduVozidla);
-        PovoleniVjezduVozidla aktualizovanePovoleni = povoleniVjezduVozidlaService.zmenitStavZadosti(povoleni, zadostStavEnum);
+
+        PovoleniVjezduVozidla aktualizovanePovoleni = povoleniVjezduVozidlaService.zmenitStavZadosti(povoleniVjezduVozidla, zadostStavEnum);
 
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(aktualizovanePovoleni));
     }
