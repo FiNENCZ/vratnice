@@ -1,5 +1,5 @@
-insert into vratnice.zdrojovy_text (hash, text) values ('STAV_ZADOST_PRIPRAVENO','Připraveno');
-insert into vratnice.zadost_stav (id_zadost_stav, nazev_resx) values (4, 'STAV_ZADOST_PRIPRAVENO');
+-- verejne - zda je lokalita určena pro výběr
+ALTER TABLE vratnice.lokalita ADD verejne boolean not null default true;
 
-insert into vratnice.zdrojovy_text (hash, text) values ('STAV_ZADOST_ZAMITNUTO','Zamítnuto');
-insert into vratnice.zadost_stav (id_zadost_stav, nazev_resx) values (5, 'STAV_ZADOST_ZAMITNUTO');
+-- Verze DB
+update vratnice.databaze set verze_db = 0, sub_verze_db = 5, cas_zmn = now(), zmenu_provedl = 'pgadmin';
