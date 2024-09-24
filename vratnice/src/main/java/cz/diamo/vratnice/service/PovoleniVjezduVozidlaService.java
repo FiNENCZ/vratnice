@@ -27,7 +27,6 @@ import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.share.services.Wso2Services;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
@@ -143,7 +142,6 @@ public class PovoleniVjezduVozidlaService {
         }
     
         LocalDate currentDate = LocalDate.now();
-        logger.info(currentDate);
             
         return povoleniVjezduVozidlaList.stream()
             .filter(povoleni -> povoleni.getAktivita()) // Filtrovat pouze povolení s aktivita == true
@@ -172,7 +170,7 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @Transactional
-    public PovoleniVjezduVozidla create(PovoleniVjezduVozidla povoleniVjezduVozidla) throws UniqueValueException, NoSuchMessageException {
+    public PovoleniVjezduVozidla create(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
         if (povoleniVjezduVozidla.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(povoleniVjezduVozidla.getRidic());
             povoleniVjezduVozidla.setRidic(savedRidic);
@@ -187,14 +185,23 @@ public class PovoleniVjezduVozidlaService {
         povoleniVjezduVozidla.setCasZmn(Utils.getCasZmn());
         povoleniVjezduVozidla.setZmenuProvedl(Utils.getZmenuProv());
 
-        // Pokud se jedná o novou žádost, tak se zapíše datumVytvoreni
-        if (povoleniVjezduVozidla.getIdPovoleniVjezduVozidla() == null) 
+        String idPovoleniVjezduVozidla = povoleniVjezduVozidla.getIdPovoleniVjezduVozidla();
+        Boolean novyZaznam = false;
+
+        // Pokud se jedná o novou žádost
+        if (idPovoleniVjezduVozidla == null) {
             povoleniVjezduVozidla.setDatumVytvoreni(new Date());
+            novyZaznam = true;
+        }
+        else 
+            povoleniVjezduVozidla.setDatumVytvoreni(povoleniVjezduVozidlaRepository.getDatumVytvoreni(idPovoleniVjezduVozidla));
+        
+ 
+        zkontrolujJestliMuzeBytDanyStav(povoleniVjezduVozidla);
 
         PovoleniVjezduVozidla savedPovoleni =  povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
-        zkontrolujZmenuStavuAktivity(savedPovoleni);
+        zkontrolovatNutnostOdeslaniOznameni(savedPovoleni, novyZaznam);
 
-    
         return savedPovoleni;
     }
 
@@ -204,40 +211,24 @@ public class PovoleniVjezduVozidlaService {
         povoleniEntity.setStav(new ZadostStav(ZadostStavEnum.PRIPRAVENO));
         PovoleniVjezduVozidla savedPovoleni = create(povoleniEntity);
 
-        zaslatEmailVytvoreniZadosti(savedPovoleni);
-
         return savedPovoleni;
     }
 
-    public void zkontrolujZmenuStavuAktivity(PovoleniVjezduVozidla povoleni) {
-        PovoleniVjezduVozidlaZmenaStavu povoleniHistorie = povoleniVjezduVozidlaZmenaStavuRepository.findLatestById(povoleni.getIdPovoleniVjezduVozidla());
-
-        if (povoleniHistorie == null) 
-            return;
+    private void zkontrolujJestliMuzeBytDanyStav(PovoleniVjezduVozidla povoleniVjezduVozidla) throws BaseException {
+        
+        if (povoleniVjezduVozidla.getIdPovoleniVjezduVozidla() != null) {
+            PovoleniVjezduVozidlaZmenaStavu povoleniZmenaStavu = povoleniVjezduVozidlaZmenaStavuRepository.findLatestById(povoleniVjezduVozidla.getIdPovoleniVjezduVozidla());
             
-        // Zkontrolujeme, zda aktualizace povolení se týkalo změny aktivity nebo stavu
-        if (!povoleniHistorie.getCas().equals(povoleni.getCasZmn())) 
-            return;
-        
-        if (!povoleniHistorie.getAktivitaNovy().equals(povoleniHistorie.getAktivitaPuvodni()))
-            oznamOArchivaciPovoleni();
-        
-        if (!povoleniHistorie.getStavNovy().equals(povoleniHistorie.getStavPuvodni()))
-            oznamOZmeneStavuPovoleni();
-
-        //TODO: implementuj mechanismus oznamánení o změně stavu nebo aktivity povolení
-
+            //Stav nemůže být nastaven na PRIPRAVENO, pokud již někdy jindy měl jiný stav (např. SCHVALENO)
+            if (povoleniZmenaStavu != null && povoleniZmenaStavu.getStavNovy().getZadostStavEnum() != ZadostStavEnum.PRIPRAVENO
+                    && povoleniVjezduVozidla.getStav().getZadostStavEnum() == ZadostStavEnum.PRIPRAVENO) {
+                throw new BaseException(messageSource.getMessage("povoleni_vjezdu_vozidla.znovu_stav_pripraveno_error", null, LocaleContextHolder.getLocale()));
+            }
+        }
     }
 
-    public void oznamOArchivaciPovoleni() {
-
-    }
-
-    public void oznamOZmeneStavuPovoleni() {
-
-    }
     @Transactional
-    public List<PovoleniVjezduVozidla> zneplatnitPovoleni(List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws UniqueValueException, NoSuchMessageException {
+    public List<PovoleniVjezduVozidla> zneplatnitPovoleni(List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws NoSuchMessageException, BaseException {
         List<PovoleniVjezduVozidla> result = new ArrayList<PovoleniVjezduVozidla>();
 
         for (PovoleniVjezduVozidlaDto povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
@@ -339,14 +330,50 @@ public class PovoleniVjezduVozidlaService {
         return pocetVjezdu;
     }
 
-    public String generateEmailStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+    public PovoleniVjezduVozidla zmenitStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, ZadostStavEnum stavEnum) throws NoSuchMessageException, BaseException {
+        povoleniVjezduVozidla.setStav(new ZadostStav(stavEnum));
+        PovoleniVjezduVozidla savedPovoleni = create(povoleniVjezduVozidla);
+
+        return savedPovoleni;
+    }
+
+
+    public void zkontrolovatNutnostOdeslaniOznameni(PovoleniVjezduVozidla povoleni, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
+        if (novyZaznam) {
+            zaslatEmailOZmeneZadosti(povoleni, novyZaznam);
+            return;
+        }
+
+        PovoleniVjezduVozidlaZmenaStavu povoleniHistorie = povoleniVjezduVozidlaZmenaStavuRepository.findLatestById(povoleni.getIdPovoleniVjezduVozidla());
+
+        //Pokud nedošlo ke změně aktivity nebo stavu
+        if (povoleniHistorie == null || !povoleniHistorie.getCas().equals(povoleni.getCasZmn())) {
+            return; 
+        }
+
+        zaslatEmailOZmeneZadosti(povoleni, novyZaznam);
+
+    }
+
+
+    public String generateEmailJadroZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, Boolean novyZaznam) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        String datumVytvoreni = dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni());
+        String prijmeni = povoleniVjezduVozidla.getPrijmeniZadatele();
         StringBuilder emailBuilder = new StringBuilder();
-        
-        emailBuilder.append("Vážený/á pane/paní ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append(",\n\n")
-            .append("rádi bychom Vás informovali, že Vaše žádost o povolení vjezdu vozidla byla úspěšně vytvořena \n")
-            .append("dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> a je v procesu schvalování. ");
-        
+
+        if (novyZaznam) { //Vytvoření žádosti
+            emailBuilder.append("Vážený/á pane/paní ").append(prijmeni).append(",\n\n")
+                .append("rádi bychom Vás informovali, že Vaše žádost o povolení vjezdu vozidla byla úspěšně vytvořena \n")
+                .append("dne <strong>").append(datumVytvoreni).append("</strong> a je v procesu schvalování. ");
+        } 
+        else { //změna stavu žádosti
+            emailBuilder.append("Vážený/á pane/paní ").append(prijmeni).append(",\n\n")
+                .append("Vaše žádost o povolení vjezdu vozidla ze dne <strong>").append(datumVytvoreni)
+                .append("</strong> byla ").append(generateOznameniZmenyStavuAktivityZadosti(povoleniVjezduVozidla));
+        }
+
+
         emailBuilder.append(generateEmailDetailZadosti(povoleniVjezduVozidla));
 
         return emailBuilder.toString();
@@ -387,49 +414,46 @@ public class PovoleniVjezduVozidlaService {
         return detailBuilder.toString();
     }
 
+    public String generateOznameniZmenyStavuAktivityZadosti(PovoleniVjezduVozidla povoleni) {
+        ZadostStavEnum stavZadostiEnum = povoleni.getStav().getZadostStavEnum();
+        PovoleniVjezduVozidlaZmenaStavu povoleniHistorie = povoleniVjezduVozidlaZmenaStavuRepository.findLatestById(povoleni.getIdPovoleniVjezduVozidla());
 
-
-    public String generateJadroEmailuZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        StringBuilder oznameniBuilder = new StringBuilder();
-
-        ZadostStavEnum stavZadostiEnum = povoleniVjezduVozidla.getStav().getZadostStavEnum();
-
-        oznameniBuilder.append("Vážený/á pane/paní ").append(povoleniVjezduVozidla.getPrijmeniZadatele()).append(",\n\n")
-            .append("Vaše žádost o povolení vjezdu vozidla ze dne <strong>").append(dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni())).append("</strong> byla ").append(generateOznameniStavuZadosti(stavZadostiEnum));
-
-
-        return oznameniBuilder.toString();
+        boolean stavZmenen = !povoleniHistorie.getStavNovy().equals(povoleniHistorie.getStavPuvodni());
+        boolean aktivitaZmenena = !povoleniHistorie.getAktivitaNovy().equals(povoleniHistorie.getAktivitaPuvodni());
+    
+        if (aktivitaZmenena) {
+            if (povoleni.getAktivita()) {
+                return "<strong>obnovena</strong> se stavem " + getOznameniStavZadosti(stavZadostiEnum);
+            } else {
+                return "<strong>zneplatněna</strong>. ";
+            }
+        }
+    
+        if (stavZmenen) {
+            return getOznameniStavZadosti(stavZadostiEnum);
+        }
+    
+        // Výchozí návratová hodnota, pokud nedojde ke změně aktivity ani stavu
+        return null;
     }
 
-    public String generateOznameniStavuZadosti(ZadostStavEnum novyStav) {
-        String stavPopis = null;
-
+    public String getOznameniStavZadosti(ZadostStavEnum novyStav) {
         switch (novyStav) {
-            case SCHVALENO:
-                stavPopis = "schválena. ";
-                break;
-            case POZASTAVENO:
-                stavPopis = "pozastavena. ";
-                break;
-            case UKONCENO:
-                stavPopis = "ukončena. ";
-                break;
-            case ZAMITNUTO:
-                stavPopis = "zamítnuta. ";
-                break;
-            default:
-                break;
+            case PRIPRAVENO: return "<strong>připraveno ke schvalování</strong>. ";
+            case SCHVALENO: return "<strong>schválena</strong>. ";
+            case POZASTAVENO: return "<strong>pozastavena</strong>. ";
+            case UKONCENO: return "<strong>ukončena</strong>. ";
+            case ZAMITNUTO: return "<strong>zamítnuta</strong>. ";
+            default: return null;
         }
-
-        return stavPopis;
-
     }
 
     @TransactionalRO
-    public void zaslatEmailVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
-        String predmet = messageSource.getMessage("avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet", null, LocaleContextHolder.getLocale());
-        String telo = generateEmailStavZadosti(povoleniVjezduVozidla);
+    public void zaslatEmailOZmeneZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
+        String predmet = messageSource.getMessage(novyZaznam ? "avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet" : 
+                    "avizace.povoleni_vjezdu_vozidla.zadost_aktualizace.predmet", null, LocaleContextHolder.getLocale());
+        
+        String telo = generateEmailJadroZadosti(povoleniVjezduVozidla, novyZaznam);
         String prijemce = povoleniVjezduVozidla.getEmailZadatele();
         String odesilatel = "noreply@diamo.cz";
 
@@ -438,10 +462,4 @@ public class PovoleniVjezduVozidlaService {
         wso2Services.poslatEmail(email);
     }
 
-    public PovoleniVjezduVozidla zmenitStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, ZadostStavEnum stavEnum) throws UniqueValueException, NoSuchMessageException {
-        povoleniVjezduVozidla.setStav(new ZadostStav(stavEnum));
-        PovoleniVjezduVozidla savedPovoleni = create(povoleniVjezduVozidla);
-
-        return savedPovoleni;
-    }
 }

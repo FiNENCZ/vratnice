@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,5 +19,8 @@ public interface PovoleniVjezduVozidlaRepository extends JpaRepository<PovoleniV
 
     @Query(sqlSelect + "join s.rzVozidla rz where rz = :rzVozidla")
     List<PovoleniVjezduVozidla> getByRzVozidla(String rzVozidla);
+
+    @Query("SELECT s.datumVytvoreni FROM PovoleniVjezduVozidla s WHERE s.idPovoleniVjezduVozidla = :idPovoleniVjezduVozidla")
+    Date getDatumVytvoreni(String idPovoleniVjezduVozidla);
 
 }

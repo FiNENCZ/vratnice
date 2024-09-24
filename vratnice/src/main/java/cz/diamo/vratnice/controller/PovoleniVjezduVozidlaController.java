@@ -23,7 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.dto.StatDto;
@@ -57,7 +56,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws UniqueValueException, NoSuchMessageException {
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.create(povoleniVjezduVozidlaDto.toEntity());
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
@@ -172,7 +171,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @PostMapping("/povoleni-vjezdu-vozidla/zneplatnit-povoleni")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
-    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) throws UniqueValueException, NoSuchMessageException {
+    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> zneplatnitPovoleni(@RequestBody List<@Valid PovoleniVjezduVozidlaDto> povoleni) throws NoSuchMessageException, BaseException {
         List<PovoleniVjezduVozidla> povoleniList = povoleniVjezduVozidlaService.zneplatnitPovoleni(povoleni);
         
         // Převod entit zpět na DTO
@@ -185,20 +184,12 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @PostMapping("/povoleni-vjezdu-vozidla/zmenit-stav-zadosti")
     @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> zmenitStavZadosti(@RequestParam PovoleniVjezduVozidla povoleniVjezduVozidla, 
-                    @RequestParam ZadostStavEnum zadostStavEnum) throws UniqueValueException, NoSuchMessageException {
+    public ResponseEntity<PovoleniVjezduVozidlaDto> zmenitStavZadosti(@RequestBody PovoleniVjezduVozidlaDto povoleniVjezduVozidla, 
+                    @RequestParam ZadostStavEnum zadostStavEnum) throws NoSuchMessageException, BaseException {
 
-        PovoleniVjezduVozidla aktualizovanePovoleni = povoleniVjezduVozidlaService.zmenitStavZadosti(povoleniVjezduVozidla, zadostStavEnum);
+        PovoleniVjezduVozidla aktualizovanePovoleni = povoleniVjezduVozidlaService.zmenitStavZadosti(povoleniVjezduVozidla.toEntity(), zadostStavEnum);
 
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(aktualizovanePovoleni));
     }
     
-    @GetMapping("/povoleni-vjezdu-vozidla/ukazka-mailu")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<String> ukazkaMailu(@RequestParam String idPovoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
-        PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaService.getDetail(idPovoleniVjezduVozidla);
-        povoleniVjezduVozidlaService.zaslatEmailVytvoreniZadosti(povoleni);
-        return ResponseEntity.ok("");
-    }
-
 }
