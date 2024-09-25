@@ -85,6 +85,18 @@ public class SecurityUtils {
 
     }
 
+    public String getClientId(String refreshToken) {
+        try {
+            String token = refreshToken.substring(0, refreshToken.lastIndexOf('.') + 1);
+            Claims claims = Jwts.parser().parseClaimsJwt(token).getBody();
+            return (String) claims.get("azp");
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+
+    }
+
     public Cookie generateAuthCookieKeyCloak(AccessTokenResponse accessTokenResponse) {
         return generateAuthCookieKeyCloak(accessTokenResponse, SecurityUtils.cookieName);
     }
@@ -97,6 +109,19 @@ public class SecurityUtils {
                 Base64.getEncoder().encodeToString(new Gson().toJson(authCookieDto).getBytes(StandardCharsets.UTF_8)));
 
         cookie.setMaxAge((int) accessTokenResponse.getRefreshExpiresIn());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        return cookie;
+    }
+
+    public Cookie generateAuthCookieKeyCloak(AuthCookieDto authCookiePuvodni, String cookieName) {
+        AuthCookieDto authCookieDto = new AuthCookieDto(AuthCookieTypeEnum.KeyCloak);
+        authCookieDto.setAccessToken(authCookiePuvodni.getAccessToken());
+        authCookieDto.setRefreshToken(authCookiePuvodni.getRefreshToken());
+        Cookie cookie = new Cookie(cookieName,
+                Base64.getEncoder().encodeToString(new Gson().toJson(authCookieDto).getBytes(StandardCharsets.UTF_8)));
+
+        cookie.setMaxAge((int) getExpDateRefreshToken(authCookiePuvodni.getRefreshToken()).getTime());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         return cookie;

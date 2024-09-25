@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 
 import cz.diamo.share.annotation.TransactionalRO;
 import cz.diamo.share.annotation.TransactionalROE;
+import cz.diamo.share.configuration.AppProperties;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.security.AuthCookieDto;
 import cz.diamo.share.entity.Uzivatel;
@@ -45,6 +46,9 @@ public class EdosBaseServices {
     @Autowired
     private SecurityUtils securityUtils;
 
+    @Autowired
+    private AppProperties appProperties;
+
     @TransactionalROE
     public HttpHeaders getEdosHttpHeaders(HttpServletRequest request) {
 
@@ -60,9 +64,15 @@ public class EdosBaseServices {
         }
 
         if (authCookieDto != null) {
-            AccessTokenResponse accessTokenResponse = authServices
-                    .refreshToken(authCookieDto.getRefreshToken());
-            Cookie edosCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse, "edos_auth");
+            Cookie edosCookie = null;
+            if (securityUtils.getClientId(authCookieDto.getRefreshToken())
+                    .equals(appProperties.getKeycloakClientId())) {
+                AccessTokenResponse accessTokenResponse = authServices
+                        .refreshToken(authCookieDto.getRefreshToken());
+                edosCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse, "edos_auth");
+            } else {
+                edosCookie = securityUtils.generateAuthCookieKeyCloak(authCookieDto, "edos_auth");
+            }
             if (edosCookie != null) {
 
                 HttpHeaders requestHeaders = new HttpHeaders();

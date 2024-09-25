@@ -190,14 +190,21 @@ public class OznameniServices {
                 }
 
                 if (authCookieDto != null) {
-                        AccessTokenResponse accessTokenResponse = authServices
-                                        .refreshToken(authCookieDto.getRefreshToken());
-                        Cookie edosCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse,
-                                        "avizace_auth");
-                        if (edosCookie != null) {
+
+                        Cookie avizaceCookie = null;
+                        if (securityUtils.getClientId(authCookieDto.getRefreshToken())
+                                        .equals(appProperties.getKeycloakClientId())) {
+                                AccessTokenResponse accessTokenResponse = authServices
+                                                .refreshToken(authCookieDto.getRefreshToken());
+                                avizaceCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse,
+                                                "avizace_auth");
+                        } else {
+                                avizaceCookie = securityUtils.generateAuthCookieKeyCloak(authCookieDto, "avizace_auth");
+                        }
+                        if (avizaceCookie != null) {
 
                                 HttpHeaders requestHeaders = new HttpHeaders();
-                                requestHeaders.add("Cookie", edosCookie.getName() + "=" + edosCookie.getValue());
+                                requestHeaders.add("Cookie", avizaceCookie.getName() + "=" + avizaceCookie.getValue());
                                 return requestHeaders;
                         }
                 }
