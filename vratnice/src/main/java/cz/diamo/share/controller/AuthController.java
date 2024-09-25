@@ -95,7 +95,7 @@ public class AuthController {
     public ResponseEntity<String> usernameByRfidUid(HttpServletRequest request, HttpServletResponse response,
             @RequestParam String rfid) {
         try {
-            if (StringUtils.isBlank(rfid) || rfid.length() != 7)
+            if (StringUtils.isBlank(rfid) || rfid.length() != 8)
                 throw new ValidationException(
                         messageSource.getMessage("rfid.uid.spatny.format", null,
                                 LocaleContextHolder.getLocale()));

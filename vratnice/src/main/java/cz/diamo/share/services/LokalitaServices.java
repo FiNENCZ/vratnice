@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 
 import cz.diamo.share.annotation.TransactionalWrite;
 import cz.diamo.share.base.Utils;
+import cz.diamo.share.configuration.AppProperties;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.edos.LokalitaEdosDto;
 import cz.diamo.share.dto.security.AuthCookieDto;
@@ -52,6 +53,9 @@ public class LokalitaServices {
     @Autowired
     private SecurityUtils securityUtils;
 
+    @Autowired
+    private AppProperties appProperties;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -80,21 +84,21 @@ public class LokalitaServices {
             queryString.append(" and s.verejne = :verejne");
 
         queryString.append(" order by zavod.sapId, s.nazev");
-            
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (StringUtils.isNotBlank(idZavod))
             vysledek.setParameter("idZavod", idZavod);
-        
+
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
-        
+
         if (verejne != null)
             vysledek.setParameter("verejne", verejne);
-        
+
         @SuppressWarnings("unchecked")
         List<Lokalita> list = vysledek.getResultList();
-        
+
         return list;
     }
 
@@ -114,7 +118,7 @@ public class LokalitaServices {
 
         return lokalita;
     }
-    
+
     /**
      * Odstranění zázmamu
      * 
@@ -164,7 +168,8 @@ public class LokalitaServices {
         Zavod zavod = null;
 
         for (LokalitaEdosDto lokalitaEdosDto : listLokalitaEdos) {
-            if (StringUtils.isBlank(lastZavodSapId) || !StringUtils.equals(lokalitaEdosDto.getZavodSapId(), lastZavodSapId)) {
+            if (StringUtils.isBlank(lastZavodSapId)
+                    || !StringUtils.equals(lokalitaEdosDto.getZavodSapId(), lastZavodSapId)) {
                 zavod = zavodServices.getDetailBySapId(lokalitaEdosDto.getZavodSapId());
                 lastZavodSapId = lokalitaEdosDto.getZavodSapId();
             }
@@ -190,20 +195,30 @@ public class LokalitaServices {
         }
     }
 
-    private List<LokalitaEdosDto> listLokalitaEdos(HttpServletRequest request, AppUserDto appUserDto) throws BaseException {
+    private List<LokalitaEdosDto> listLokalitaEdos(HttpServletRequest request, AppUserDto appUserDto)
+            throws BaseException {
         AuthCookieDto authCookieDto = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals(SecurityUtils.cookieName)) {
-                    authCookieDto = new Gson().fromJson(new String(Base64.getDecoder().decode(cookie.getValue())), AuthCookieDto.class);
+                    authCookieDto = new Gson().fromJson(new String(Base64.getDecoder().decode(cookie.getValue())),
+                            AuthCookieDto.class);
                     break;
                 }
             }
         }
 
         if (authCookieDto != null) {
-            AccessTokenResponse accessTokenResponse = authServices.refreshToken(authCookieDto.getRefreshToken());
-            Cookie edosCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse, "edos_auth");
+
+            Cookie edosCookie = null;
+            if (securityUtils.getClientId(authCookieDto.getRefreshToken())
+                    .equals(appProperties.getKeycloakClientId())) {
+                AccessTokenResponse accessTokenResponse = authServices
+                        .refreshToken(authCookieDto.getRefreshToken());
+                edosCookie = securityUtils.generateAuthCookieKeyCloak(accessTokenResponse, "edos_auth");
+            } else {
+                edosCookie = securityUtils.generateAuthCookieKeyCloak(authCookieDto, "edos_auth");
+            }
             if (edosCookie != null) {
 
                 HttpHeaders requestHeaders = new HttpHeaders();
@@ -211,11 +226,13 @@ public class LokalitaServices {
 
                 HttpEntity<Void> requestEntity = new HttpEntity<Void>(null, requestHeaders);
 
-                ResponseEntity<LokalitaEdosDto[]> result = restEdos.exchange("/zadosti/lokalita/list", HttpMethod.GET, requestEntity, LokalitaEdosDto[].class,
+                ResponseEntity<LokalitaEdosDto[]> result = restEdos.exchange("/zadosti/lokalita/list", HttpMethod.GET,
+                        requestEntity, LokalitaEdosDto[].class,
                         new HashMap<>());
 
                 if (result.getStatusCode().isError()) {
-                    throw new BaseException(String.format("Při volání EDOS došlo k chybě./n%s", result.getStatusCode()));
+                    throw new BaseException(
+                            String.format("Při volání EDOS došlo k chybě./n%s", result.getStatusCode()));
                 } else {
                     return Arrays.asList(result.getBody());
                 }
