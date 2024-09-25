@@ -7,8 +7,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,10 +26,18 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.annotation.TransactionalRO;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
+import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
+import cz.diamo.share.entity.Opravneni;
+import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.enums.RoleEnum;
+import cz.diamo.share.enums.TypOznameniEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.share.repository.OpravneniZavodRepository;
+import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.services.Wso2Services;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
@@ -45,6 +56,7 @@ import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -78,12 +90,23 @@ public class PovoleniVjezduVozidlaService {
     private PovoleniVjezduVozidlaZmenaStavuRepository povoleniVjezduVozidlaZmenaStavuRepository;
 
     @Autowired
+    private UzivatelOpravneniRepository uzivatelOpravneniRepository;
+
+    @Autowired
+    private OpravneniZavodRepository opravneniZavodRepository;
+
+    @Autowired
+    private VratniceBaseService vratniceBaseService;
+
+    @Autowired
     private Wso2Services wso2Services;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum) {
+    public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        Set<Zavod> zavody = getAllZavodByPristup(appUserDto.getIdUzivatel());
+
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("SELECT s FROM PovoleniVjezduVozidla s ");
@@ -96,6 +119,10 @@ public class PovoleniVjezduVozidlaService {
             queryString.append("AND s.stav.idZadostStav = :stav ");
         }
 
+        if (!zavody.isEmpty()) {
+            queryString.append("AND s.zavod.idZavod IN :zavody ");
+        }
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null) {
@@ -104,6 +131,14 @@ public class PovoleniVjezduVozidlaService {
 
         if (stavEnum != null) {
             vysledek.setParameter("stav", stavEnum.getValue());
+        }
+
+        if (!zavody.isEmpty()) {
+            // Převod závodů na seznam jejich ID
+            List<String> zavodIds = zavody.stream()
+                                        .map(Zavod::getIdZavod)
+                                        .collect(Collectors.toList());
+            vysledek.setParameter("zavody", zavodIds);
         }
 
         @SuppressWarnings("unchecked")
@@ -340,7 +375,8 @@ public class PovoleniVjezduVozidlaService {
 
     public void zkontrolovatNutnostOdeslaniOznameni(PovoleniVjezduVozidla povoleni, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
         if (novyZaznam) {
-            zaslatEmailOZmeneZadosti(povoleni, novyZaznam);
+            //oznamitObsluhuOVytvoreniZadosti(povoleni);
+            zaslatEmailOZmeneZadostiZadateli(povoleni, novyZaznam);
             return;
         }
 
@@ -351,7 +387,69 @@ public class PovoleniVjezduVozidlaService {
             return; 
         }
 
-        zaslatEmailOZmeneZadosti(povoleni, novyZaznam);
+        zaslatEmailOZmeneZadostiZadateli(povoleni, novyZaznam);
+    }
+
+    //TODO: připojit na oznameniServices bez autentizovaného requestu
+    public void oznamitObsluhuOVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
+        List<RoleEnum> pozadovaneRoleObsluhy = new ArrayList<RoleEnum>();
+        pozadovaneRoleObsluhy.add(RoleEnum.ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA);
+
+        List<Uzivatel> odpovidajiciObsluha = listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(pozadovaneRoleObsluhy, povoleniVjezduVozidla.getZavod().getIdZavod());
+
+
+        String predmet = messageSource.getMessage("avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet", null, LocaleContextHolder.getLocale());
+        String oznameniText = vytvorOznameniProObsluhu(povoleniVjezduVozidla);
+        String telo = String.format("Dobrý den, \n") + oznameniText;
+
+        vratniceBaseService.zaslatOznameniUzivateli(predmet, oznameniText, telo, null, odpovidajiciObsluha, TypOznameniEnum.DULEZITE_INFO, null);
+    }
+
+    private String vytvorOznameniProObsluhu(PovoleniVjezduVozidla povoleniVjezduVozidla) {
+        String celeJmenoZadatele = povoleniVjezduVozidla.getJmenoZadatele() + povoleniVjezduVozidla.getPrijmeniZadatele();
+        String zavodNazev = povoleniVjezduVozidla.getZavod().getNazev();
+
+        String lokalityNazvy = ""; // Inicializace proměnné
+        List<Lokalita> lokality = povoleniVjezduVozidla.getLokality();
+    
+        if (lokality != null && !lokality.isEmpty()) {
+            lokalityNazvy = lokality.stream()
+                .map(Lokalita::getNazev)
+                .collect(Collectors.joining(", "));
+        }
+
+        String rzVozidelNazvy = ""; // Inicializace proměnné
+        List<String> rzVozidel = povoleniVjezduVozidla.getRzVozidla();
+        
+        if (rzVozidel != null && !rzVozidel.isEmpty()) {
+            // Není třeba použít .map(String), protože je to již List<String>
+            rzVozidelNazvy = rzVozidel.stream()
+                .collect(Collectors.joining(", "));
+        }
+
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        String datumVytvoreni = dateFormat.format(povoleniVjezduVozidla.getDatumVytvoreni());
+        String datumOd = dateFormat.format(povoleniVjezduVozidla.getDatumOd());
+        String datumDo = dateFormat.format(povoleniVjezduVozidla.getDatumDo());
+
+        String datumPlatnosti = "<strong>"+ datumOd +"</strong> - <strong>" + datumDo +"</strong>";
+
+        return String.format(
+            "Byla vytvořena nová žádost o povolení vjezdu vozidla dne <strong>%s</strong>.\n" + 
+            "Jméno žadalatele: <strong>%s</strong>\n" +
+            "Závod: <strong>%s</strong>" +
+            "Lokality: <strong>%s</strong>" +
+            "RZ vozidel: <strong>%s</strong>"+
+            "Datum platnosti: <strong>%s<strong>",
+            datumVytvoreni,
+            celeJmenoZadatele,
+            zavodNazev,
+            lokalityNazvy,
+            rzVozidelNazvy,
+            datumPlatnosti
+        );
 
     }
 
@@ -449,7 +547,7 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @TransactionalRO
-    public void zaslatEmailOZmeneZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
+    public void zaslatEmailOZmeneZadostiZadateli(PovoleniVjezduVozidla povoleniVjezduVozidla, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
         String predmet = messageSource.getMessage(novyZaznam ? "avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet" : 
                     "avizace.povoleni_vjezdu_vozidla.zadost_aktualizace.predmet", null, LocaleContextHolder.getLocale());
         
@@ -461,5 +559,42 @@ public class PovoleniVjezduVozidlaService {
 
         wso2Services.poslatEmail(email);
     }
+
+    public Set<Zavod> getAllZavodByPristup(String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
+        Set<Zavod> result = new HashSet<Zavod>();
+
+        List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, true);
+
+        if (opravneniUzivatele == null || opravneniUzivatele.isEmpty()) {
+			return result;  // pokud uživatel nemá oprávnění, vracíme prázdný set
+		}
+
+        for (Opravneni opravneni : opravneniUzivatele) {
+            result.addAll(opravneniZavodRepository.listZavod(opravneni.getIdOpravneni()));
+        }
+
+        return result;
+    }
+
+
+    public List<Uzivatel> listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(List<RoleEnum> role, String idZavod) {
+        // HQL dotaz na výběr uživatelů s odpovídajícími rolemi, modulem "vratnice" a přístupem k danému závodu
+        String hql = "SELECT u FROM Uzivatel u " +
+            "JOIN UzivatelModul um ON u.idUzivatel = um.idUzivatel " +
+            "JOIN UzivatelOpravneni uo ON u.idUzivatel = uo.idUzivatel " +
+            "JOIN Opravneni o ON uo.idOpravneni = o.idOpravneni " +
+            "JOIN OpravneniRole orl ON o.idOpravneni = orl.idOpravneni " +
+            "JOIN OpravneniZavod oz ON o.idOpravneni = oz.idOpravneni " +
+            "WHERE orl.authority IN :roles " +
+            "AND um.modul = 'vratnice' " +
+            "AND oz.idZavod = :idZavod";
+
+        TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
+        query.setParameter("roles", role.stream().map(RoleEnum::toString).toList()); // Převod RoleEnum na String
+        query.setParameter("idZavod", idZavod);
+
+        return query.getResultList();
+    }
+
 
 }

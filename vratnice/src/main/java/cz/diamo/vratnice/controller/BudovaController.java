@@ -124,7 +124,7 @@ public class BudovaController extends BudovaBaseController {
 		String idUzivatel = appUserDto.getIdUzivatel();
 
 		Set<BudovaDto> resultBudovy = new HashSet<>();
-		List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, aktivita);
+		List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, true);
 	
 		if (opravneniUzivatele == null || opravneniUzivatele.isEmpty()) {
 			return ResponseEntity.ok(resultBudovy);  // pokud uživatel nemá oprávnění, vracíme prázdný set

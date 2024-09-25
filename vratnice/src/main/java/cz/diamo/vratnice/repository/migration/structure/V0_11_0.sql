@@ -1,0 +1,2 @@
+insert into vratnice.zdrojovy_text (hash, text) values ('EXT_ROLE_VRATNICE_PUBLIC','Vrátnice public - API');
+insert into vratnice.zdrojovy_text (hash, text) values ('EXT_ROLE_VRATNICE_KAMERY','Vrátnice kamery - API');

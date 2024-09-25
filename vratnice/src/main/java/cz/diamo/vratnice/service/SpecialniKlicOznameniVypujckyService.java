@@ -13,16 +13,11 @@ import org.springframework.stereotype.Service;
 import cz.diamo.share.annotation.TransactionalRO;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.dto.avizace.AvizaceEmailRequestDto;
-import cz.diamo.share.dto.avizace.AvizaceOznameniRequestDto;
-import cz.diamo.share.dto.avizace.AvizacePrijemceRequestDto;
-import cz.diamo.share.dto.avizace.AvizaceRequestDto;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.enums.TypOznameniEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
-import cz.diamo.share.services.OznameniServices;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.entity.Klic;
@@ -45,13 +40,13 @@ public class SpecialniKlicOznameniVypujckyService {
     private SpecialniKlicOznameniVypujckyRepository specialniKlicOznameniVypujckyRepository;
 
     @Autowired
-    private OznameniServices oznameniServices;
-
-    @Autowired
     private KlicService klicService;
 
     @Autowired
     private UzivatelServices uzivatelServices;
+
+    @Autowired
+    private VratniceBaseService vratniceBaseService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -131,30 +126,12 @@ public class SpecialniKlicOznameniVypujckyService {
 
         Uzivatel uzivatelVypujcky = uzivatelServices.getDetail(idUzivatel);
 
-        AvizaceRequestDto avizaceRequestDto = new AvizaceRequestDto();
         String predmet = messageSource.getMessage("avizace.specialni_klic_oznameni_vypujcky.predmet", null, LocaleContextHolder.getLocale());
         String oznameniText = vytvorObsahOznameni(klic, uzivatelVypujcky, akceEnum);
         String telo = String.format("Dobrý den, \n") + oznameniText;
+        List<Uzivatel> prijemci = oznameniVypujcky.getUzivatele();
 
-        avizaceRequestDto.setEmail(new AvizaceEmailRequestDto(predmet, telo, null));
-        avizaceRequestDto.setOznameni(new AvizaceOznameniRequestDto(TypOznameniEnum.DULEZITE_INFO, predmet, oznameniText, null));
-
-        //Přidat příjemce
-        for (Uzivatel uzivatelOznameni: oznameniVypujcky.getUzivatele()) {
-            String email = uzivatelOznameni.getEmail();
-            String sapId = uzivatelOznameni.getSapId();
-            AvizacePrijemceRequestDto prijemnce = new AvizacePrijemceRequestDto();
-            
-            if (sapId != null) 
-                prijemnce.setSapId(sapId);
-
-            if (email != null)
-                prijemnce.setEmail(email);
-   
-            avizaceRequestDto.pridatPrijemce(prijemnce);
-        }
-
-        oznameniServices.save(avizaceRequestDto, request);
+        vratniceBaseService.zaslatOznameniUzivateli(predmet, oznameniText, telo, null, prijemci, TypOznameniEnum.DULEZITE_INFO, request);
     }
 
     private String vytvorObsahOznameni(Klic klic, Uzivatel uzivatelVypujcky, HistorieVypujcekAkceEnum akceEnum) throws NoSuchMessageException, BaseException {

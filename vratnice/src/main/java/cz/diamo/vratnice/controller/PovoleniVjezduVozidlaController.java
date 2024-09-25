@@ -17,10 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.dto.UzivatelDto;
+import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.base.VratniceUtils;
@@ -34,6 +39,7 @@ import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,20 +68,21 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @GetMapping("/povoleni-vjezdu-vozidla/list")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<List<PovoleniVjezduVozidlaDto>> list(
+                        @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumOd,
                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam @Nullable Date datumDo,
                         @RequestParam @Nullable Boolean aktivita,
                         @RequestParam @Nullable ZadostStavEnum zadostStavEnum,
-                        @RequestParam @Nullable Integer minimalniPocetVjezdu) {
+                        @RequestParam @Nullable Integer minimalniPocetVjezdu) throws RecordNotFoundException, NoSuchMessageException {
 
 
         // Pokud jsou vyplněny všechny parametry vyplněny
         if (datumOd != null && datumDo != null && minimalniPocetVjezdu != null) {
             
             List<PovoleniVjezduVozidlaDto> result = new ArrayList<>();
-            List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getList(aktivita, zadostStavEnum);
+            List<PovoleniVjezduVozidla> list = povoleniVjezduVozidlaService.getList(aktivita, zadostStavEnum, appUserDto);
     
             if (list != null && !list.isEmpty()) {
                 for (PovoleniVjezduVozidla povoleniVjezduVozidla : list) {
@@ -98,7 +105,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         } 
         // pokud není žádný parametr vyplněn
         if (datumOd == null && datumDo == null && minimalniPocetVjezdu == null) {
-            List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getList(aktivita, zadostStavEnum).stream()
+            List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getList(aktivita, zadostStavEnum, appUserDto).stream()
                 .map(PovoleniVjezduVozidlaDto::new)
                 .collect(Collectors.toList());
             return ResponseEntity.ok(povoleniVjezduVozidel);
@@ -183,7 +190,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
     }
 
     @PostMapping("/povoleni-vjezdu-vozidla/zmenit-stav-zadosti")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
     public ResponseEntity<PovoleniVjezduVozidlaDto> zmenitStavZadosti(@RequestBody PovoleniVjezduVozidlaDto povoleniVjezduVozidla, 
                     @RequestParam ZadostStavEnum zadostStavEnum) throws NoSuchMessageException, BaseException {
 
@@ -191,5 +198,18 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(aktualizovanePovoleni));
     }
-    
+
+
+    @GetMapping("/povoleni-vjezdu-vozidla/get-app")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
+    public ResponseEntity<List<UzivatelDto>> getApp(
+                        @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+                        @RequestParam List<RoleEnum> role,
+                        @RequestParam String idZavod) {
+
+        List<Uzivatel> uzivatele = povoleniVjezduVozidlaService.listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(role, idZavod);
+
+        List<UzivatelDto> uzivateleDto = uzivatele.stream().map(UzivatelDto::new).collect(Collectors.toList());
+        return ResponseEntity.ok(uzivateleDto);
+    }
 }
