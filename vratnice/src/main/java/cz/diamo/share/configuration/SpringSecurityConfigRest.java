@@ -24,18 +24,18 @@ public class SpringSecurityConfigRest {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.jdbcAuthentication().passwordEncoder(new BCryptPasswordEncoder()).dataSource(dataSource)
 				.authoritiesByUsernameQuery(
-						"select u.username, a.authority from " + Constants.SCHEMA  + ".externi_uzivatel u, " + Constants.SCHEMA  + ".externi_role a, " + Constants.SCHEMA  + ".externi_uzivatel_role v where u.id_externi_uzivatel = v.id_externi_uzivatel and a.authority = v.authority and u.username = ?")
+						"select u.username, a.authority from " + Constants.SCHEMA + ".externi_uzivatel u, "
+								+ Constants.SCHEMA + ".externi_role a, " + Constants.SCHEMA
+								+ ".externi_uzivatel_role v where u.id_externi_uzivatel = v.id_externi_uzivatel and a.authority = v.authority and u.username = ?")
 				.usersByUsernameQuery(
-						"select username, password, 1 from " + Constants.SCHEMA  + ".externi_uzivatel where upper(username) = upper(?) and aktivita = true");
+						"select username, password, 1 from " + Constants.SCHEMA
+								+ ".externi_uzivatel where upper(username) = upper(?) and aktivita = true");
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChainRest(HttpSecurity http) throws Exception {
 		http.securityMatcher("/rest/**")
-				.authorizeHttpRequests(t -> t.requestMatchers("/rest/*")
-						.hasAnyAuthority("ROLE_PERSONALISTIKA")
-						.requestMatchers("/rest/**")
-						.hasAnyAuthority("ROLE_PERSONALISTIKA"))
+				.authorizeHttpRequests(t -> t.anyRequest().authenticated())
 				.httpBasic(t -> t.toString()).csrf(t -> t.disable());
 		return http.build();
 	}
