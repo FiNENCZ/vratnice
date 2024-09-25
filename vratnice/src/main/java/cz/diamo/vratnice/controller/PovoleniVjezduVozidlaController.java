@@ -23,9 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.share.entity.Uzivatel;
-import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.base.VratniceUtils;
@@ -197,19 +194,5 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         PovoleniVjezduVozidla aktualizovanePovoleni = povoleniVjezduVozidlaService.zmenitStavZadosti(povoleniVjezduVozidla.toEntity(), zadostStavEnum);
 
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(aktualizovanePovoleni));
-    }
-
-
-    @GetMapping("/povoleni-vjezdu-vozidla/get-app")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
-    public ResponseEntity<List<UzivatelDto>> getApp(
-                        @Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-                        @RequestParam List<RoleEnum> role,
-                        @RequestParam String idZavod) {
-
-        List<Uzivatel> uzivatele = povoleniVjezduVozidlaService.listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(role, idZavod);
-
-        List<UzivatelDto> uzivateleDto = uzivatele.stream().map(UzivatelDto::new).collect(Collectors.toList());
-        return ResponseEntity.ok(uzivateleDto);
     }
 }

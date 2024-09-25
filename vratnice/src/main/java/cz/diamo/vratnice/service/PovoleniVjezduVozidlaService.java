@@ -7,10 +7,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,15 +27,12 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
-import cz.diamo.share.entity.Opravneni;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.enums.TypOznameniEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.share.repository.OpravneniZavodRepository;
-import cz.diamo.share.repository.UzivatelOpravneniRepository;
 import cz.diamo.share.services.Wso2Services;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
@@ -90,12 +85,6 @@ public class PovoleniVjezduVozidlaService {
     private PovoleniVjezduVozidlaZmenaStavuRepository povoleniVjezduVozidlaZmenaStavuRepository;
 
     @Autowired
-    private UzivatelOpravneniRepository uzivatelOpravneniRepository;
-
-    @Autowired
-    private OpravneniZavodRepository opravneniZavodRepository;
-
-    @Autowired
     private VratniceBaseService vratniceBaseService;
 
     @Autowired
@@ -105,7 +94,7 @@ public class PovoleniVjezduVozidlaService {
     private EntityManager entityManager;
 
     public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        Set<Zavod> zavody = getAllZavodByPristup(appUserDto.getIdUzivatel());
+        List<Zavod> zavody = getAllZavodByPristup(appUserDto.getIdUzivatel());
 
         StringBuilder queryString = new StringBuilder();
 
@@ -560,21 +549,23 @@ public class PovoleniVjezduVozidlaService {
         wso2Services.poslatEmail(email);
     }
 
-    public Set<Zavod> getAllZavodByPristup(String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
-        Set<Zavod> result = new HashSet<Zavod>();
+    public List<Zavod> getAllZavodByPristup(String idUzivatel) {
+        String hql = "SELECT DISTINCT z FROM Zavod z " +
+        "LEFT JOIN UzivatelZavod uz ON z.idZavod = uz.idZavod " +
+        "LEFT JOIN OpravneniZavod oz ON z.idZavod = oz.idZavod " +
+        "LEFT JOIN Opravneni o ON o.idOpravneni = oz.idOpravneni " +
+        "LEFT JOIN Uzivatel u ON u.idUzivatel = uz.idUzivatel OR u.idUzivatel = :idUzivatel " +
+        "WHERE uz.idUzivatel = :idUzivatel OR u.idUzivatel = :idUzivatel";
 
-        List<Opravneni> opravneniUzivatele = uzivatelOpravneniRepository.listOpravneni(idUzivatel, true);
 
-        if (opravneniUzivatele == null || opravneniUzivatele.isEmpty()) {
-			return result;  // pokud uživatel nemá oprávnění, vracíme prázdný set
-		}
+        TypedQuery<Zavod> query = entityManager.createQuery(hql, Zavod.class);
+        query.setParameter("idUzivatel", idUzivatel);
 
-        for (Opravneni opravneni : opravneniUzivatele) {
-            result.addAll(opravneniZavodRepository.listZavod(opravneni.getIdOpravneni()));
-        }
-
-        return result;
+        return query.getResultList();
     }
+
+ 
+
 
 
     public List<Uzivatel> listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(List<RoleEnum> role, String idZavod) {
