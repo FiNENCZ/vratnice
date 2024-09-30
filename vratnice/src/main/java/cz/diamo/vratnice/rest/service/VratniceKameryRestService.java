@@ -43,7 +43,7 @@ public class VratniceKameryRestService {
     private MessageSource messageSource;
 
     @Transactional
-    public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
+    public void saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
         Vratnice vratniceKamery = vratniceService.getDetail(idVratnice);
 
         if (vratniceKamery == null)
@@ -76,7 +76,6 @@ public class VratniceKameryRestService {
 
 
         rzVozidlaDetektorService.sendWebSocketMessage(idVratnice ,"all", RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, null);
-        return "";
     }
     
 
