@@ -22,9 +22,7 @@ import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.KlicDto;
-import cz.diamo.vratnice.dto.KlicTypDto;
 import cz.diamo.vratnice.entity.Klic;
-import cz.diamo.vratnice.entity.KlicTyp;
 import cz.diamo.vratnice.service.HistorieKlicService;
 import cz.diamo.vratnice.service.KlicService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -57,7 +55,13 @@ public class KlicController extends BaseController {
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat 
             CompletableFuture<Klic> oldKlicFuture = CompletableFuture.supplyAsync(() -> {
                 if (klicDto.getId() != null) {
-                    return klicService.getDetail(klicDto.getId());
+                    Klic klic = new Klic();
+                    try {
+                        klic = klicService.getDetail(klicDto.getId());
+                    } catch (RecordNotFoundException | NoSuchMessageException e) {
+                        e.printStackTrace();
+                    }
+                    return klic;
                 } else {
                     return new Klic();
                 }
@@ -103,18 +107,11 @@ public class KlicController extends BaseController {
 
     @GetMapping("/klic/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
-    public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) {
+    public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) throws RecordNotFoundException, NoSuchMessageException {
         Klic key = klicService.getDetail(idKey);
         if (key == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new KlicDto(key));
-    }
-
-    @GetMapping("/klic/typ")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<KlicTypDto> typ(@RequestParam String idKlic) {
-        KlicTyp klicTyp = klicService.getKlicTyp(idKlic);
-        return ResponseEntity.ok(new KlicTypDto(klicTyp));
     }
 }

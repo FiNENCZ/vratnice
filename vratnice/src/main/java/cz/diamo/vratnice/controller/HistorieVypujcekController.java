@@ -83,7 +83,6 @@ public class HistorieVypujcekController extends BaseController {
 
         if (list != null && list.size() > 0) {
             for (HistorieVypujcek vypujcka : list) {
-                vypujcka.setAkce(historieVypujcekService.getHistorieVypujcekAkce(vypujcka.getIdHistorieVypujcek()));
                 result.add(new HistorieVypujcekDto(vypujcka));
             }
         }
@@ -95,7 +94,7 @@ public class HistorieVypujcekController extends BaseController {
 
     @GetMapping("/historie-vypujcek/list-by-zadost")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
-    public ResponseEntity<List<HistorieVypujcekDto>> listByZadost(@RequestParam String idZadostiKlic) {
+    public ResponseEntity<List<HistorieVypujcekDto>> listByZadost(@RequestParam String idZadostiKlic) throws RecordNotFoundException, NoSuchMessageException {
         ZadostKlic zadostKlicEntity = zadostKlicService.getDetail(idZadostiKlic);
         List<HistorieVypujcekDto> historieVypujcekDtos = historieVypujcekService.findByZadostKlic(zadostKlicEntity).stream()
             .map(HistorieVypujcekDto::new)
@@ -106,27 +105,35 @@ public class HistorieVypujcekController extends BaseController {
 
     @GetMapping("historie-vypujcek/list-by-id-klic")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
-    public ResponseEntity<List<HistorieVypujcekDto>> listByIdKlic(@RequestParam String idKlic) {
+    public ResponseEntity<List<HistorieVypujcekDto>> listByIdKlic(@RequestParam String idKlic) throws RecordNotFoundException, NoSuchMessageException {
         Klic klic = klicService.getDetail(idKlic);
         List<ZadostKlic> zadostKlicList = zadostKlicService.findByKlic(klic);
 
-        List<HistorieVypujcekDto> historieVypujcekDtos = zadostKlicList.stream()
-            .flatMap(zadostKlic -> historieVypujcekService.findByZadostKlic(zadostKlic).stream())
-            .map(HistorieVypujcekDto::new)
-            .collect(Collectors.toList());
+        List<HistorieVypujcekDto> historieVypujcekDtos  = new ArrayList<HistorieVypujcekDto>();
+
+        if (zadostKlicList != null) {
+            for (ZadostKlic zadostKlic : zadostKlicList) {
+                List<HistorieVypujcek> historieVypujcekList = historieVypujcekService.findByZadostKlic(zadostKlic);
+
+                if (historieVypujcekList != null) {
+                    for (HistorieVypujcek historieVypujcek : historieVypujcekList) {
+                        historieVypujcekDtos.add(new HistorieVypujcekDto(historieVypujcek));
+                    }
+                }
+            }
+        }
 
         return ResponseEntity.ok(historieVypujcekDtos);
     }
 
     @GetMapping("historie-vypujcek/list-nevracene-klice")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYPUJCEK_KLICU')")
-    public ResponseEntity<List<HistorieVypujcekDto>> listNevraceneKlice(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) {
+    public ResponseEntity<List<HistorieVypujcekDto>> listNevraceneKlice(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         List<HistorieVypujcekDto> result = new ArrayList<HistorieVypujcekDto>();
         List<HistorieVypujcek> list = historieVypujcekService.listNevraceneKlice(appUserDto);
 
         if (list != null && list.size() > 0) {
             for (HistorieVypujcek vypujcka : list) {
-                vypujcka.setAkce(historieVypujcekService.getHistorieVypujcekAkce(vypujcka.getIdHistorieVypujcek()));
                 result.add(new HistorieVypujcekDto(vypujcka));
             }
         }

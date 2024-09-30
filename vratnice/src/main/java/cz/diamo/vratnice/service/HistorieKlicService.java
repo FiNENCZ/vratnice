@@ -8,12 +8,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
@@ -34,9 +31,6 @@ public class HistorieKlicService {
 
     @Autowired
     private HistorieKlicRepository historieKlicRepository;
-
-    @Autowired
-	private MessageSource messageSource;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -89,20 +83,16 @@ public class HistorieKlicService {
         
     }
 
-    public List<HistorieKlic> findByKlic(String idKlic) {
-        return historieKlicRepository.findByIdKlic(idKlic);
-    }
+    public List<HistorieKlic> findByKlic(String idKlic) throws Exception, NoSuchMessageException {
+        List<HistorieKlic> list =  historieKlicRepository.findByIdKlic(idKlic);
 
-    public HistorieKlicAkce getAkci(String idHistorieKlic) {
-        HistorieKlic historieKlic = historieKlicRepository.getDetail(idHistorieKlic);
-        try {
-            if (historieKlic == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+        if (list != null) {
+            for (HistorieKlic historieKlic : list) {
+                historieKlic.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieKlic.getAkce().getNazevResx()));
+            }
+        }
+
+        return list;
         
-            historieKlic.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieKlic.getAkce().getNazevResx()));
-            return historieKlic.getAkce();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
     }
 }

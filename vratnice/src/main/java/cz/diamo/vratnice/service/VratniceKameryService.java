@@ -16,6 +16,7 @@ import cz.diamo.share.annotation.TransactionalROE;
 import cz.diamo.share.base.Utils;
 import cz.diamo.vratnice.dto.VratniceDto;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.repository.VratniceRepository;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryDto;
 import cz.diamo.vratnice.rest.dto.KonfiguraceVratniceKameryNgDto;
 import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
@@ -28,7 +29,7 @@ public class VratniceKameryService {
     RestTemplate restVratniceKameryTemplate;
 
     @Autowired
-    private VratniceService vratniceService;
+    private VratniceRepository vratniceRepository;
 
     public KonfiguraceVratniceKameryDto getKonfiguraceDetail(String ipAdresa) {
         String url = "http://" + ipAdresa + ":8091/api/konfigurace/detail";
@@ -69,7 +70,7 @@ public class VratniceKameryService {
         KonfiguraceVratniceKameryNgDto konfiguraceNg = new KonfiguraceVratniceKameryNgDto(konfigurace);
 
         if(konfigurace.getIdVratnice() != null) {
-            Vratnice vratnice = vratniceService.getDetail(konfigurace.getIdVratnice());
+            Vratnice vratnice = vratniceRepository.getDetail(konfigurace.getIdVratnice());
             konfiguraceNg.setVratnice(new VratniceDto(vratnice));
         }
 

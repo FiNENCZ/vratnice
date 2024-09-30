@@ -8,14 +8,14 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
-import cz.diamo.vratnice.dto.HistorieSluzebniVozidloAkceDto;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
-import cz.diamo.vratnice.entity.HistorieSluzebniVozidloAkce;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.service.HistorieSluzebniVozidloService;
 import cz.diamo.vratnice.service.SluzebniVozidloService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,12 +33,11 @@ public class HistorieSluzebniVozidloController extends BaseController {
 
     @Autowired
     private SluzebniVozidloService sluzebniVozidloService;
-
     
 
     @GetMapping("/historie-sluzebni-vozidlo/list-by-sluzebni-vozidlo")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
-    public ResponseEntity<List<HistorieSluzebniVozidloDto>> listBySluzebniVozidlo(@RequestParam String idSluzebniVozidlo) {
+    public ResponseEntity<List<HistorieSluzebniVozidloDto>> listBySluzebniVozidlo(@RequestParam String idSluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
         SluzebniVozidlo sluzebniVozidloEntity = sluzebniVozidloService.getDetail(idSluzebniVozidlo);
         List<HistorieSluzebniVozidloDto> historieSluzebniVozidloDtos = historieSluzebniVozidloService.findBySluzebniVozidlo(sluzebniVozidloEntity).stream()
             .map(HistorieSluzebniVozidloDto::new)
@@ -46,16 +45,4 @@ public class HistorieSluzebniVozidloController extends BaseController {
 
         return ResponseEntity.ok(historieSluzebniVozidloDtos);
     }
-
-
-    @GetMapping("/historie-sluzebni-vozidlo/akce")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
-    public ResponseEntity<HistorieSluzebniVozidloAkceDto> akce(@RequestParam String idHistorieSluzebniVozidlo) {
-        HistorieSluzebniVozidloAkce historieSluzebniVozidloAkce = historieSluzebniVozidloService.getAkci(idHistorieSluzebniVozidlo);
-        return ResponseEntity.ok(new HistorieSluzebniVozidloAkceDto(historieSluzebniVozidloAkce));
-    }
-
-    
-    
-
 }

@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
-import cz.diamo.vratnice.dto.HistorieKlicAkceDto;
 import cz.diamo.vratnice.dto.HistorieKlicDto;
 import cz.diamo.vratnice.entity.HistorieKlic;
-import cz.diamo.vratnice.entity.HistorieKlicAkce;
 import cz.diamo.vratnice.service.HistorieKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -41,19 +39,12 @@ public class HistorieKlicController extends BaseController {
 
     @GetMapping("/historie-klic/list-by-klic")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
-    public ResponseEntity<List<HistorieKlicDto>> listByKlic(@RequestParam String idKlic) {
+    public ResponseEntity<List<HistorieKlicDto>> listByKlic(@RequestParam String idKlic) throws NoSuchMessageException, Exception {
         List<HistorieKlicDto> historieSluzebniVozidloDtos = historieKlicService.findByKlic(idKlic).stream()
             .map(HistorieKlicDto::new)
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(historieSluzebniVozidloDtos);
-    }
-
-    @GetMapping("/historie-klic/akce")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
-    public ResponseEntity<HistorieKlicAkceDto> akce(@RequestParam String idHistorieKlic) {
-        HistorieKlicAkce historieKlicAkce = historieKlicService.getAkci(idHistorieKlic);
-        return ResponseEntity.ok(new HistorieKlicAkceDto(historieKlicAkce));
     }
 
     @PostMapping("/historie-klic/save")

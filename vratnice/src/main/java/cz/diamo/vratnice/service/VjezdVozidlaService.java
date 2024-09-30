@@ -3,19 +3,15 @@ package cz.diamo.vratnice.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
-import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
@@ -29,9 +25,6 @@ public class VjezdVozidlaService {
 
     @Autowired
     private VjezdVozidlaRepository vjezdVozidlaRepository;
-
-    @Autowired
-	private MessageSource messageSource;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -68,11 +61,32 @@ public class VjezdVozidlaService {
         
         @SuppressWarnings("unchecked")
         List<VjezdVozidla> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (VjezdVozidla vjezdVozidla : list) {
+                vjezdVozidla = translatVjezdVozidla(vjezdVozidla);
+            }
+        }
+
+
         return list;
     }
 
-    public VjezdVozidla getDetail(String idVjezdVozidla) {
-        return vjezdVozidlaRepository.getDetail(idVjezdVozidla);
+    private VjezdVozidla translatVjezdVozidla(VjezdVozidla vjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
+        if (vjezdVozidla.getTypVozidla() != null)
+            vjezdVozidla.getTypVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vjezdVozidla.getTypVozidla().getNazevResx()));
+
+        return vjezdVozidla;
+    }
+
+    public VjezdVozidla getDetail(String idVjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
+
+        VjezdVozidla vjezdVozidla = vjezdVozidlaRepository.getDetail(idVjezdVozidla);
+
+        if (vjezdVozidla != null) 
+            vjezdVozidla = translatVjezdVozidla(vjezdVozidla);
+        
+        return vjezdVozidla;
     }
 
     public List<VjezdVozidla> getByRzVozidla(String rzVozidla) {
@@ -80,7 +94,7 @@ public class VjezdVozidlaService {
     }
 
     @Transactional
-    public VjezdVozidla create(VjezdVozidla vjezdVozidla, Vratnice vratnice) {
+    public VjezdVozidla create(VjezdVozidla vjezdVozidla, Vratnice vratnice) throws RecordNotFoundException, NoSuchMessageException {
         if (vjezdVozidla.getZmenuProvedl() == null ) {        
             vjezdVozidla.setCasZmn(Utils.getCasZmn());
             vjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
@@ -90,20 +104,8 @@ public class VjezdVozidlaService {
             if (vratnice != null)
                 vjezdVozidla.setVratnice(vratnice);
 
-        return vjezdVozidlaRepository.save(vjezdVozidla);
+            
+        VjezdVozidla saveVjezdVozidla =  vjezdVozidlaRepository.save(vjezdVozidla);
+        return translatVjezdVozidla(saveVjezdVozidla);
     }
-
-    public VozidloTyp getVozidloTyp(String idVozidlo) {
-        VjezdVozidla vjezdVozidla = vjezdVozidlaRepository.getDetail(idVozidlo);
-        try {
-            if (vjezdVozidla == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            vjezdVozidla.getTypVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vjezdVozidla.getTypVozidla().getNazevResx()));
-            return vjezdVozidla.getTypVozidla();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
 }

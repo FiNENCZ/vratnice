@@ -26,7 +26,7 @@ public class RzVozidlaDetektorService {
     private VyjezdVozidlaService vyjezdVozidlaService;
     
     @Autowired
-    WebSocketService webSocketService;
+    private WebSocketService webSocketService;
 
     public RzDetectedMessageDto checkIfRzVozidlaIsAllowedAndSendWS(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException, RecordNotFoundException, NoSuchMessageException {
         Optional<PovoleniVjezduVozidla> result = povoleniVjezduVozidlaService.jeRzVozidlaPovolena(rzVozidla, idVratnice);

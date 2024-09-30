@@ -43,6 +43,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -83,6 +84,7 @@ public class VratnicePublicRestController extends BaseRestController{
     private PovoleniVjezduVozidlaService povoleniVjezduVozidlaService;
 
     @GetMapping("/lokalita/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<List<LokalitaDto>> list(@RequestParam @Nullable String idZavod) {
         List<LokalitaDto> result = new ArrayList<LokalitaDto>();
         List<Lokalita> list = lokalitaService.getList(idZavod, true, true);
@@ -97,6 +99,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
     
     @GetMapping("/zavod/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
 	public ResponseEntity<List<ZavodDto>> list(HttpServletRequest request, @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idZavodu) {
 
 		List<ZavodDto> result = new ArrayList<ZavodDto>();
@@ -112,6 +115,7 @@ public class VratnicePublicRestController extends BaseRestController{
 	}
 
     @GetMapping("/vozidlo-typ/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<List<VozidloTypDto>> list(@RequestParam @Nullable Boolean withIZS) {
         List<VozidloTypDto> result = new ArrayList<VozidloTypDto>();
         List<VozidloTyp> list = vozidloTypService.getList(withIZS);
@@ -131,6 +135,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @GetMapping("/vozidlo-typ/get-by-nazev")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<VozidloTypDto> getVozidloTypByNazev(@RequestParam String nazev) {
         VozidloTyp vozidloTyp = vozidloTypService.getByNazev(nazev);
 
@@ -138,6 +143,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @GetMapping("/stat/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public List<StatDto> list(HttpServletRequest request) {
         List<StatDto> result = new ArrayList<StatDto>();
 
@@ -159,6 +165,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @GetMapping("/stat/get-by-nazev")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<StatDto> getStatByNazev(@RequestParam String nazev) {
         Stat stat = statService.getByNazev(nazev);
 
@@ -166,18 +173,21 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @GetMapping("/ridic/get-by-cislo-op")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<RidicDto> getRidicByCisloOp(@RequestParam String cisloOp) {
         Ridic ridic = ridicService.getRidicByCisloOp(cisloOp);
         return ResponseEntity.ok(new RidicDto(ridic));
     }
 
     @PostMapping("/ridic/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<RidicDto> save(@RequestBody @Valid RidicDto ridicDto) throws UniqueValueException, NoSuchMessageException {
         Ridic newRidic = ridicService.create(ridicDto.toEntity());
         return ResponseEntity.ok(new RidicDto(newRidic));
     }
 
     @GetMapping("/spolecnost/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<List<SpolecnostDto>> spolecnostList() {
         List<SpolecnostDto> result = new ArrayList<SpolecnostDto>();
 		List<Spolecnost> list = spolecnostService.getList();
@@ -192,6 +202,7 @@ public class VratnicePublicRestController extends BaseRestController{
     }
 
     @GetMapping("/spolecnost/get-by-nazev")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<SpolecnostDto> getSpolecnostByNazev(@RequestParam String nazev) {
         Spolecnost spolecnost = spolecnostService.getByNazev(nazev);
         return ResponseEntity.ok(new SpolecnostDto(spolecnost));
@@ -199,6 +210,7 @@ public class VratnicePublicRestController extends BaseRestController{
     
     
     @PostMapping("/spolecnost/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<SpolecnostDto> save(@RequestBody @Valid SpolecnostDto spolecnostDto) {
         Spolecnost savedSpolecnost = spolecnostService.save(spolecnostDto.toEntity());
         return ResponseEntity.ok(new SpolecnostDto(savedSpolecnost));
@@ -206,6 +218,7 @@ public class VratnicePublicRestController extends BaseRestController{
 
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
     public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
         PovoleniVjezduVozidla savedPovoleni = povoleniVjezduVozidlaService.createFromPublic(povoleniVjezduVozidlaDto);
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(savedPovoleni));

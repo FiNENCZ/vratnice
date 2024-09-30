@@ -27,9 +27,7 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
-import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
@@ -102,7 +100,7 @@ public class ZadostKlicController extends BaseController{
     @GetMapping("/zadosti-klic/list")
     @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<ZadostKlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-        @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) {
+        @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) throws RecordNotFoundException, NoSuchMessageException {
 
         List<ZadostKlicDto> result = new ArrayList<ZadostKlicDto>();
         List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel, appUserDto);
@@ -123,7 +121,7 @@ public class ZadostKlicController extends BaseController{
 
     @GetMapping("/zadosti-klic/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_ZADOSTI_KLICU')")
-    public ResponseEntity<ZadostKlicDto> getDetail(@RequestParam String idZadostKey) {
+    public ResponseEntity<ZadostKlicDto> getDetail(@RequestParam String idZadostKey) throws RecordNotFoundException, NoSuchMessageException {
         ZadostKlic zadostKlic = zadostKlicService.getDetail(idZadostKey);
         if (zadostKlic == null) {
             return ResponseEntity.notFound().build();
@@ -183,14 +181,4 @@ public class ZadostKlicController extends BaseController{
 
         return ResponseEntity.ok(new UzivatelDto(uzivatel));
     }
-
-    @GetMapping("/zadost-klic/stav")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<ZadostStavDto> stav(@RequestParam String idZadostKlic) {
-        ZadostStav stav = zadostKlicService.getZadostStav(idZadostKlic);
-        return ResponseEntity.ok(new ZadostStavDto(stav));
-    }
-    
-    
-
 }

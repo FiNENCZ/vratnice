@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
@@ -109,7 +107,7 @@ public class HistorieVypujcekService {
         return create(posledniVypujcka.getZadostKlic(), appUserDto, HistorieVypujcekAkceEnum.HISTORIE_VYPUJCEK_VRACEN, request);
     }
 
-    public List<HistorieVypujcek> getList(String idKlic, String idZadostKlic, AppUserDto appUserDto) {
+    public List<HistorieVypujcek> getList(String idKlic, String idZadostKlic, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         String idUzivatel = appUserDto.getIdUzivatel();
         
         StringBuilder queryString = new StringBuilder();
@@ -138,27 +136,29 @@ public class HistorieVypujcekService {
         
         @SuppressWarnings("unchecked")
         List<HistorieVypujcek> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (HistorieVypujcek historieVypujcek : list) {
+                historieVypujcek.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieVypujcek.getAkce().getNazevResx()));
+            }
+        }
+
         return list;
     }
 
-    public List<HistorieVypujcek> findByZadostKlic(ZadostKlic zadostKlic) {
-        return historieVypujcekRepository.findByZadostKlic(zadostKlic);
-    }
-
-    public HistorieVypujcekAkce getHistorieVypujcekAkce(String idHistorieVypujcek) {
-        HistorieVypujcek historieVypujcek = historieVypujcekRepository.getDetail(idHistorieVypujcek);
-        try {
-            if (historieVypujcek == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
+    public List<HistorieVypujcek> findByZadostKlic(ZadostKlic zadostKlic) throws RecordNotFoundException, NoSuchMessageException {
+        List<HistorieVypujcek> list =  historieVypujcekRepository.findByZadostKlic(zadostKlic);
         
-            historieVypujcek.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieVypujcek.getAkce().getNazevResx()));
-            return historieVypujcek.getAkce();
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        if (list != null) {
+            for (HistorieVypujcek historieVypujcek : list) {
+                historieVypujcek.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieVypujcek.getAkce().getNazevResx()));
+            }
         }
+
+        return list;
     }
 
-    public List<HistorieVypujcek> listNevraceneKlice(AppUserDto appUserDto) {
+    public List<HistorieVypujcek> listNevraceneKlice(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
@@ -177,6 +177,13 @@ public class HistorieVypujcekService {
 
         @SuppressWarnings("unchecked")
         List<HistorieVypujcek> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (HistorieVypujcek historieVypujcek : list) {
+                historieVypujcek.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieVypujcek.getAkce().getNazevResx()));
+            }
+        }
+
         return list;
     }
 

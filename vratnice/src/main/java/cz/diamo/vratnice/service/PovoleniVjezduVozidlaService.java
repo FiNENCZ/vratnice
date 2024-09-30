@@ -17,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.annotation.TransactionalRO;
 import cz.diamo.share.base.Utils;
@@ -39,7 +37,6 @@ import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidlaZmenaStavu;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.Spolecnost;
-import cz.diamo.vratnice.entity.Stat;
 import cz.diamo.vratnice.entity.VjezdVozidla;
 import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
@@ -132,12 +129,36 @@ public class PovoleniVjezduVozidlaService {
 
         @SuppressWarnings("unchecked")
         List<PovoleniVjezduVozidla> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (PovoleniVjezduVozidla povoleni : list) {
+                povoleni = translatePovoleniVjezduVozidla(povoleni);
+            }
+        }
+
         return list;
     }
 
-    public PovoleniVjezduVozidla getDetail(String idPovoleniVjezduVozidla) {
-        return povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
+    private PovoleniVjezduVozidla translatePovoleniVjezduVozidla(PovoleniVjezduVozidla povoleni) throws RecordNotFoundException, NoSuchMessageException {
+        for (VozidloTyp vozidloTyp : povoleni.getTypVozidla()) {
+            vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vozidloTyp.getNazevResx()));
+        }
+        povoleni.getZemeRegistraceVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getZemeRegistraceVozidla().getNazevResx()));
+        povoleni.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getStav().getNazevResx()));
+        
+        return povoleni;
     }
+
+    public PovoleniVjezduVozidla getDetail(String idPovoleniVjezduVozidla) throws RecordNotFoundException, NoSuchMessageException {
+        PovoleniVjezduVozidla povoleni =  povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
+
+        if (povoleni != null) {
+            povoleni = translatePovoleniVjezduVozidla(povoleni);
+        }
+
+        return povoleni;
+    }
+    
 
     public List<PovoleniVjezduVozidla> getByStav(String stav) {
         return povoleniVjezduVozidlaRepository.getByStav(stav);
@@ -226,7 +247,7 @@ public class PovoleniVjezduVozidlaService {
         PovoleniVjezduVozidla savedPovoleni =  povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
         zkontrolovatNutnostOdeslaniOznameni(savedPovoleni, novyZaznam);
 
-        return savedPovoleni;
+        return translatePovoleniVjezduVozidla(savedPovoleni);
     }
 
     @Transactional
@@ -264,52 +285,6 @@ public class PovoleniVjezduVozidlaService {
         return result;
     }
 
-    public Stat getZemeRegistraceVozidla(String idPovoleniVjezduVozidla) {
-        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
-        try {
-            if (povoleniVjezduVozidla == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            povoleniVjezduVozidla.getZemeRegistraceVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleniVjezduVozidla.getZemeRegistraceVozidla().getNazevResx()));
-            return povoleniVjezduVozidla.getZemeRegistraceVozidla();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-    public List<VozidloTyp> getTypyVozidel(String idPovoleniVjezduVozidla) {
-        PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
-        try {
-            if (povoleniVjezduVozidla == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            List<VozidloTyp> typyVozidel = new ArrayList<VozidloTyp>();
-
-            for (VozidloTyp vozidloTyp : povoleniVjezduVozidla.getTypVozidla()){
-                vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vozidloTyp.getNazevResx()));
-                typyVozidel.add(vozidloTyp);
-            }
-
-            return typyVozidel;
-
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-    public ZadostStav getZadostStav(String idPovoleniVjezduVozidla) {
-        PovoleniVjezduVozidla povoleni = getDetail(idPovoleniVjezduVozidla);
-
-        try {
-            if (povoleni == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-                povoleni.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getStav().getNazevResx()));
-            return povoleni.getStav();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
 
     public Integer pocetVjezdu(String idPovoleniVjezduVozidla) {
         PovoleniVjezduVozidla povoleni = povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);

@@ -17,10 +17,8 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.RidicDto;
 import cz.diamo.vratnice.dto.VjezdVozidlaDto;
-import cz.diamo.vratnice.dto.VozidloTypDto;
 import cz.diamo.vratnice.entity.Ridic;
 import cz.diamo.vratnice.entity.VjezdVozidla;
-import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.service.RidicService;
 import cz.diamo.vratnice.service.UzivatelVratniceService;
@@ -82,18 +80,11 @@ public class VjezdVozidlaController extends BaseController{
 
     @GetMapping("/vjezd-vozidla/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
-    public ResponseEntity<VjezdVozidlaDto> getDetail(@RequestParam String idVjezdVozidla) {
+    public ResponseEntity<VjezdVozidlaDto> getDetail(@RequestParam String idVjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
         VjezdVozidla vjezdVozidla = vjezdVozidlaService.getDetail(idVjezdVozidla);
         if (vjezdVozidla == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
-    }
-
-    @GetMapping("/vjezd-vozidla/typ")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
-    public ResponseEntity<VozidloTypDto> typ(@RequestParam String idVozidlo) {
-        VozidloTyp vozidloTyp = vjezdVozidlaService.getVozidloTyp(idVozidlo);
-        return ResponseEntity.ok(new VozidloTypDto(vozidloTyp));
     }
 }

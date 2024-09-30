@@ -9,9 +9,9 @@ import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,7 +30,6 @@ import cz.diamo.vratnice.service.RzVozidlaDetektorService;
 
 
 @RestController
-@RequestMapping("vratnice-kamery")
 public class VratniceKameryRestController extends BaseRestController {
 
     final static Logger logger = LogManager.getLogger(VratniceKameryRestController.class);
@@ -46,7 +45,8 @@ public class VratniceKameryRestController extends BaseRestController {
 
 
     @PostMapping("/rz-vozidla-detektor/detekce")
-    private RzDetectedMessageDto processRzVozidla(@RequestParam String idVratnice, @RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException, RecordNotFoundException, NoSuchMessageException {
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_KAMERY')")
+    public RzDetectedMessageDto processRzVozidla(@RequestParam String idVratnice, @RequestParam String rzVozidla, @RequestParam Boolean vjezd) throws JSONException, RecordNotFoundException, NoSuchMessageException {
         if (vjezd) {
             return rzVozidlaDetektorService.checkIfRzVozidlaIsAllowedAndSendWS(idVratnice, rzVozidla, vjezd);
         } else {
@@ -55,6 +55,7 @@ public class VratniceKameryRestController extends BaseRestController {
     }
 
     @PostMapping("/rz-vozidla-detektor/nevyporadane-zaznamy")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_KAMERY')")
     public ResponseEntity<StatusMessageVjezdVyjezdDto> nevyporadaneZaznamy(@RequestBody List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, @RequestParam String idVratnice) throws JSONException{
         try {
             vratniceKameryRestService.saveNevyporadaneZaznamy(vjezdVyjezdVozidlaDtoList, idVratnice);
@@ -67,6 +68,7 @@ public class VratniceKameryRestController extends BaseRestController {
     }
 
     @PostMapping("/vratnice-kamery-konfigurace/inicializace")
+    @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_KAMERY')")
     public ResponseEntity<InicializaceVratniceKameryDto> inicializace(@RequestBody InicializaceVratniceKameryDto inicializaceVratniceKameryDto) throws JSONException{
         try {
             InicializaceVratniceKamery savedInicializaceVratniceKamery = inicializaceVratniceKameryService.save(inicializaceVratniceKameryDto.toEntity());

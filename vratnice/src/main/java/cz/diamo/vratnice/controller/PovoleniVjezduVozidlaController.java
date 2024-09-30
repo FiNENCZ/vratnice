@@ -27,13 +27,7 @@ import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.base.VratniceUtils;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
-import cz.diamo.vratnice.dto.StatDto;
-import cz.diamo.vratnice.dto.VozidloTypDto;
-import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
-import cz.diamo.vratnice.entity.Stat;
-import cz.diamo.vratnice.entity.VozidloTyp;
-import cz.diamo.vratnice.entity.ZadostStav;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.PovoleniVjezduVozidlaService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -115,7 +109,7 @@ public class PovoleniVjezduVozidlaController extends BaseController {
 
     @GetMapping("/povoleni-vjezdu-vozidla/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> getDetail(@RequestParam String idPovoleniVjezduVozidla) {
+    public ResponseEntity<PovoleniVjezduVozidlaDto> getDetail(@RequestParam String idPovoleniVjezduVozidla) throws RecordNotFoundException, NoSuchMessageException {
         PovoleniVjezduVozidla povoleniVjezduVozidla = povoleniVjezduVozidlaService.getDetail(idPovoleniVjezduVozidla);
         if (povoleniVjezduVozidla == null) {
             return ResponseEntity.notFound().build();
@@ -140,38 +134,6 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         Optional<PovoleniVjezduVozidlaDto> optionalPovoleniVjezduVozidlaDto = povoleniVjezduVozidla.map(PovoleniVjezduVozidlaDto::new);
         return ResponseEntity.ok(optionalPovoleniVjezduVozidlaDto);
     }
-    
-    
-    @GetMapping("/povoleni-vjezdu-vozidla/zeme-registrace-vozidla")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<StatDto> zemeRegistracePuvodu(@RequestParam String idPovoleniVjezduVozidla) {
-        Stat stat = povoleniVjezduVozidlaService.getZemeRegistraceVozidla(idPovoleniVjezduVozidla);
-        return ResponseEntity.ok(new StatDto(stat));
-    }
-
-    @GetMapping("povoleni-vjezdu-vozidla/typy-vozidel")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<List<VozidloTypDto>> typyVozidel(@RequestParam String idPovoleniVjezduVozidla) {
-        List<VozidloTypDto> result = new ArrayList<VozidloTypDto>();
-        List<VozidloTyp> typyVozidel = povoleniVjezduVozidlaService.getTypyVozidel(idPovoleniVjezduVozidla);
-
-        if (typyVozidel != null && typyVozidel.size() > 0) {
-            for (VozidloTyp vozidloTyp : typyVozidel) {
-                result.add(new VozidloTypDto(vozidloTyp));
-            }
-        }
-
-        return ResponseEntity.ok(result);
-
-    }
-
-    @GetMapping("/povoleni-vjezdu-vozidla/stav")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<ZadostStavDto> stav(@RequestParam String idZadostKlic) {
-        ZadostStav stav = povoleniVjezduVozidlaService.getZadostStav(idZadostKlic);
-        return ResponseEntity.ok(new ZadostStavDto(stav));
-    }
-
 
     @PostMapping("/povoleni-vjezdu-vozidla/zneplatnit-povoleni")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")

@@ -8,14 +8,13 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.HistorieSluzebniVozidlo;
 import cz.diamo.vratnice.entity.HistorieSluzebniVozidloAkce;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
@@ -31,10 +30,6 @@ public class HistorieSluzebniVozidloService {
 
     @Autowired
     private HistorieSluzebniVozidloRepository historieSluzebniVozidloRepository;
-
-
-    @Autowired
-	private MessageSource messageSource;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -74,22 +69,15 @@ public class HistorieSluzebniVozidloService {
         return historieSluzebniVozidloRepository.save(historieSluzebniVozidlo);
     }
 
-    public List<HistorieSluzebniVozidlo> findBySluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo) {
-        return historieSluzebniVozidloRepository.findBySluzebniVozidlo(sluzebniVozidlo);
+    public List<HistorieSluzebniVozidlo> findBySluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
+        List<HistorieSluzebniVozidlo> list =  historieSluzebniVozidloRepository.findBySluzebniVozidlo(sluzebniVozidlo);
+
+        if (list != null) {
+            for (HistorieSluzebniVozidlo historieSluzebniVozidlo : list) {
+                historieSluzebniVozidlo.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieSluzebniVozidlo.getAkce().getNazevResx()));
+            }
+        }
+
+        return list;
     }
-
-    public HistorieSluzebniVozidloAkce getAkci(String idHistorieSluzebniVozidlo) {
-        HistorieSluzebniVozidlo historieSluzebniVozidlo = historieSluzebniVozidloRepository.getDetail(idHistorieSluzebniVozidlo);
-        try {
-            if (historieSluzebniVozidlo == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            historieSluzebniVozidlo.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieSluzebniVozidlo.getAkce().getNazevResx()));
-            return historieSluzebniVozidlo.getAkce();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-
 }

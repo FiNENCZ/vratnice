@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
@@ -19,10 +17,6 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.controller.SluzebniVozidloController;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
-import cz.diamo.vratnice.entity.SluzebniVozidloFunkce;
-import cz.diamo.vratnice.entity.SluzebniVozidloKategorie;
-import cz.diamo.vratnice.entity.SluzebniVozidloStav;
-import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.enums.SluzebniVozidloKategorieEnum;
 import cz.diamo.vratnice.repository.SluzebniVozidloRepository;
@@ -35,6 +29,7 @@ import jakarta.transaction.Transactional;
 public class SluzebniVozidloService {
 
     final static Logger logger = LogManager.getLogger(SluzebniVozidloController.class);
+    
     @Autowired
     private SluzebniVozidloRepository sluzebniVozidloRepository;
     
@@ -51,7 +46,7 @@ public class SluzebniVozidloService {
     private VratniceService vratniceService;
 
 
-    public List<SluzebniVozidlo> getList(Boolean aktivita) {
+    public List<SluzebniVozidlo> getList(Boolean aktivita) throws RecordNotFoundException, NoSuchMessageException {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from SluzebniVozidlo s");
@@ -68,11 +63,19 @@ public class SluzebniVozidloService {
         
         @SuppressWarnings("unchecked")
         List<SluzebniVozidlo> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (SluzebniVozidlo sluzebniVozidlo : list) {
+                sluzebniVozidlo = translateSluzebniVozidlo(sluzebniVozidlo);
+            }
+        }
+
+
         return list;
     }
 
     @Transactional
-    public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) throws UniqueValueException, NoSuchMessageException {
+    public SluzebniVozidlo create(SluzebniVozidlo sluzebniVozidlo) throws UniqueValueException, NoSuchMessageException, RecordNotFoundException {
         if (sluzebniVozidlo.getIdSluzebniVozidlo() == null || sluzebniVozidlo.getIdSluzebniVozidlo().isEmpty()){
             if (sluzebniVozidloRepository.existsByRz(sluzebniVozidlo.getRz()))
                 throw new UniqueValueException(
@@ -80,11 +83,32 @@ public class SluzebniVozidloService {
         }
         sluzebniVozidlo.setCasZmn(Utils.getCasZmn());
         sluzebniVozidlo.setZmenuProvedl(Utils.getZmenuProv());
-        return sluzebniVozidloRepository.save(sluzebniVozidlo);
+
+        SluzebniVozidlo savedSluzebniVozidlo = sluzebniVozidloRepository.save(sluzebniVozidlo);
+
+        return translateSluzebniVozidlo(savedSluzebniVozidlo);
     }
 
-    public SluzebniVozidlo getDetail(String id) {
-        return sluzebniVozidloRepository.getDetail(id);
+    public SluzebniVozidlo getDetail(String id) throws RecordNotFoundException, NoSuchMessageException {
+        SluzebniVozidlo sluzebniVozidlo =  sluzebniVozidloRepository.getDetail(id);
+        
+        if (sluzebniVozidlo != null) {
+            sluzebniVozidlo = translateSluzebniVozidlo(sluzebniVozidlo);
+        }
+
+        return sluzebniVozidlo;
+    }
+
+    private SluzebniVozidlo translateSluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
+        sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getTyp().getNazevResx()));
+        sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getKategorie().getNazevResx()));
+        
+        if (sluzebniVozidlo.getFunkce() != null )
+            sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getFunkce().getNazevResx()));
+        
+        sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getStav().getNazevResx()));
+
+        return sluzebniVozidlo;
     }
 
     public Boolean muzeSluzebniVozidloProjetVratnici(String rz, String idVratnice) throws RecordNotFoundException, NoSuchMessageException {
@@ -120,57 +144,4 @@ public class SluzebniVozidloService {
     public SluzebniVozidlo getByRz(String rz) {
         return sluzebniVozidloRepository.getByRz(rz);
     }
-
-    public VozidloTyp getVozidloTyp(String idVozidlo) {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
-        try {
-            if (sluzebniVozidlo == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getTyp().getNazevResx()));
-            return sluzebniVozidlo.getTyp();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-    public SluzebniVozidloKategorie getKategorie(String idVozidlo) {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
-        try {
-            if (sluzebniVozidlo == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getKategorie().getNazevResx()));
-            return sluzebniVozidlo.getKategorie();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-    public SluzebniVozidloFunkce getFunkce(String idVozidlo) {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
-        try {
-            if (sluzebniVozidlo == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getFunkce().getNazevResx()));
-            return sluzebniVozidlo.getFunkce();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
-    public SluzebniVozidloStav getVozidloStav(String idVozidlo) {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(idVozidlo);
-        try {
-            if (sluzebniVozidlo == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getStav().getNazevResx()));
-            return sluzebniVozidlo.getStav();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
-    }
-
 }

@@ -8,18 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.HistorieVypujcekAkce;
 import cz.diamo.vratnice.entity.Klic;
-import cz.diamo.vratnice.entity.KlicTyp;
 import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.HistorieVypujcekAkceEnum;
@@ -42,7 +40,7 @@ public class KlicService {
     private EntityManager entityManager;
 
     @Autowired
-	private MessageSource messageSource;
+    private MessageSource messageSource;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -59,9 +57,6 @@ public class KlicService {
     @Autowired
     private BudovaVratniceService budovaVratniceService;
 
-    public List<Klic> getAllKeys() {
-        return klicRepository.findAll();
-    }
 
     @Transactional
     public Klic createKey(Klic klic, AppUserDto appUserDto) throws NoSuchMessageException, BaseException {
@@ -73,7 +68,10 @@ public class KlicService {
 
         klic.setCasZmn(Utils.getCasZmn());
         klic.setZmenuProvedl(Utils.getZmenuProv());
-        return klicRepository.save(klic);
+
+        Klic savedKlic = klicRepository.save(klic);
+
+        return translateKlic(savedKlic);
     }
 
 
@@ -86,7 +84,7 @@ public class KlicService {
         }
     }
 
-    public List<Klic> getList(Boolean aktivita, Boolean specialni, AppUserDto appUserDto)  {
+    public List<Klic> getList(Boolean aktivita, Boolean specialni, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException  {
         String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
@@ -114,11 +112,18 @@ public class KlicService {
 
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (Klic klic : list) {
+                klic = translateKlic(klic);
+            }
+        }
+
         return list;
 
     }
 
-    public List<Klic> getList(String idLokalita, String idBudova, String idPoschodi, Boolean aktivita, Boolean specialni) {
+    public List<Klic> getList(String idLokalita, String idBudova, String idPoschodi, Boolean aktivita, Boolean specialni) throws RecordNotFoundException, NoSuchMessageException {
         StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from Klic s");
@@ -161,38 +166,30 @@ public class KlicService {
             
         @SuppressWarnings("unchecked")
         List<Klic> list = vysledek.getResultList();
+
+        if (list != null) {
+            for (Klic klic : list) {
+                klic = translateKlic(klic);
+            }
+        }
+
         return list;
 
     }
 
-    public Klic getDetail(String idKlic) {
-        return klicRepository.getDetail(idKlic);
+    private Klic translateKlic(Klic klic) throws RecordNotFoundException, NoSuchMessageException {
+        klic.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), klic.getTyp().getNazevResx()));
+        return klic;
     }
 
-    public Klic getDetailByChipCode(String kodCipu) {
-        return klicRepository.getDetailByKodCipu(kodCipu);
-    }
-
-    public List<Klic> getBySpecialni(Boolean specialni) {
-        return klicRepository.getBySpecialni(specialni);
-    }
-
-
-    public List<Klic> getKlicByAktivita(Boolean aktivita) {
-        return klicRepository.findByAktivita(aktivita);
-    }
-
-    public KlicTyp getKlicTyp(String idKlic) {
+    public Klic getDetail(String idKlic) throws RecordNotFoundException, NoSuchMessageException {
         Klic klic = klicRepository.getDetail(idKlic);
-        try {
-            if (klic == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, messageSource.getMessage("record.not.found", null, LocaleContextHolder.getLocale()));
-        
-            klic.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), klic.getTyp().getNazevResx()));
-            return klic.getTyp();
-        } catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
-		}
+
+        if (klic != null) {
+            klic = translateKlic(klic);
+        }
+
+        return klic;
     }
 
     public Boolean jeDostupny(ZadostKlic zadost) {

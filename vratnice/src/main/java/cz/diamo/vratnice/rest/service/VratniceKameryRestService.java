@@ -7,16 +7,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.entity.VyjezdVozidla;
 import cz.diamo.vratnice.enums.RzDetectedMessageStatusEnum;
 import cz.diamo.vratnice.rest.dto.VjezdVyjezdVozidlaDto;
 import cz.diamo.vratnice.service.RzVozidlaDetektorService;
 import cz.diamo.vratnice.service.VjezdVozidlaService;
+import cz.diamo.vratnice.service.VratniceService;
 import cz.diamo.vratnice.service.VyjezdVozidlaService;
 import jakarta.transaction.Transactional;
 
@@ -32,8 +36,20 @@ public class VratniceKameryRestService {
     @Autowired
     private RzVozidlaDetektorService rzVozidlaDetektorService;
 
+    @Autowired
+    private VratniceService vratniceService;
+
+    @Autowired
+    private MessageSource messageSource;
+
     @Transactional
     public String saveNevyporadaneZaznamy(List<VjezdVyjezdVozidlaDto> vjezdVyjezdVozidlaDtoList, String idVratnice) throws JSONException, RecordNotFoundException, NoSuchMessageException  {
+        Vratnice vratniceKamery = vratniceService.getDetail(idVratnice);
+
+        if (vratniceKamery == null)
+            throw new RecordNotFoundException(
+                    messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale()));
+        
         for (VjezdVyjezdVozidlaDto dto : vjezdVyjezdVozidlaDtoList) {
             if(dto.getVjezd()) {
                 VjezdVozidla vjezdVozidla = new VjezdVozidla();
@@ -42,6 +58,7 @@ public class VratniceKameryRestService {
                 vjezdVozidla.setAktivita(true);
                 vjezdVozidla.setCasZmn(Timestamp.from(Instant.now()));
                 vjezdVozidla.setZmenuProvedl("kamery");
+                vjezdVozidla.setVratnice(vratniceKamery);
 
                 vjezdVozidlaService.create(vjezdVozidla, null);
             } else {
@@ -51,6 +68,7 @@ public class VratniceKameryRestService {
                 vyjezdVozidla.setAktivita(true);
                 vyjezdVozidla.setCasZmn(Timestamp.from(Instant.now()));
                 vyjezdVozidla.setZmenuProvedl("kamery");
+                vyjezdVozidla.setVratnice(vratniceKamery);
 
                 vyjezdVozidlaService.create(vyjezdVozidla, null);
             }
@@ -60,5 +78,6 @@ public class VratniceKameryRestService {
         rzVozidlaDetektorService.sendWebSocketMessage(idVratnice ,"all", RzDetectedMessageStatusEnum.SLUZEBNI_VOZIDLO, null);
         return "";
     }
+    
 
 }
