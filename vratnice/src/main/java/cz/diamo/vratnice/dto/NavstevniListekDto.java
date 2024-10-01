@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.share.entity.Uzivatel;
+
 import cz.diamo.vratnice.entity.NavstevaOsoba;
+import cz.diamo.vratnice.entity.NavstevaUzivatelStav;
 import cz.diamo.vratnice.entity.NavstevniListek;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -29,7 +29,7 @@ public class NavstevniListekDto implements Serializable{
     private List<NavstevaOsobaDto> navstevaOsoba;
 
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
-    private List<UzivatelDto> uzivatel;
+    private List<NavstevaUzivatelStavDto> uzivateleStav;
 
     //@NotNull(message = "{navstevni_listek.typ.require}")
     private NavstevniListekTypDto typ;
@@ -58,14 +58,14 @@ public class NavstevniListekDto implements Serializable{
             }
         }
         this.setNavstevaOsoba(navstevaOsobaDtos);
-
-        List<UzivatelDto> uzivatelDtos = new ArrayList<>();
-        if(navstevniListek.getNavstevaOsoba() != null) {
-            for(Uzivatel uzivatel: navstevniListek.getUzivatel()) {
-                uzivatelDtos.add(new UzivatelDto(uzivatel));
+        
+        List<NavstevaUzivatelStavDto> uzivatelDtos = new ArrayList<>();
+        if(navstevniListek.getUzivateleStav() != null) {
+            for(NavstevaUzivatelStav uzivatel: navstevniListek.getUzivateleStav()) {
+                uzivatelDtos.add(new NavstevaUzivatelStavDto(uzivatel));
             }
         }
-        this.setUzivatel(uzivatelDtos);
+        this.setUzivateleStav(uzivatelDtos);
 
         this.typ = new NavstevniListekTypDto(navstevniListek.getTyp());
         this.stav = navstevniListek.getStav();
@@ -88,13 +88,13 @@ public class NavstevniListekDto implements Serializable{
         }
         navstevniListek.setNavstevaOsoba(navstevaOsobas);
 
-        List<Uzivatel> uzivatels = new ArrayList<>();
-        if (getUzivatel() != null) {
-            for (UzivatelDto uzivatelDto : this.getUzivatel()) {
-                uzivatels.add(new Uzivatel(uzivatelDto.getId()));
+        List<NavstevaUzivatelStav> uzivatels = new ArrayList<>();
+        if (getUzivateleStav() != null) {
+            for (NavstevaUzivatelStavDto uzivatelDto : this.getUzivateleStav()) {
+                uzivatels.add(uzivatelDto.toEntity());
             }
         }
-        navstevniListek.setUzivatel(uzivatels);
+        navstevniListek.setUzivateleStav(uzivatels);
 
         navstevniListek.setTyp(getTyp().toEntity());
         navstevniListek.setStav(this.stav);

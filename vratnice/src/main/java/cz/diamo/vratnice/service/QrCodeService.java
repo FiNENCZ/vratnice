@@ -60,14 +60,16 @@ public class QrCodeService {
         // Informace o uživateli
         sb.append("Navštívený zaměstnanec: \n");
         int uzivatelIndex = 1;
+
+        //TODO:dodělat pro nový lístek
         
-        for (Uzivatel uzivatel : navstevniListek.getUzivatel()) {
-            sb.append("Uživatel ").append(uzivatelIndex).append(": \n");
-            sb.append("Název: ").append(uzivatel.getNazev()).append("\n");
-            sb.append("Závod: ").append(uzivatel.getZavod().getNazev());
-            sb.append(" (").append(uzivatel.getZavod().getSapId()).append(")").append("\n\n");
-            uzivatelIndex++;
-        }
+        // for (Uzivatel uzivatel : navstevniListek.getUzivatel()) {
+        //     sb.append("Uživatel ").append(uzivatelIndex).append(": \n");
+        //     sb.append("Název: ").append(uzivatel.getNazev()).append("\n");
+        //     sb.append("Závod: ").append(uzivatel.getZavod().getNazev());
+        //     sb.append(" (").append(uzivatel.getZavod().getSapId()).append(")").append("\n\n");
+        //     uzivatelIndex++;
+        // }
         
         return sb.toString();
     }

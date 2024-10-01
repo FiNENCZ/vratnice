@@ -51,11 +51,11 @@ public class NavstevniListek implements Serializable {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "navstevni_listek_uzivatel",
+        name = "navstevni_listek_uzivatel_stav",
         joinColumns = @JoinColumn(name = "id_navstevni_listek"),
-        inverseJoinColumns = @JoinColumn(name = "id_uzivatel")
+        inverseJoinColumns = @JoinColumn(name = "id_navsteva_uzivatel_stav")
     )
-    private List<Uzivatel> uzivatel;
+    private List<NavstevaUzivatelStav> uzivateleStav;
 
     @ManyToOne
     @JoinColumn(name = "id_navstevni_listek_typ")

@@ -14,13 +14,14 @@ import org.springframework.web.server.ResponseStatusException;
 import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
+import cz.diamo.vratnice.dto.NavstevaUzivatelStavDto;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
+import cz.diamo.vratnice.entity.NavstevaUzivatelStav;
 import cz.diamo.vratnice.entity.NavstevniListek;
 import cz.diamo.vratnice.entity.NavstevniListekTyp;
 import cz.diamo.vratnice.entity.Vratnice;
@@ -45,6 +46,9 @@ public class NavstevniListekService {
 
     @Autowired
     private NavstevniListekTypRepository navstevniListekTypRepository;
+
+    @Autowired
+    private NavstevaUzivatelStavService navstevaUzivatelStavService;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -82,11 +86,34 @@ public class NavstevniListekService {
                 .collect(Collectors.toList()));
         }
 
+               // Vytvoření NavstevaUzivatelStav jako entity (záznam v databázi)
+       if (navstevniListekDto.getUzivateleStav() != null && !navstevniListekDto.getUzivateleStav().isEmpty()) {
+        
+            List<NavstevaUzivatelStav> navstevaUzivateleStavEntities = navstevniListekDto.getUzivateleStav().stream()
+                .map(NavstevaUzivatelStavDto::toEntity)
+                .collect(Collectors.toList());
+
+            List<NavstevaUzivatelStav> savedUzivateleStavy = navstevaUzivateleStavEntities.stream()
+            .map(navstevaOsoba -> {
+                try {
+                    return navstevaUzivatelStavService.create(navstevaOsoba);
+                } catch (NoSuchMessageException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .collect(Collectors.toList());
+
+            navstevniListekDto.setUzivateleStav(savedUzivateleStavy.stream()
+                .map(NavstevaUzivatelStavDto::new)
+                .collect(Collectors.toList()));
+        }
+
+
         // Rozhodnutí o NavstevniListekTyp. Pokud alespoň jedna z návštěv má definovaný papírový typ, tak návštěvní lístek bude papírový
         NavstevniListekTypEnum currentNavstevniListekTypEnum = NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY;
 
-        for (UzivatelDto uzivatelDto: navstevniListekDto.getUzivatel()) {
-            NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypByUzivatel(uzivatelDto.getId());
+        for (NavstevaUzivatelStavDto uzivatelDto: navstevniListekDto.getUzivateleStav()) {
+            NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypByUzivatel(uzivatelDto.getUzivatel().getId());
             if (navstevniListekTyp.getNavstevniListekTypEnum() == NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY) {
                 currentNavstevniListekTypEnum = NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY;
             }
@@ -102,6 +129,7 @@ public class NavstevniListekService {
         if (navstevniListek.getVratnice() == null)
             if (vratnice != null)
                 navstevniListek.setVratnice(vratnice);
+
 
         return navstevniListekRepository.save(navstevniListek);
     }
