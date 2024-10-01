@@ -29,9 +29,11 @@ import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.enums.TypOznameniEnum;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.Wso2Services;
+import cz.diamo.vratnice.configuration.VratniceProperties;
 import cz.diamo.vratnice.dto.PovoleniVjezduVozidlaDto;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidla;
 import cz.diamo.vratnice.entity.PovoleniVjezduVozidlaZmenaStavu;
@@ -48,7 +50,7 @@ import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -87,11 +89,14 @@ public class PovoleniVjezduVozidlaService {
     @Autowired
     private Wso2Services wso2Services;
 
+    @Autowired
+    private VratniceProperties vratniceProperties;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        List<Zavod> zavody = getAllZavodByPristup(appUserDto.getIdUzivatel());
+        List<Zavod> zavody = vratniceBaseService.getAllZavodyUzivateleByPristup(appUserDto.getIdUzivatel());
 
         StringBuilder queryString = new StringBuilder();
 
@@ -140,17 +145,24 @@ public class PovoleniVjezduVozidlaService {
     }
 
     private PovoleniVjezduVozidla translatePovoleniVjezduVozidla(PovoleniVjezduVozidla povoleni) throws RecordNotFoundException, NoSuchMessageException {
+
         for (VozidloTyp vozidloTyp : povoleni.getTypVozidla()) {
+            if (vozidloTyp.getNazevResx() != null)
             vozidloTyp.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vozidloTyp.getNazevResx()));
         }
-        povoleni.getZemeRegistraceVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getZemeRegistraceVozidla().getNazevResx()));
-        povoleni.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getStav().getNazevResx()));
+        if (povoleni.getZemeRegistraceVozidla().getNazevResx() != null)
+            povoleni.getZemeRegistraceVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getZemeRegistraceVozidla().getNazevResx()));
+        
+        if (povoleni.getStav().getNazevResx() != null)
+            povoleni.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), povoleni.getStav().getNazevResx()));
         
         return povoleni;
     }
 
-    public PovoleniVjezduVozidla getDetail(String idPovoleniVjezduVozidla) throws RecordNotFoundException, NoSuchMessageException {
+    public PovoleniVjezduVozidla getDetail(String idPovoleniVjezduVozidla, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
         PovoleniVjezduVozidla povoleni =  povoleniVjezduVozidlaRepository.getDetail(idPovoleniVjezduVozidla);
+
+        zkontrolujOpravneniUzivateleVuciPovoleni(povoleni.getZavod().getIdZavod(), appUserDto.getIdUzivatel());
 
         if (povoleni != null) {
             povoleni = translatePovoleniVjezduVozidla(povoleni);
@@ -215,7 +227,10 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @Transactional
-    public PovoleniVjezduVozidla create(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
+    public PovoleniVjezduVozidla create(AppUserDto appUserDto,PovoleniVjezduVozidla povoleniVjezduVozidla, HttpServletRequest request) throws NoSuchMessageException, BaseException {
+        if (appUserDto != null) //Pro vratnice-public se neověřuje
+            zkontrolujOpravneniUzivateleVuciPovoleni(povoleniVjezduVozidla.getZavod().getIdZavod(), appUserDto.getIdUzivatel());
+        
         if (povoleniVjezduVozidla.getRidic() != null) {
             Ridic savedRidic =  ridicService.create(povoleniVjezduVozidla.getRidic());
             povoleniVjezduVozidla.setRidic(savedRidic);
@@ -245,16 +260,16 @@ public class PovoleniVjezduVozidlaService {
         zkontrolujJestliMuzeBytDanyStav(povoleniVjezduVozidla);
 
         PovoleniVjezduVozidla savedPovoleni =  povoleniVjezduVozidlaRepository.save(povoleniVjezduVozidla);
-        zkontrolovatNutnostOdeslaniOznameni(savedPovoleni, novyZaznam);
+        zkontrolovatNutnostOdeslaniOznameni(savedPovoleni, novyZaznam, request);
 
         return translatePovoleniVjezduVozidla(savedPovoleni);
     }
 
     @Transactional
-    public PovoleniVjezduVozidla createFromPublic(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
+    public PovoleniVjezduVozidla createFromPublic(PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto, HttpServletRequest request) throws NoSuchMessageException, BaseException {
         PovoleniVjezduVozidla povoleniEntity = povoleniVjezduVozidlaDto.toEntity();
         povoleniEntity.setStav(new ZadostStav(ZadostStavEnum.PRIPRAVENO));
-        PovoleniVjezduVozidla savedPovoleni = create(povoleniEntity);
+        PovoleniVjezduVozidla savedPovoleni = create(null, povoleniEntity, request);
 
         return savedPovoleni;
     }
@@ -273,13 +288,13 @@ public class PovoleniVjezduVozidlaService {
     }
 
     @Transactional
-    public List<PovoleniVjezduVozidla> zneplatnitPovoleni(List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws NoSuchMessageException, BaseException {
+    public List<PovoleniVjezduVozidla> zneplatnitPovoleni(AppUserDto appUserDto, HttpServletRequest request, List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidlaList) throws NoSuchMessageException, BaseException {
         List<PovoleniVjezduVozidla> result = new ArrayList<PovoleniVjezduVozidla>();
 
         for (PovoleniVjezduVozidlaDto povoleniVjezduVozidla : povoleniVjezduVozidlaList) {
             povoleniVjezduVozidla.setAktivita(false);
 
-            result.add(create(povoleniVjezduVozidla.toEntity()));
+            result.add(create(appUserDto, povoleniVjezduVozidla.toEntity(), request));
         }
 
         return result;
@@ -329,17 +344,19 @@ public class PovoleniVjezduVozidlaService {
         return pocetVjezdu;
     }
 
-    public PovoleniVjezduVozidla zmenitStavZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, ZadostStavEnum stavEnum) throws NoSuchMessageException, BaseException {
+    public PovoleniVjezduVozidla zmenitStavZadosti(AppUserDto appUserDto, HttpServletRequest request, PovoleniVjezduVozidla povoleniVjezduVozidla, ZadostStavEnum stavEnum) throws NoSuchMessageException, BaseException {        
         povoleniVjezduVozidla.setStav(new ZadostStav(stavEnum));
-        PovoleniVjezduVozidla savedPovoleni = create(povoleniVjezduVozidla);
+        PovoleniVjezduVozidla savedPovoleni = create(appUserDto, povoleniVjezduVozidla, request);
 
         return savedPovoleni;
     }
 
 
-    public void zkontrolovatNutnostOdeslaniOznameni(PovoleniVjezduVozidla povoleni, Boolean novyZaznam) throws NoSuchMessageException, BaseException {
+    public void zkontrolovatNutnostOdeslaniOznameni(PovoleniVjezduVozidla povoleni, Boolean novyZaznam, HttpServletRequest request) throws NoSuchMessageException, BaseException {
         if (novyZaznam) {
-            //oznamitObsluhuOVytvoreniZadosti(povoleni);
+            if (povoleni.getStav().getZadostStavEnum().equals(ZadostStavEnum.PRIPRAVENO))
+                oznamitObsluhuOVytvoreniZadosti(povoleni, request);
+
             zaslatEmailOZmeneZadostiZadateli(povoleni, novyZaznam);
             return;
         }
@@ -354,23 +371,28 @@ public class PovoleniVjezduVozidlaService {
         zaslatEmailOZmeneZadostiZadateli(povoleni, novyZaznam);
     }
 
-    //TODO: připojit na oznameniServices bez autentizovaného requestu
-    public void oznamitObsluhuOVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla) throws NoSuchMessageException, BaseException {
+    public void oznamitObsluhuOVytvoreniZadosti(PovoleniVjezduVozidla povoleniVjezduVozidla, HttpServletRequest request) throws NoSuchMessageException, BaseException {        
         List<RoleEnum> pozadovaneRoleObsluhy = new ArrayList<RoleEnum>();
         pozadovaneRoleObsluhy.add(RoleEnum.ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA);
 
-        List<Uzivatel> odpovidajiciObsluha = listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(pozadovaneRoleObsluhy, povoleniVjezduVozidla.getZavod().getIdZavod());
+        List<Uzivatel> odpovidajiciObsluha = vratniceBaseService.listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(pozadovaneRoleObsluhy, povoleniVjezduVozidla.getZavod().getIdZavod());
 
+        //http://localhost:4206/#/private/zadost-povoleni-vjezdu-vozidla?typSeznamuZadostiInt=enum&idPovoleniVjezduVozidla=id
+        String oznameniUrl = vratniceProperties.getNgServerUrl() 
+            + String.format("#/private/zadost-povoleni-vjezdu-vozidla?typSeznamuZadostiInt=%s&idPovoleniVjezduVozidla=%s",
+                povoleniVjezduVozidla.getStav().getZadostStavEnum().getValue().toString(), 
+                povoleniVjezduVozidla.getIdPovoleniVjezduVozidla());
 
         String predmet = messageSource.getMessage("avizace.povoleni_vjezdu_vozidla.zadost_vytvorena.predmet", null, LocaleContextHolder.getLocale());
         String oznameniText = vytvorOznameniProObsluhu(povoleniVjezduVozidla);
-        String telo = String.format("Dobrý den, \n") + oznameniText;
+        String emailUrl = String.format("\n\n<a href='%s'>Detail žádosti</a>", oznameniUrl);
+        String telo = String.format("Dobrý den, \n") + oznameniText + emailUrl;
 
-        vratniceBaseService.zaslatOznameniUzivateli(predmet, oznameniText, telo, null, odpovidajiciObsluha, TypOznameniEnum.DULEZITE_INFO, null);
+        vratniceBaseService.zaslatOznameniUzivateli(predmet, oznameniText, telo, oznameniUrl, odpovidajiciObsluha, TypOznameniEnum.DULEZITE_INFO, request);
     }
 
     private String vytvorOznameniProObsluhu(PovoleniVjezduVozidla povoleniVjezduVozidla) {
-        String celeJmenoZadatele = povoleniVjezduVozidla.getJmenoZadatele() + povoleniVjezduVozidla.getPrijmeniZadatele();
+        String celeJmenoZadatele = povoleniVjezduVozidla.getJmenoZadatele() + " " + povoleniVjezduVozidla.getPrijmeniZadatele();
         String zavodNazev = povoleniVjezduVozidla.getZavod().getNazev();
 
         String lokalityNazvy = ""; // Inicializace proměnné
@@ -403,10 +425,10 @@ public class PovoleniVjezduVozidlaService {
         return String.format(
             "Byla vytvořena nová žádost o povolení vjezdu vozidla dne <strong>%s</strong>.\n" + 
             "Jméno žadalatele: <strong>%s</strong>\n" +
-            "Závod: <strong>%s</strong>" +
-            "Lokality: <strong>%s</strong>" +
-            "RZ vozidel: <strong>%s</strong>"+
-            "Datum platnosti: <strong>%s<strong>",
+            "Závod: <strong>%s</strong>\n" +
+            "Lokality: <strong>%s</strong>\n" +
+            "RZ vozidel: <strong>%s</strong>\n"+
+            "Datum platnosti: <strong>%s<strong>\n",
             datumVytvoreni,
             celeJmenoZadatele,
             zavodNazev,
@@ -424,7 +446,7 @@ public class PovoleniVjezduVozidlaService {
         String prijmeni = povoleniVjezduVozidla.getPrijmeniZadatele();
         StringBuilder emailBuilder = new StringBuilder();
 
-        if (novyZaznam) { //Vytvoření žádosti
+        if (novyZaznam && povoleniVjezduVozidla.getStav().getZadostStavEnum().equals(ZadostStavEnum.PRIPRAVENO)) { //Vytvoření žádosti
             emailBuilder.append("Vážený/á pane/paní ").append(prijmeni).append(",\n\n")
                 .append("rádi bychom Vás informovali, že Vaše žádost o povolení vjezdu vozidla byla úspěšně vytvořena \n")
                 .append("dne <strong>").append(datumVytvoreni).append("</strong> a je v procesu schvalování. ");
@@ -524,43 +546,21 @@ public class PovoleniVjezduVozidlaService {
         wso2Services.poslatEmail(email);
     }
 
-    public List<Zavod> getAllZavodByPristup(String idUzivatel) {
-        String hql = "SELECT DISTINCT z FROM Zavod z " +
-        "LEFT JOIN UzivatelZavod uz ON z.idZavod = uz.idZavod " +
-        "LEFT JOIN OpravneniZavod oz ON z.idZavod = oz.idZavod " +
-        "LEFT JOIN Opravneni o ON o.idOpravneni = oz.idOpravneni " +
-        "LEFT JOIN Uzivatel u ON u.idUzivatel = uz.idUzivatel OR u.idUzivatel = :idUzivatel " +
-        "WHERE uz.idUzivatel = :idUzivatel OR u.idUzivatel = :idUzivatel";
+    public void zkontrolujOpravneniUzivateleVuciPovoleni(String idZavodPovoleni, String idUzivatel) throws AccessDeniedException, NoSuchMessageException {
+        List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(idUzivatel);
+
+        logger.info("---------");
+        logger.info(idZavodPovoleni);
+        logger.info(zavodyUzivatele);
+
+        boolean povoleniNalezeno = zavodyUzivatele.stream()
+            .anyMatch(zavod -> zavod.getIdZavod().equals(idZavodPovoleni));
+
+        if (!povoleniNalezeno) {
+            throw new AccessDeniedException(
+						messageSource.getMessage("povoleni.vjezdu.vozidla.not_access", null, LocaleContextHolder.getLocale()));
+        }
 
 
-        TypedQuery<Zavod> query = entityManager.createQuery(hql, Zavod.class);
-        query.setParameter("idUzivatel", idUzivatel);
-
-        return query.getResultList();
     }
-
- 
-
-
-
-    public List<Uzivatel> listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(List<RoleEnum> role, String idZavod) {
-        // HQL dotaz na výběr uživatelů s odpovídajícími rolemi, modulem "vratnice" a přístupem k danému závodu
-        String hql = "SELECT u FROM Uzivatel u " +
-            "JOIN UzivatelModul um ON u.idUzivatel = um.idUzivatel " +
-            "JOIN UzivatelOpravneni uo ON u.idUzivatel = uo.idUzivatel " +
-            "JOIN Opravneni o ON uo.idOpravneni = o.idOpravneni " +
-            "JOIN OpravneniRole orl ON o.idOpravneni = orl.idOpravneni " +
-            "JOIN OpravneniZavod oz ON o.idOpravneni = oz.idOpravneni " +
-            "WHERE orl.authority IN :roles " +
-            "AND um.modul = 'vratnice' " +
-            "AND oz.idZavod = :idZavod";
-
-        TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
-        query.setParameter("roles", role.stream().map(RoleEnum::toString).toList()); // Převod RoleEnum na String
-        query.setParameter("idZavod", idZavod);
-
-        return query.getResultList();
-    }
-
-
 }

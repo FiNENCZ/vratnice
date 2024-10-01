@@ -12,9 +12,14 @@ import cz.diamo.share.dto.avizace.AvizaceOznameniRequestDto;
 import cz.diamo.share.dto.avizace.AvizacePrijemceRequestDto;
 import cz.diamo.share.dto.avizace.AvizaceRequestDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.enums.TypOznameniEnum;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.services.OznameniServices;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -23,6 +28,8 @@ public class VratniceBaseService {
     @Autowired
     private OznameniServices oznameniServices;
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @TransactionalRO
     public void zaslatOznameniUzivateli(String predmet, String oznameniText, String teloEmailu, String url,
@@ -49,6 +56,40 @@ public class VratniceBaseService {
 
         oznameniServices.save(avizaceRequestDto, request);
 
+    }
+
+    public List<Zavod> getAllZavodyUzivateleByPristup(String idUzivatel) {
+    String hql = "SELECT DISTINCT z FROM Zavod z " +
+        "LEFT JOIN UzivatelZavod uz ON z.idZavod = uz.idZavod " +
+        "LEFT JOIN OpravneniZavod oz ON z.idZavod = oz.idZavod " +
+        "LEFT JOIN Opravneni o ON oz.idOpravneni = o.idOpravneni " +
+        "LEFT JOIN UzivatelOpravneni uo ON o.idOpravneni = uo.idOpravneni " +
+        "WHERE uz.idUzivatel = :idUzivatel OR uo.idUzivatel = :idUzivatel";
+
+
+        TypedQuery<Zavod> query = entityManager.createQuery(hql, Zavod.class);
+        query.setParameter("idUzivatel", idUzivatel);
+
+        return query.getResultList();
+    }
+
+    public List<Uzivatel> listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(List<RoleEnum> role, String idZavod) {
+        // HQL dotaz na výběr uživatelů s odpovídajícími rolemi, modulem "vratnice" a přístupem k danému závodu
+        String hql = "SELECT u FROM Uzivatel u " +
+            "JOIN UzivatelModul um ON u.idUzivatel = um.idUzivatel " +
+            "JOIN UzivatelOpravneni uo ON u.idUzivatel = uo.idUzivatel " +
+            "JOIN Opravneni o ON uo.idOpravneni = o.idOpravneni " +
+            "JOIN OpravneniRole orl ON o.idOpravneni = orl.idOpravneni " +
+            "JOIN OpravneniZavod oz ON o.idOpravneni = oz.idOpravneni " +
+            "WHERE orl.authority IN :roles " +
+            "AND um.modul = 'vratnice' " +
+            "AND oz.idZavod = :idZavod";
+
+        TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
+        query.setParameter("roles", role.stream().map(RoleEnum::toString).toList()); // Převod RoleEnum na String
+        query.setParameter("idZavod", idZavod);
+
+        return query.getResultList();
     }
 
 

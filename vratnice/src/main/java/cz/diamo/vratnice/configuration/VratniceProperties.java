@@ -23,6 +23,8 @@ public class VratniceProperties {
     private String barvaPovoleneSpz;
 
     private String barvaSluzebnihoVozidla;
+
+    private String ngServerUrl;
     
 
 }

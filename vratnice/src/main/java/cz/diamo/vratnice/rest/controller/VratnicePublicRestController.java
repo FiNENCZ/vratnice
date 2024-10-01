@@ -219,8 +219,8 @@ public class VratnicePublicRestController extends BaseRestController{
 
     @PostMapping("/povoleni-vjezdu-vozidla/save")
     @PreAuthorize("hasAnyAuthority('ROLE_VRATNICE_PUBLIC')")
-    public ResponseEntity<PovoleniVjezduVozidlaDto> save(@RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
-        PovoleniVjezduVozidla savedPovoleni = povoleniVjezduVozidlaService.createFromPublic(povoleniVjezduVozidlaDto);
+    public ResponseEntity<PovoleniVjezduVozidlaDto> save(HttpServletRequest request, @RequestBody @Valid PovoleniVjezduVozidlaDto povoleniVjezduVozidlaDto) throws NoSuchMessageException, BaseException {
+        PovoleniVjezduVozidla savedPovoleni = povoleniVjezduVozidlaService.createFromPublic(povoleniVjezduVozidlaDto, request);
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(savedPovoleni));
     }
 
