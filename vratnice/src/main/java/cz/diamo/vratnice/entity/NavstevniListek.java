@@ -57,6 +57,9 @@ public class NavstevniListek implements Serializable {
     @JoinColumn(name = "id_navstevni_listek_typ")
     private NavstevniListekTyp typ;
 
+    @Column(name = "cas_vytvoreni")
+    private Timestamp casVytvoreni;
+
     private String poznamka;
 
     private Boolean aktivita = true;

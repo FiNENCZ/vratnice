@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
@@ -54,7 +55,7 @@ public class NavstevniListekController extends BaseController {
     @PostMapping("/navstevni-listek/create")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevniListekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-    @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws RecordNotFoundException, NoSuchMessageException {
+    @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
         Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
         NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto, vratnice);
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));

@@ -2,6 +2,7 @@ package cz.diamo.vratnice.entity;
 
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -44,6 +45,14 @@ public class NavstevniListekUzivatelStav implements Serializable {
     @ManyToOne
     @JoinColumn(name = "id_navstevni_listek_stav")
     private NavstevniListekStav stav = new NavstevniListekStav(NavstevniListekStavEnum.KE_ZPRACOVANI);
+
+    private String poznamka;
+
+    @Column(name = "cas_zmn")
+    private Timestamp casZmn;
+
+    @Column(name = "zmenu_provedl")
+    private String zmenuProvedl;
 
 
     public NavstevniListekUzivatelStav(Uzivatel uzivatel, NavstevniListekStav stav) {

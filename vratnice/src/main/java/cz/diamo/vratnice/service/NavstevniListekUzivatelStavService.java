@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.exceptions.RecordNotFoundException;
+import cz.diamo.vratnice.entity.NavstevniListekStav;
 import cz.diamo.vratnice.entity.NavstevniListekUzivatelStav;
+import cz.diamo.vratnice.enums.NavstevniListekStavEnum;
 import cz.diamo.vratnice.repository.NavstevniListekUzivatelStavRepository;
 import jakarta.transaction.Transactional;
 
@@ -42,6 +44,14 @@ public class NavstevniListekUzivatelStavService {
         }
 
         return uzivateleStav;
+    }
+
+    public NavstevniListekUzivatelStav zmenitStav(String idNavstevniListek, String idUzivatel, NavstevniListekStavEnum novyStavEnum) {
+        NavstevniListekUzivatelStav uzivatelStav = navstevaUzivatelStavRepository.getByNavstevniListekAndUzivatel(idNavstevniListek, idUzivatel);
+        uzivatelStav.setStav(new NavstevniListekStav(novyStavEnum));
+        NavstevniListekUzivatelStav savedUzivatelStav = create(uzivatelStav);
+
+        return savedUzivatelStav;
     }
 
 }

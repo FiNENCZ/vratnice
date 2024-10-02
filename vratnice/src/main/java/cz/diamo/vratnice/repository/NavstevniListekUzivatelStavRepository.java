@@ -16,4 +16,7 @@ public interface NavstevniListekUzivatelStavRepository extends JpaRepository<Nav
 
     @Query(sqlSelect + "where s.navstevniListek.idNavstevniListek = :idNavstevniListek")
     List<NavstevniListekUzivatelStav> getByNavstevniListek(String idNavstevniListek);
+
+    @Query(sqlSelect + "where s.navstevniListek.idNavstevniListek = :idNavstevniListek AND s.uzivatel.idUzivatel = :idUzivatel")
+    NavstevniListekUzivatelStav getByNavstevniListekAndUzivatel(String idNavstevniListek, String idUzivatel);
 }
