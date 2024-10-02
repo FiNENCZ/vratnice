@@ -79,7 +79,7 @@ public class NavstevniListekController extends BaseController {
 
     @GetMapping("/navstevni-listek/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
-    public ResponseEntity<NavstevniListekDto> getDetail(@RequestParam String idNavstevniListek) {
+    public ResponseEntity<NavstevniListekDto> getDetail(@RequestParam String idNavstevniListek) throws RecordNotFoundException, NoSuchMessageException {
         NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
         if (navstevniListek == null) {
             return ResponseEntity.notFound().build();
@@ -89,7 +89,7 @@ public class NavstevniListekController extends BaseController {
 
     @GetMapping("/navstevni-listek/qrcode")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
-    public ResponseEntity<byte[]> getQRCode(@RequestParam String idNavstevniListek) {
+    public ResponseEntity<byte[]> getQRCode(@RequestParam String idNavstevniListek) throws RecordNotFoundException, NoSuchMessageException {
         NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
         if (navstevniListek == null) {
             return ResponseEntity.notFound().build();
@@ -103,13 +103,6 @@ public class NavstevniListekController extends BaseController {
             // Handle exception appropriately
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    @GetMapping("/navstevni-listek/typ")
-    @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<NavstevniListekTypDto> navstevniListekTyp(@RequestParam String idNavstevniListek) {
-        NavstevniListekTyp navstevniListekTyp = navstevniListekService.getNavstevniListekTyp(idNavstevniListek);
-        return ResponseEntity.ok(new NavstevniListekTypDto(navstevniListekTyp));
     }
 
     @GetMapping("/navstevni-listek/typ-by-uzivatel")

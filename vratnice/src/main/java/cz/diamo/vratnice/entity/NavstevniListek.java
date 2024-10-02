@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 
+
 import cz.diamo.share.constants.Constants;
-import cz.diamo.share.entity.Uzivatel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -49,19 +50,12 @@ public class NavstevniListek implements Serializable {
     )
     private List<NavstevaOsoba> navstevaOsoba;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "navstevni_listek_uzivatel_stav",
-        joinColumns = @JoinColumn(name = "id_navstevni_listek"),
-        inverseJoinColumns = @JoinColumn(name = "id_navsteva_uzivatel_stav")
-    )
-    private List<NavstevaUzivatelStav> uzivateleStav;
+    @Transient
+    private List<NavstevniListekUzivatelStav> uzivateleStav;
 
     @ManyToOne
     @JoinColumn(name = "id_navstevni_listek_typ")
     private NavstevniListekTyp typ;
-
-    private String stav = "vyžádáno";
 
     private String poznamka;
 

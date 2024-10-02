@@ -6,12 +6,10 @@ import java.util.List;
 
 
 import cz.diamo.vratnice.entity.NavstevaOsoba;
-import cz.diamo.vratnice.entity.NavstevaUzivatelStav;
+import cz.diamo.vratnice.entity.NavstevniListekUzivatelStav;
 import cz.diamo.vratnice.entity.NavstevniListek;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,14 +27,10 @@ public class NavstevniListekDto implements Serializable{
     private List<NavstevaOsobaDto> navstevaOsoba;
 
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
-    private List<NavstevaUzivatelStavDto> uzivateleStav;
+    @Valid
+    private List<NavstevniListekUzivatelStavDto> uzivateleStav;
 
-    //@NotNull(message = "{navstevni_listek.typ.require}")
     private NavstevniListekTypDto typ;
-
-    @NotBlank(message = "{navstevni_listek.stav.require}")
-    @Size(max = 30, message = "{navstevni_listek.stav.max.30}")
-    private String stav = "vyžádáno";
 
     @NotNull(message = "{aktivita.require}")
     private Boolean aktivita = true;
@@ -59,16 +53,17 @@ public class NavstevniListekDto implements Serializable{
         }
         this.setNavstevaOsoba(navstevaOsobaDtos);
         
-        List<NavstevaUzivatelStavDto> uzivatelDtos = new ArrayList<>();
+        List<NavstevniListekUzivatelStavDto> uzivatelDtos = new ArrayList<>();
         if(navstevniListek.getUzivateleStav() != null) {
-            for(NavstevaUzivatelStav uzivatel: navstevniListek.getUzivateleStav()) {
-                uzivatelDtos.add(new NavstevaUzivatelStavDto(uzivatel));
+            for(NavstevniListekUzivatelStav uzivatel: navstevniListek.getUzivateleStav()) {
+                uzivatelDtos.add(new NavstevniListekUzivatelStavDto(uzivatel));
             }
         }
         this.setUzivateleStav(uzivatelDtos);
 
-        this.typ = new NavstevniListekTypDto(navstevniListek.getTyp());
-        this.stav = navstevniListek.getStav();
+        if (navstevniListek.getTyp() != null)
+            this.typ = new NavstevniListekTypDto(navstevniListek.getTyp());
+
         this.aktivita = navstevniListek.getAktivita();
     }
 
@@ -88,16 +83,17 @@ public class NavstevniListekDto implements Serializable{
         }
         navstevniListek.setNavstevaOsoba(navstevaOsobas);
 
-        List<NavstevaUzivatelStav> uzivatels = new ArrayList<>();
+        List<NavstevniListekUzivatelStav> uzivatels = new ArrayList<>();
         if (getUzivateleStav() != null) {
-            for (NavstevaUzivatelStavDto uzivatelDto : this.getUzivateleStav()) {
+            for (NavstevniListekUzivatelStavDto uzivatelDto : this.getUzivateleStav()) {
                 uzivatels.add(uzivatelDto.toEntity());
             }
         }
         navstevniListek.setUzivateleStav(uzivatels);
 
-        navstevniListek.setTyp(getTyp().toEntity());
-        navstevniListek.setStav(this.stav);
+        if (getTyp() != null)
+            navstevniListek.setTyp(getTyp().toEntity());
+
         navstevniListek.setAktivita(this.aktivita);
 
         return navstevniListek;

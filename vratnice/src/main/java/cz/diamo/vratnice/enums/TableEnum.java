@@ -6,7 +6,7 @@ public enum TableEnum {
     PovoleniVjezduVozidla("PV"), VjezdVozidla("VI"), VyjezdVozidla("VO"), 
     NavstevaOsoba("NO"), NavstevniListek("NL"), NajemnikNavstevnickaKarta("NK"), JmenoKorektura("JK"),
     InicializaceVratniceKamery("VK"), UzivatelVratnice("UV"), Spolecnost("SP"), SpecialniKlicOznameniVypujcky("SK"),
-    NavstevaUzivatelStav("NU");
+    NavstevniListekUzivatelStav("NU");
 
     private String prefix;
 

@@ -1,0 +1,53 @@
+
+--- VYMAZANI TABULKY navstevni_listek_uzivatel_stav
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT fk_navstevni_listek_uzivatel_stav_navsteva_uzivatel_stav;
+
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT fk_navstevni_listek_uzivatel_stav_navstevni_listek;
+
+DROP INDEX IF EXISTS ix_navstevni_listek_uzivatel_stav_navsteva_uzivatel_stav;
+DROP INDEX IF EXISTS ix_navstevni_listek_uzivatel_stav_navstevni_listek;
+
+DROP TABLE IF EXISTS vratnice.navstevni_listek_uzivatel_stav;
+
+
+---- PŘEJMENOVÁNÍ/NAHRAZENÍ TÉTO TABULKY 
+-- Přejmenování tabulky na navstevni_listek_uzivatel_stav
+ALTER TABLE vratnice.navsteva_uzivatel_stav
+RENAME TO navstevni_listek_uzivatel_stav;
+
+-- Přejmenování primárního klíče
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT pk_navsteva_uzivatel_stav,
+ADD CONSTRAINT pk_navstevni_listek_uzivatel_stav PRIMARY KEY (id_navsteva_uzivatel_stav);
+
+-- Přejmenování cizích klíčů
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT fk_navsteva_uzivatel_stav_id_navstevni_listek,
+ADD CONSTRAINT fk_navstevni_listek_uzivatel_stav_id_navstevni_listek FOREIGN KEY (id_navstevni_listek)
+REFERENCES vratnice.navstevni_listek(id_navstevni_listek);
+
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT fk_navsteva_uzivatel_stav_id_navstevni_listek_stav,
+ADD CONSTRAINT fk_navstevni_listek_uzivatel_stav_id_navstevni_listek_stav FOREIGN KEY (id_navstevni_listek_stav)
+REFERENCES vratnice.navstevni_listek_stav(id_navstevni_listek_stav);
+
+ALTER TABLE vratnice.navstevni_listek_uzivatel_stav
+DROP CONSTRAINT fk_navsteva_uzivatel_stav_id_uzivatel,
+ADD CONSTRAINT fk_navstevni_listek_uzivatel_stav_id_uzivatel FOREIGN KEY (id_uzivatel)
+REFERENCES vratnice.uzivatel(id_uzivatel);
+
+-- Přejmenování indexů
+DROP INDEX ix_navsteva_uzivatel_stav_id_navstevni_listek;
+CREATE INDEX ix_navstevni_listek_uzivatel_stav_id_navstevni_listek 
+ON vratnice.navstevni_listek_uzivatel_stav USING btree (id_navstevni_listek);
+
+DROP INDEX ix_navsteva_uzivatel_stav_id_uzivatel;
+CREATE INDEX ix_navstevni_listek_uzivatel_stav_id_uzivatel 
+ON vratnice.navstevni_listek_uzivatel_stav USING btree (id_uzivatel);
+
+-- Přidání indexu a cizího klíče pro id_navstevni_listek_stav
+CREATE INDEX ix_navstevni_listek_uzivatel_stav_id_navstevni_listek_stav 
+ON vratnice.navstevni_listek_uzivatel_stav USING btree (id_navstevni_listek_stav);
+

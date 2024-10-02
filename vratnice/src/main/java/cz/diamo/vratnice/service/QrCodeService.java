@@ -10,6 +10,8 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.vratnice.entity.NavstevaOsoba;
 import cz.diamo.vratnice.entity.NavstevniListek;
+import cz.diamo.vratnice.entity.NavstevniListekUzivatelStav;
+
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -42,7 +44,6 @@ public class QrCodeService {
         
         // Informace o navštěvním lístku
         sb.append("ID navštěvního lístku: ").append(navstevniListek.getIdNavstevniListek()).append("\n");
-        sb.append("Stav: ").append(navstevniListek.getStav()).append("\n\n");
         
         // Informace o navštěvovaných osobách
         sb.append("Návštěva: \n");
@@ -63,13 +64,14 @@ public class QrCodeService {
 
         //TODO:dodělat pro nový lístek
         
-        // for (Uzivatel uzivatel : navstevniListek.getUzivatel()) {
-        //     sb.append("Uživatel ").append(uzivatelIndex).append(": \n");
-        //     sb.append("Název: ").append(uzivatel.getNazev()).append("\n");
-        //     sb.append("Závod: ").append(uzivatel.getZavod().getNazev());
-        //     sb.append(" (").append(uzivatel.getZavod().getSapId()).append(")").append("\n\n");
-        //     uzivatelIndex++;
-        // }
+        for (NavstevniListekUzivatelStav uzivatelStav : navstevniListek.getUzivateleStav()) {
+            Uzivatel uzivatel = uzivatelStav.getUzivatel();
+            sb.append("Uživatel ").append(uzivatelIndex).append(": \n");
+            sb.append("Název: ").append(uzivatel.getNazev()).append("\n");
+            sb.append("Závod: ").append(uzivatel.getZavod().getNazev());
+            sb.append(" (").append(uzivatel.getZavod().getSapId()).append(")").append("\n\n");
+            uzivatelIndex++;
+        }
         
         return sb.toString();
     }

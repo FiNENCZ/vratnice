@@ -3,30 +3,32 @@ package cz.diamo.vratnice.dto;
 import java.io.Serializable;
 
 import cz.diamo.share.dto.UzivatelDto;
-import cz.diamo.vratnice.entity.NavstevaUzivatelStav;
+import cz.diamo.vratnice.entity.NavstevniListekUzivatelStav;
 import cz.diamo.vratnice.entity.NavstevniListekStav;
 import cz.diamo.vratnice.enums.NavstevniListekStavEnum;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class NavstevaUzivatelStavDto implements Serializable {
+public class NavstevniListekUzivatelStavDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private String id;
 
+    @Valid
     private UzivatelDto uzivatel;
 
     private NavstevniListekStavDto stav = new NavstevniListekStavDto(new NavstevniListekStav(NavstevniListekStavEnum.KE_ZPRACOVANI));
 
-    public NavstevaUzivatelStavDto(NavstevaUzivatelStav navstevaUzivatelStav) {
+    public NavstevniListekUzivatelStavDto(NavstevniListekUzivatelStav navstevaUzivatelStav) {
         if (navstevaUzivatelStav == null) {
             return;
         }
 
-        this.id = navstevaUzivatelStav.getIdNavstevaUzivatelStav();
+        this.id = navstevaUzivatelStav.getIdNavstevniListekUzivatelStav();
         this.uzivatel = new UzivatelDto(navstevaUzivatelStav.getUzivatel());
 
         if (navstevaUzivatelStav.getStav() != null)
@@ -34,11 +36,11 @@ public class NavstevaUzivatelStavDto implements Serializable {
     }
 
 
-    public NavstevaUzivatelStav toEntity() {
-        NavstevaUzivatelStav navstevaUzivatelStav = new NavstevaUzivatelStav();
+    public NavstevniListekUzivatelStav toEntity() {
+        NavstevniListekUzivatelStav navstevaUzivatelStav = new NavstevniListekUzivatelStav();
 
-        navstevaUzivatelStav.setIdNavstevaUzivatelStav(this.id);
-        navstevaUzivatelStav.setUzivatel(this.getUzivatel().getUzivatel(null, false));
+        navstevaUzivatelStav.setIdNavstevniListekUzivatelStav(this.id);
+        navstevaUzivatelStav.setUzivatel(this.getUzivatel().getUzivatel(null, true));
 
         if (getStav() != null)
             navstevaUzivatelStav.setStav(getStav().toEntity());

@@ -22,16 +22,20 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "navsteva_uzivatel_stav", schema = Constants.SCHEMA)
-@NamedQuery(name = "NavstevaUzivatelStav.findAll", query = "SELECT s FROM NavstevaUzivatelStav s")
-public class NavstevaUzivatelStav implements Serializable {
+@Table(name = "navstevni_listek_uzivatel_stav", schema = Constants.SCHEMA)
+@NamedQuery(name = "NavstevniListekUzivatelStav.findAll", query = "SELECT s FROM NavstevniListekUzivatelStav s")
+public class NavstevniListekUzivatelStav implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GenericGenerator(name = "id", strategy = "cz.diamo.vratnice.base.VratniceIdentifierGenerator")
     @GeneratedValue(generator = "id")
-    @Column(name = "id_navsteva_uzivatel_stav")
-    private String idNavstevaUzivatelStav;
+    @Column(name = "id_navstevni_listek_uzivatel_stav")
+    private String idNavstevniListekUzivatelStav;
+
+    @ManyToOne
+    @JoinColumn(name = "id_navstevni_listek")
+    private NavstevniListek navstevniListek;
 
     @ManyToOne
     @JoinColumn(name = "id_uzivatel")
@@ -42,7 +46,7 @@ public class NavstevaUzivatelStav implements Serializable {
     private NavstevniListekStav stav = new NavstevniListekStav(NavstevniListekStavEnum.KE_ZPRACOVANI);
 
 
-    public NavstevaUzivatelStav(Uzivatel uzivatel, NavstevniListekStav stav) {
+    public NavstevniListekUzivatelStav(Uzivatel uzivatel, NavstevniListekStav stav) {
         this.uzivatel = uzivatel;
         this.stav = stav;
     }
