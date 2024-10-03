@@ -28,6 +28,8 @@ import cz.diamo.share.security.UserAuthentication;
 import cz.diamo.share.services.AuthServices;
 import cz.diamo.vratnice.dto.KlicDto;
 import cz.diamo.vratnice.dto.PoschodiDto;
+import cz.diamo.vratnice.enums.NavstevniListekStavEnum;
+import cz.diamo.vratnice.service.NavstevniListekUzivatelStavService;
 import cz.diamo.vratnice.zadosti.dto.ZadostKlicExtDto;
 import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -49,6 +51,10 @@ public class ZadostiRestController extends BaseRestController {
 
 	@Autowired
     private UzivatelRepository uzivatelRepository;
+
+    @Autowired
+    private NavstevniListekUzivatelStavService navstevniListekUzivatelStavService;
+
 
 	@Autowired
     private AuthServices authServices;
@@ -144,6 +150,23 @@ public class ZadostiRestController extends BaseRestController {
                 }
             }
 
+        } catch (BaseException be) {
+            logger.error(be);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, be.toString());
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+        }
+    }
+
+    //TODO: pokud nutno, tak upravit funkce ze strany žádostí
+
+    @PostMapping("/navstevni-listek/zmenit-stav")
+	@PreAuthorize("isFullyAuthenticated()")
+    public void zmenitStavNavstevnihoListku(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
+            @RequestParam String idNavstevniListek, @RequestParam String idUzivatel, @RequestParam NavstevniListekStavEnum novyStavEnum) {
+        try {
+            navstevniListekUzivatelStavService.zmenitStav(idNavstevniListek, idUzivatel, novyStavEnum);
         } catch (BaseException be) {
             logger.error(be);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, be.toString());

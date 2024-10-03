@@ -62,7 +62,6 @@ public class QrCodeService {
         sb.append("Navštívený zaměstnanec: \n");
         int uzivatelIndex = 1;
 
-        //TODO:dodělat pro nový lístek
         
         for (NavstevniListekUzivatelStav uzivatelStav : navstevniListek.getUzivateleStav()) {
             Uzivatel uzivatel = uzivatelStav.getUzivatel();

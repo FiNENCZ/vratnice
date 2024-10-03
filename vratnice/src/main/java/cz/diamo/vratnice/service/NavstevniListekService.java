@@ -17,6 +17,7 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.AccessDeniedException;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
 import cz.diamo.vratnice.dto.NavstevaOsobaDto;
@@ -32,9 +33,11 @@ import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.NavstevniListekRepository;
 import cz.diamo.vratnice.repository.NavstevniListekTypRepository;
 import cz.diamo.vratnice.repository.UzivatelNavstevniListekTypRepository;
+import cz.diamo.vratnice.zadosti.services.ZadostiServices;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -61,11 +64,16 @@ public class NavstevniListekService {
     @Autowired
     private NavstevaOsobaService navstevaOsobaService;
 
+    @Autowired
+    private ZadostiServices zadostiServices;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     @Transactional
-    public NavstevniListek create(NavstevniListekDto navstevniListekDto, Vratnice vratnice) throws AccessDeniedException, NoSuchMessageException {
+    public NavstevniListek create(HttpServletRequest request, AppUserDto appUserDto,
+                NavstevniListekDto navstevniListekDto, Vratnice vratnice) throws AccessDeniedException, NoSuchMessageException, BaseException {
+
         if (navstevniListekDto.getIdNavstevniListek() != null) 
             throw new AccessDeniedException(messageSource.getMessage("navstevni_listek.cannot_be_edited", null, LocaleContextHolder.getLocale()));
 
@@ -90,6 +98,9 @@ public class NavstevniListekService {
 
         List<NavstevniListekUzivatelStav> savedUzivateleStav = createNavstevniListekUzivatelStavy(savedNavstevniListek);
         savedNavstevniListek.setUzivateleStav(savedUzivateleStav);
+
+        //TODO: -- ŽÁDOSTI -- napojit na žádosti
+        //zadostiServices.saveNavstevniListek(request, appUserDto, new NavstevniListekDto(savedNavstevniListek));
 
         return savedNavstevniListek;
     }
@@ -123,8 +134,6 @@ public class NavstevniListekService {
 
         for (NavstevniListekUzivatelStav uzivatelStav : navstevniListek.getUzivateleStav()) {
             uzivatelStav.setNavstevniListek(new NavstevniListek(navstevniListek.getIdNavstevniListek()));
-            uzivatelStav.setCasZmn(Utils.getCasZmn());
-            uzivatelStav.setZmenuProvedl(Utils.getZmenuProv());
             NavstevniListekUzivatelStav savedUzivatelStav = navstevniListekUzivatelStavService.create(uzivatelStav);
             savedUzivateleStavy.add(savedUzivatelStav);
         }

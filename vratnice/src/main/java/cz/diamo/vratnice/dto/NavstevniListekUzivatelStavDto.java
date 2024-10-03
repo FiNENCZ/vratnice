@@ -7,6 +7,7 @@ import cz.diamo.vratnice.entity.NavstevniListekUzivatelStav;
 import cz.diamo.vratnice.entity.NavstevniListekStav;
 import cz.diamo.vratnice.enums.NavstevniListekStavEnum;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +22,10 @@ public class NavstevniListekUzivatelStavDto implements Serializable {
     @Valid
     private UzivatelDto uzivatel;
 
+    @NotNull(message = "{navstevni_listek_uzivatel_stav.stav.require}")
     private NavstevniListekStavDto stav = new NavstevniListekStavDto(new NavstevniListekStav(NavstevniListekStavEnum.KE_ZPRACOVANI));
+
+    private String poznamka;
 
     public NavstevniListekUzivatelStavDto(NavstevniListekUzivatelStav navstevaUzivatelStav) {
         if (navstevaUzivatelStav == null) {
@@ -33,6 +37,8 @@ public class NavstevniListekUzivatelStavDto implements Serializable {
 
         if (navstevaUzivatelStav.getStav() != null)
             this.stav = new NavstevniListekStavDto(navstevaUzivatelStav.getStav());
+        
+        this.poznamka = navstevaUzivatelStav.getPoznamka();
     }
 
 
@@ -44,6 +50,8 @@ public class NavstevniListekUzivatelStavDto implements Serializable {
 
         if (getStav() != null)
             navstevaUzivatelStav.setStav(getStav().toEntity());
+        
+        navstevaUzivatelStav.setPoznamka(this.poznamka);
 
         return navstevaUzivatelStav;
     }

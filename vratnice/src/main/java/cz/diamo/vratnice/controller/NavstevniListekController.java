@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
-import cz.diamo.share.exceptions.AccessDeniedException;
+import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.NavstevniListekDto;
 import cz.diamo.vratnice.dto.NavstevniListekTypDto;
@@ -29,6 +29,7 @@ import cz.diamo.vratnice.service.NavstevniListekService;
 import cz.diamo.vratnice.service.QrCodeService;
 import cz.diamo.vratnice.service.UzivatelVratniceService;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,10 +55,11 @@ public class NavstevniListekController extends BaseController {
 
     @PostMapping("/navstevni-listek/create")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
-    public ResponseEntity<NavstevniListekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-    @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
+    public ResponseEntity<NavstevniListekDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, HttpServletRequest request,
+        @RequestBody @Valid NavstevniListekDto navstevniListekDto) throws NoSuchMessageException, BaseException {
+
         Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
-        NavstevniListek navstevniListek = navstevniListekService.create(navstevniListekDto, vratnice);
+        NavstevniListek navstevniListek = navstevniListekService.create(request, appUserDto, navstevniListekDto, vratnice);
         return ResponseEntity.ok(new NavstevniListekDto(navstevniListek));
     }
     

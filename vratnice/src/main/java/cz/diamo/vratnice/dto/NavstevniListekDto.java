@@ -3,6 +3,7 @@ package cz.diamo.vratnice.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Timestamp;
 
 
 import cz.diamo.vratnice.entity.NavstevaOsoba;
@@ -29,6 +30,8 @@ public class NavstevniListekDto implements Serializable{
     @NotNull(message = "{navstevni_listek.uzivatel.require}")
     @Valid
     private List<NavstevniListekUzivatelStavDto> uzivateleStav;
+
+    private Timestamp casVytvoreni;
 
     private NavstevniListekTypDto typ;
 
@@ -63,6 +66,8 @@ public class NavstevniListekDto implements Serializable{
 
         if (navstevniListek.getTyp() != null)
             this.typ = new NavstevniListekTypDto(navstevniListek.getTyp());
+
+        this.casVytvoreni = navstevniListek.getCasVytvoreni();
 
         this.aktivita = navstevniListek.getAktivita();
     }

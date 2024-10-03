@@ -42,6 +42,8 @@ import cz.diamo.share.security.SecurityUtils;
 import cz.diamo.share.services.AuthServices;
 import cz.diamo.share.services.ZadostiExterniServices;
 import cz.diamo.vratnice.dto.KlicDto;
+import cz.diamo.vratnice.dto.NavstevniListekDto;
+import cz.diamo.vratnice.dto.NavstevniListekUzivatelStavDto;
 import cz.diamo.vratnice.dto.PoschodiDto;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.Poschodi;
@@ -288,5 +290,92 @@ public class ZadostiServices extends ZadostiExterniServices {
             logger.error(e);
         }
     }
+
+
+    //TODO:  -- ŽÁDOSTI -- upravit dle potřeby
+    public void saveNavstevniListek(HttpServletRequest request, AppUserDto appUserDto, NavstevniListekDto navstevniListekdDto) throws BaseException {
+
+        // volání aplikace Žádosti
+        try {
+
+            // nastavení zástupu
+            nastavitZastup(request, appUserDto);
+
+            HttpEntity<NavstevniListekDto> requestEntity = new HttpEntity<NavstevniListekDto>(
+                    navstevniListekdDto,
+                    getZadostiHttpHeaders(request));
+
+            ResponseEntity<Void> result = restZadosti
+                    .exchange("/vratnice/navstevni-listek/save", HttpMethod.POST,
+                            requestEntity, Void.class,
+                            new HashMap<>());
+
+            if (result.getStatusCode().isError())
+                throw new BaseException(
+                        String.format(messageSource.getMessage("zadosti.error", null, LocaleContextHolder.getLocale()),
+                                result.getStatusCode()));
+
+            return;
+
+        } catch (HttpClientErrorException he) {
+            try {
+                JSONObject obj = new JSONObject(new String(he.getResponseBodyAsByteArray(), StandardCharsets.UTF_8));
+                throw new BaseException(obj.getString("message"));
+            } catch (JSONException e) {
+                throw new BaseException(he.getMessage());
+            }
+        } catch (BaseException be) {
+            logger.error(be);
+            throw be;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new BaseException(
+                    messageSource.getMessage("zadosti.nelze.spojit", null, LocaleContextHolder.getLocale()));
+        }
+    }
+
+    //TODO:  -- ŽÁDOSTI -- upravit dle potřeby - metoda například pro odůvodnění, proč neproběhla návštěva
+    public void navstevniListekPridatPoznamku(HttpServletRequest request, AppUserDto appUserDto, NavstevniListekUzivatelStavDto uzivatelStavDto) throws BaseException {
+
+        // volání aplikace Žádosti
+        try {
+
+            // nastavení zástupu
+            nastavitZastup(request, appUserDto);
+
+            HttpEntity<NavstevniListekUzivatelStavDto> requestEntity = new HttpEntity<NavstevniListekUzivatelStavDto>(
+                    uzivatelStavDto,
+                    getZadostiHttpHeaders(request));
+
+            ResponseEntity<Void> result = restZadosti
+                    .exchange("/vratnice/navstevni-listek/pridat-poznamku", HttpMethod.POST,
+                            requestEntity, Void.class,
+                            new HashMap<>());
+
+            if (result.getStatusCode().isError())
+                throw new BaseException(
+                        String.format(messageSource.getMessage("zadosti.error", null, LocaleContextHolder.getLocale()),
+                                result.getStatusCode()));
+
+            return;
+
+        } catch (HttpClientErrorException he) {
+            try {
+                JSONObject obj = new JSONObject(new String(he.getResponseBodyAsByteArray(), StandardCharsets.UTF_8));
+                throw new BaseException(obj.getString("message"));
+            } catch (JSONException e) {
+                throw new BaseException(he.getMessage());
+            }
+        } catch (BaseException be) {
+            logger.error(be);
+            throw be;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new BaseException(
+                    messageSource.getMessage("zadosti.nelze.spojit", null, LocaleContextHolder.getLocale()));
+        }
+    }
+
+
 
 }
