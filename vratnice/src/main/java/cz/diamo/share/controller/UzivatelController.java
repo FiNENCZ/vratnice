@@ -140,9 +140,9 @@ public class UzivatelController extends BaseController {
 					UzivatelDto uzivatelDto = new UzivatelDto(uzivatel);
 
 					// varování
-					if (!uzivatel.getExterni() && uzivatel.getPlatnostKeDni() == null
+					if (!uzivatel.getExterni() && (uzivatel.getPlatnostKeDni() == null
 							|| uzivatel.getPlatnostKeDni().compareTo(date) == -1
-									&& (uzivatel.getDatumDo() == null || uzivatel.getDatumDo().compareTo(date) == 1)) {
+									&& (uzivatel.getDatumDo() == null || uzivatel.getDatumDo().compareTo(date) == 1))) {
 						uzivatelDto.setVarovani(true);
 						uzivatelDto.setVarovaniText(
 								String.format(
