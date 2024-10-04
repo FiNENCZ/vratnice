@@ -199,7 +199,7 @@ public class UzivatelServices {
         boolean novy = StringUtils.isBlank(uzivatel.getIdUzivatel());
 
         // kontrola jedinečnosti sapId
-        if (novy && uzivatel.getExterni())
+        if (novy && uzivatel.getExterni() && StringUtils.isBlank(uzivatel.getSapId()))
             uzivatel.setSapId(generateSapIdExterni());
 
         Integer existSapId = uzivatelRepository.existsBySapId(uzivatel.getSapId(),
