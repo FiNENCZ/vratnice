@@ -52,6 +52,7 @@ public class NavstevniListekUzivatelStavController extends BaseController{
     }
 
     @GetMapping("/navstevni-listek-uzivatel-stav/detail")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevniListekUzivatelStavDto> detail(@RequestParam String idNavstevniListekUzivatelStav) {
         NavstevniListekUzivatelStav uzivatelStav = navstevniListekUzivatelStavService.getDetail(idNavstevniListekUzivatelStav);
         return ResponseEntity.ok(new NavstevniListekUzivatelStavDto(uzivatelStav));

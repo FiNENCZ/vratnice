@@ -98,6 +98,16 @@ public class UzivatelVratniceService {
             if (uzivatelVratnice.getVratnice() != null && !uzivatelVratnice.getVratnice().isEmpty()) {
                 uzivatelVratnice.setNastavenaVratnice(uzivatelVratnice.getVratnice().get(0));
             }
+        } else { //pokud je nastavena výchozí, tak zkontrolovat, jestli vůbec odpovídá nějaké přidělené
+            boolean shodaNastaveneVratnice = false;
+            for (Vratnice vratnice : uzivatelVratnice.getVratnice()) {
+                if (vratnice.getIdVratnice().equals(uzivatelVratnice.getNastavenaVratnice().getIdVratnice())) 
+                    shodaNastaveneVratnice = true;
+
+            }
+            // pokud neodpovídá, tak se vybere první přidělená
+            if (!shodaNastaveneVratnice)
+                uzivatelVratnice.setNastavenaVratnice(uzivatelVratnice.getVratnice().get(0));
         }
 
         // Pokud má nastavený přístup do všech vrátnic, tak při vytvoření napojení vrátnic (UzivatelVratnice) nastaví v dropdownu "nastavenou vrátnici"

@@ -97,11 +97,13 @@ public class NavstevniListekController extends BaseController {
         if (navstevniListek == null) {
             return ResponseEntity.notFound().build();
         }
-
+    
         try {
             byte[] qrCode = qrCodeService.generateQRCodeImage(navstevniListek);
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qrcode.png\"")
-                    .contentType(MediaType.IMAGE_PNG).body(qrCode);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qrcode.png\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(qrCode);
         } catch (Exception e) {
             // Handle exception appropriately
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

@@ -7,6 +7,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
 import cz.diamo.share.annotation.TransactionalRO;
+import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.avizace.AvizaceEmailRequestDto;
 import cz.diamo.share.dto.avizace.AvizaceOznameniRequestDto;
 import cz.diamo.share.dto.avizace.AvizacePrijemceRequestDto;
@@ -16,7 +17,9 @@ import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.enums.TypOznameniEnum;
 import cz.diamo.share.exceptions.BaseException;
+import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.OznameniServices;
+import cz.diamo.vratnice.entity.Vratnice;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -27,6 +30,9 @@ public class VratniceBaseService {
 
     @Autowired
     private OznameniServices oznameniServices;
+
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -92,5 +98,16 @@ public class VratniceBaseService {
         return query.getResultList();
     }
 
+    public List<Uzivatel> getUzivateleDleNastaveneVratnice(AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
 
+        String hql = "SELECT u FROM Uzivatel u " +
+        "WHERE u.zavod.idZavod = :idZavod " +
+        "AND u.aktivita = true";
+
+        TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
+        query.setParameter("idZavod", nastavenaVratnice.getZavod().getIdZavod());
+
+        return query.getResultList();
+    }
 }

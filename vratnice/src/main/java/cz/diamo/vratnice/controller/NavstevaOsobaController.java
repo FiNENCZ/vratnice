@@ -33,7 +33,7 @@ public class NavstevaOsobaController extends BaseController {
     private NavstevaOsobaService navstevaOsobaService;
 
     @PostMapping("/navsteva-osoba/save")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("isFullyAuthenticated()") //TODO: popřemýšlet, jestli zde nedat omezení na roli správy návštěvních lístku: @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevaOsobaDto> save(@RequestBody @Valid NavstevaOsobaDto navstevaOsobaDto) throws UniqueValueException, NoSuchMessageException {
         NavstevaOsoba newNavstevaOsoba = navstevaOsobaService.create(navstevaOsobaDto.toEntity());
         return ResponseEntity.ok(new NavstevaOsobaDto(newNavstevaOsoba));
