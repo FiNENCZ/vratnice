@@ -145,6 +145,7 @@ public class NavstevniListekService {
     private NavstevniListekTyp getNavstevniListekTypDleVsechUzivatelu(List<NavstevniListekUzivatelStavDto> uzivateleStavDto) {
         NavstevniListekTypEnum currentNavstevniListekTypEnum = NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY;
 
+        //Pokud nějaký z návštěvníků má nastaven papirový návštěvní lístek, tak ním stává automaticky pro všechny (navstevní listek je tedy papírový)
         for (NavstevniListekUzivatelStavDto uzivatelDto: uzivateleStavDto) {
             NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypByUzivatel(uzivatelDto.getUzivatel().getId());
             if (navstevniListekTyp.getNavstevniListekTypEnum() == NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY) {
@@ -203,9 +204,8 @@ public class NavstevniListekService {
         NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository.findNavstevniListekTypByUzivatelId(idUzivatel);
 
         try {
-            if (navstevniListekTypUzivatele == null) // pokud není nalezen, nastaví se PAPIROVY jako výchozí
-                navstevniListekTypUzivatele = navstevniListekTypRepository.getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY.getValue());
-            
+            if (navstevniListekTypUzivatele == null) // pokud není nalezen, nastaví se ELEKTRONICKY jako výchozí
+                navstevniListekTypUzivatele = navstevniListekTypRepository.getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY.getValue());
                 
             navstevniListekTypUzivatele.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListekTypUzivatele.getNazevResx()));
             return navstevniListekTypUzivatele; 

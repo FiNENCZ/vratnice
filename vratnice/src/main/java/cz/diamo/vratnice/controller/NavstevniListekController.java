@@ -29,6 +29,7 @@ import cz.diamo.vratnice.service.NavstevniListekService;
 import cz.diamo.vratnice.service.QrCodeService;
 import cz.diamo.vratnice.service.UzivatelVratniceService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -91,6 +92,7 @@ public class NavstevniListekController extends BaseController {
     }
 
     @GetMapping("/navstevni-listek/qrcode")
+    @ApiResponse(responseCode = "200", content = @io.swagger.v3.oas.annotations.media.Content(schema = @io.swagger.v3.oas.annotations.media.Schema(type = "string", format = "binary")))
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<byte[]> getQRCode(@RequestParam String idNavstevniListek) throws RecordNotFoundException, NoSuchMessageException {
         NavstevniListek navstevniListek = navstevniListekService.getDetail(idNavstevniListek);
