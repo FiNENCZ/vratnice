@@ -125,16 +125,6 @@ public class PovoleniVjezduVozidlaController extends BaseController {
         return ResponseEntity.ok(new PovoleniVjezduVozidlaDto(povoleniVjezduVozidla));
     }
     
-
-    @GetMapping("/povoleni-vjezdu-vozidla/get-by-stav")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
-    public ResponseEntity<List<PovoleniVjezduVozidlaDto>> getByStav(@RequestParam String stav) {
-        List<PovoleniVjezduVozidlaDto> povoleniVjezduVozidel = povoleniVjezduVozidlaService.getByStav(stav).stream()
-            .map(PovoleniVjezduVozidlaDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(povoleniVjezduVozidel);
-    }
-
     @GetMapping("/povoleni-vjezdu-vozidla/je-rz-vozidla-povolena")
     @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Optional<PovoleniVjezduVozidlaDto>> jeRzVozidlaPovolena(@RequestParam String rzVozidla, @RequestParam String idVratnice) throws RecordNotFoundException, NoSuchMessageException {

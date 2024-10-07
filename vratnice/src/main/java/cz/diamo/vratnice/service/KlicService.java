@@ -178,7 +178,8 @@ public class KlicService {
     }
 
     private Klic translateKlic(Klic klic) throws RecordNotFoundException, NoSuchMessageException {
-        klic.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), klic.getTyp().getNazevResx()));
+        if (klic.getTyp().getNazev() != null)
+            klic.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), klic.getTyp().getNazevResx()));
         return klic;
     }
 

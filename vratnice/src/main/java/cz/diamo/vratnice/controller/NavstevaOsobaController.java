@@ -33,14 +33,14 @@ public class NavstevaOsobaController extends BaseController {
     private NavstevaOsobaService navstevaOsobaService;
 
     @PostMapping("/navsteva-osoba/save")
-    @PreAuthorize("isFullyAuthenticated()") //TODO: popřemýšlet, jestli zde nedat omezení na roli správy návštěvních lístku: @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')") //TODO: popřemýšlet, jestli zde nedat omezení na roli správy návštěvních lístku: @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevaOsobaDto> save(@RequestBody @Valid NavstevaOsobaDto navstevaOsobaDto) throws UniqueValueException, NoSuchMessageException {
         NavstevaOsoba newNavstevaOsoba = navstevaOsobaService.create(navstevaOsobaDto.toEntity());
         return ResponseEntity.ok(new NavstevaOsobaDto(newNavstevaOsoba));
     }
 
     @GetMapping("/navsteva-osoba/list-all")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<List<NavstevaOsobaDto>> listAll() {
         List<NavstevaOsobaDto> navstevaOsobaDtos = navstevaOsobaService.list().stream()
             .map(NavstevaOsobaDto::new)
@@ -49,7 +49,7 @@ public class NavstevaOsobaController extends BaseController {
     }
 
     @GetMapping("/navsteva-osoba/detail")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevaOsobaDto> getDetail(@RequestParam String idNavstevaOsoba) {
         NavstevaOsoba navstevaOsoba = navstevaOsobaService.getDetail(idNavstevaOsoba);
         if (navstevaOsoba == null) {
@@ -59,7 +59,7 @@ public class NavstevaOsobaController extends BaseController {
     }
 
     @GetMapping("/navsteva-osoba/list-by-cislo-op")
-    @PreAuthorize("isFullyAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevaOsobaDto> getByCisloOp(@RequestParam String cisloOp) {
         NavstevaOsoba navstevaOsoba = navstevaOsobaService.getRidicByCisloOp(cisloOp);
         if (navstevaOsoba == null) {

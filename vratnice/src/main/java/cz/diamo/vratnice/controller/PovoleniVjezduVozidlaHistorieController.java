@@ -36,7 +36,7 @@ public class PovoleniVjezduVozidlaHistorieController extends BaseController {
 	private ResourcesComponent resourcesComponent;
 
     @GetMapping("/povoleni-vjezdu-vozidla-historie/list")
-	@PreAuthorize("isFullyAuthenticated()")
+	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA')")
 	public List<PovoleniVjezduVozidlaHistorieDto> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			HttpServletRequest request, @RequestParam String idPovoleniVjezduVozidla) {
 		try {

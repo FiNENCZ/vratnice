@@ -19,6 +19,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +37,7 @@ public class InicializaceVratniceKameryController extends BaseController {
     private MessageSource messageSource;
 
     @PostMapping("/inicializace-vratnice-kamery/save")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<InicializaceVratniceKameryDto> save(@RequestParam String ipAdresaKamery) {
         InetAddressValidator validator = new InetAddressValidator();
         if (!validator.isValid(ipAdresaKamery)) {
@@ -55,6 +57,7 @@ public class InicializaceVratniceKameryController extends BaseController {
     
     
     @DeleteMapping("/inicializace-vratnice-kamery/delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VRANTNICE_KAMERY')")
     public ResponseEntity<Void> deleteById(@RequestParam String id) {
         InicializaceVratniceKamery inicializace = inicializaceVratniceKameryService.getDetail(id);
         if (inicializace == null) {
