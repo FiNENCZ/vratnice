@@ -64,17 +64,23 @@ public class VratniceBaseService {
 
     }
 
-    public List<Zavod> getAllZavodyUzivateleByPristup(String idUzivatel) {
-    String hql = "SELECT DISTINCT z FROM Zavod z " +
-        "LEFT JOIN UzivatelZavod uz ON z.idZavod = uz.idZavod " +
-        "LEFT JOIN OpravneniZavod oz ON z.idZavod = oz.idZavod " +
-        "LEFT JOIN Opravneni o ON oz.idOpravneni = o.idOpravneni " +
-        "LEFT JOIN UzivatelOpravneni uo ON o.idOpravneni = uo.idOpravneni " +
-        "WHERE uz.idUzivatel = :idUzivatel OR uo.idUzivatel = :idUzivatel";
-
-
+    public List<Zavod> getAllZavodyUzivateleByPristup(String idUzivatel, Boolean aktivita) {
+        String hql = "SELECT DISTINCT z FROM Zavod z " +
+            "LEFT JOIN UzivatelZavod uz ON z.idZavod = uz.idZavod " +
+            "LEFT JOIN OpravneniZavod oz ON z.idZavod = oz.idZavod " +
+            "LEFT JOIN Opravneni o ON oz.idOpravneni = o.idOpravneni " +
+            "LEFT JOIN UzivatelOpravneni uo ON o.idOpravneni = uo.idOpravneni " +
+            "WHERE (uz.idUzivatel = :idUzivatel OR uo.idUzivatel = :idUzivatel) ";
+            
+        if (aktivita != null) 
+            hql += "AND z.aktivita = :aktivita";
+        
+    
         TypedQuery<Zavod> query = entityManager.createQuery(hql, Zavod.class);
         query.setParameter("idUzivatel", idUzivatel);
+
+        if (aktivita != null) 
+            query.setParameter("aktivita", aktivita);
 
         return query.getResultList();
     }

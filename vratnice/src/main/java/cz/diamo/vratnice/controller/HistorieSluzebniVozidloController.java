@@ -8,16 +8,20 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
+import cz.diamo.share.dto.AppUserDto;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.dto.HistorieSluzebniVozidloDto;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
 import cz.diamo.vratnice.service.HistorieSluzebniVozidloService;
 import cz.diamo.vratnice.service.SluzebniVozidloService;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -37,8 +41,10 @@ public class HistorieSluzebniVozidloController extends BaseController {
 
     @GetMapping("/historie-sluzebni-vozidlo/list-by-sluzebni-vozidlo")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
-    public ResponseEntity<List<HistorieSluzebniVozidloDto>> listBySluzebniVozidlo(@RequestParam String idSluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
-        SluzebniVozidlo sluzebniVozidloEntity = sluzebniVozidloService.getDetail(idSluzebniVozidlo);
+    public ResponseEntity<List<HistorieSluzebniVozidloDto>> listBySluzebniVozidlo(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                @RequestParam String idSluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
+                    
+        SluzebniVozidlo sluzebniVozidloEntity = sluzebniVozidloService.getDetail(appUserDto, idSluzebniVozidlo);
         List<HistorieSluzebniVozidloDto> historieSluzebniVozidloDtos = historieSluzebniVozidloService.findBySluzebniVozidlo(sluzebniVozidloEntity).stream()
             .map(HistorieSluzebniVozidloDto::new)
             .collect(Collectors.toList());

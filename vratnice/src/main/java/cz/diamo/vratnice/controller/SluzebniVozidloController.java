@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
@@ -57,21 +58,19 @@ public class SluzebniVozidloController extends BaseController {
             //načteno oldSluzebniVozidlo z databaze
             CompletableFuture<SluzebniVozidlo> oldSluzebniVozidloFuture = CompletableFuture.supplyAsync(() -> {
                 if (sluzebniVozidloDto.getIdSluzebniVozidlo() != null) {
-                    SluzebniVozidlo sluzebniVozidlo = new SluzebniVozidlo();
                     try {
-                        sluzebniVozidlo =  sluzebniVozidloService.getDetail(sluzebniVozidloDto.getIdSluzebniVozidlo());
-                    } catch (RecordNotFoundException | NoSuchMessageException e) {
-                        e.printStackTrace();
+                        return sluzebniVozidloService.getDetail(appUserDto, sluzebniVozidloDto.getIdSluzebniVozidlo());
+                    } catch (RecordNotFoundException | NoSuchMessageException | AccessDeniedException e) {
+                        // Propagace výjimky dál pomocí CompletionException
+                        throw new CompletionException(e);
                     }
-                    return sluzebniVozidlo;
                 } else {
                     return new SluzebniVozidlo();
                 }
             });
-    
             CompletableFuture<SluzebniVozidlo> newSluzebniVozidloFuture = oldSluzebniVozidloFuture.thenApplyAsync(oldSluzebniVozidlo -> {
                 try {
-                    return sluzebniVozidloService.create(sluzebniVozidloDto.toEntity());
+                    return sluzebniVozidloService.create(appUserDto, sluzebniVozidloDto.toEntity());
                     
                 } catch (Exception e) {
                     throw new CompletionException(e);
@@ -88,16 +87,13 @@ public class SluzebniVozidloController extends BaseController {
 
 
             return ResponseEntity.ok(new SluzebniVozidloDto(newSluzebniVozidlo));
-        
-   
-        
     }
     
     @GetMapping("/sluzebni-vozidlo/list")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
-    public ResponseEntity<List<SluzebniVozidloDto>> list(@RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
+    public ResponseEntity<List<SluzebniVozidloDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam @Nullable Boolean aktivni) throws RecordNotFoundException, NoSuchMessageException {
         List<SluzebniVozidloDto> result = new ArrayList<SluzebniVozidloDto>();
-        List<SluzebniVozidlo> list = sluzebniVozidloService.getList(aktivni);
+        List<SluzebniVozidlo> list = sluzebniVozidloService.getList(appUserDto, aktivni);
 
         if (list != null && list.size() > 0) {
             for (SluzebniVozidlo sluzebniVozidlo : list) {
@@ -111,8 +107,8 @@ public class SluzebniVozidloController extends BaseController {
 
     @GetMapping("/sluzebni-vozidlo/detail")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
-    public ResponseEntity<SluzebniVozidloDto> getDetail(@RequestParam String id) throws RecordNotFoundException, NoSuchMessageException {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getDetail(id);
+    public ResponseEntity<SluzebniVozidloDto> getDetail(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String id) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getDetail(appUserDto, id);
         if (sluzebniVozidlo == null) {
             return ResponseEntity.notFound().build();
         }
@@ -120,7 +116,7 @@ public class SluzebniVozidloController extends BaseController {
     }
 
     @GetMapping("/sluzebni-vozidlo/get-by-rz")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<SluzebniVozidloDto> getByRz(@RequestParam String rz) {
         SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getByRz(rz);
         return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));

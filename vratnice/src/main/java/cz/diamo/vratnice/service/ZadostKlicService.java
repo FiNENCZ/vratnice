@@ -105,8 +105,10 @@ public class ZadostKlicService {
     }
 
     private ZadostKlic translateZadostKlic(ZadostKlic zadostKlic) throws RecordNotFoundException, NoSuchMessageException {
-        zadostKlic.getZadostStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), zadostKlic.getZadostStav().getNazevResx()));
-        return zadostKlic;
+        if (zadostKlic.getZadostStav().getNazevResx() != null)
+            zadostKlic.getZadostStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), zadostKlic.getZadostStav().getNazevResx()));
+        
+            return zadostKlic;
     }
 
     public List<ZadostKlic> getZadostiByStav(Integer idZadostStav) {

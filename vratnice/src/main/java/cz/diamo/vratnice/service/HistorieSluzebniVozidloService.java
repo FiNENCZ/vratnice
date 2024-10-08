@@ -40,6 +40,9 @@ public class HistorieSluzebniVozidloService {
         HistorieSluzebniVozidlo historieSluzebniVozidlo = new HistorieSluzebniVozidlo();
         historieSluzebniVozidlo.setSluzebniVozidlo(newSluzebniVozidlo);
 
+        logger.info(newSluzebniVozidlo);
+        logger.info(oldSluzebniVozidlo);
+
         if (oldSluzebniVozidlo.getIdSluzebniVozidlo() != null) {
 
 

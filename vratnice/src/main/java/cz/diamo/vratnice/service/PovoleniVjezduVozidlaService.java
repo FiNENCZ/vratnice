@@ -96,7 +96,7 @@ public class PovoleniVjezduVozidlaService {
     private EntityManager entityManager;
 
     public List<PovoleniVjezduVozidla> getList(Boolean aktivita, ZadostStavEnum stavEnum, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
-        List<Zavod> zavody = vratniceBaseService.getAllZavodyUzivateleByPristup(appUserDto.getIdUzivatel());
+        List<Zavod> zavody = vratniceBaseService.getAllZavodyUzivateleByPristup(appUserDto.getIdUzivatel(), null);
 
         StringBuilder queryString = new StringBuilder();
 
@@ -547,11 +547,7 @@ public class PovoleniVjezduVozidlaService {
     }
 
     public void zkontrolujOpravneniUzivateleVuciPovoleni(String idZavodPovoleni, String idUzivatel) throws AccessDeniedException, NoSuchMessageException {
-        List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(idUzivatel);
-
-        logger.info("---------");
-        logger.info(idZavodPovoleni);
-        logger.info(zavodyUzivatele);
+        List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(idUzivatel, null);
 
         boolean povoleniNalezeno = zavodyUzivatele.stream()
             .anyMatch(zavod -> zavod.getIdZavod().equals(idZavodPovoleni));

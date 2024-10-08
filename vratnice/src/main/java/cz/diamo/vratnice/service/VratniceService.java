@@ -80,7 +80,8 @@ public class VratniceService {
     }
 
     private Vratnice translateVratnice(Vratnice vratnice) throws RecordNotFoundException, NoSuchMessageException {
-        vratnice.getVstupniKartyTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vratnice.getVstupniKartyTyp().getNazevResx()));
+        if (vratnice.getVstupniKartyTyp().getNazevResx() != null)
+            vratnice.getVstupniKartyTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vratnice.getVstupniKartyTyp().getNazevResx()));
         return vratnice;
     }
 }
