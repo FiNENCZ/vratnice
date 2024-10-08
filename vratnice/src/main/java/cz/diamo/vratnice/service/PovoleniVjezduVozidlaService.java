@@ -7,8 +7,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +27,7 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
+import cz.diamo.share.entity.Role;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;
@@ -375,7 +378,7 @@ public class PovoleniVjezduVozidlaService {
         List<RoleEnum> pozadovaneRoleObsluhy = new ArrayList<RoleEnum>();
         pozadovaneRoleObsluhy.add(RoleEnum.ROLE_SPRAVA_POVOLENI_VJEZDU_VOZIDLA);
 
-        List<Uzivatel> odpovidajiciObsluha = vratniceBaseService.listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(pozadovaneRoleObsluhy, povoleniVjezduVozidla.getZavod().getIdZavod());
+        List<Uzivatel> odpovidajiciObsluha = getVsechnyUzivateleDlePristupuKPovoleni(pozadovaneRoleObsluhy, povoleniVjezduVozidla.getZavod().getIdZavod());
 
         //http://localhost:4206/#/private/zadost-povoleni-vjezdu-vozidla?typSeznamuZadostiInt=enum&idPovoleniVjezduVozidla=id
         String oznameniUrl = vratniceProperties.getNgServerUrl() 
@@ -390,6 +393,29 @@ public class PovoleniVjezduVozidlaService {
 
         vratniceBaseService.zaslatOznameniUzivateli(predmet, oznameniText, telo, oznameniUrl, odpovidajiciObsluha, TypOznameniEnum.DULEZITE_INFO, request);
     }
+
+    public List<Uzivatel> getVsechnyUzivateleDlePristupuKPovoleni(List<RoleEnum> pozadovaneRoleUzivatele, String idZavod) {
+        List<Uzivatel> odpovidajiciUzivatele = vratniceBaseService.listUzivateleDleOpravneniKZavoduARoliProCelyPodnik(pozadovaneRoleUzivatele, idZavod);
+    
+        Set<Uzivatel> odpovidajiciUzivateleSeZastupy = new HashSet<>();
+    
+        if (odpovidajiciUzivatele != null) {
+            for (Uzivatel uzivatel : odpovidajiciUzivatele) {
+                // Přidání samotného uživatele do sady
+                odpovidajiciUzivateleSeZastupy.add(uzivatel);
+    
+                // Získání zastupujících uživatelů
+                List<Uzivatel> zastupyUzivatele = vratniceBaseService.getZastupujiciUzivatele(uzivatel.getIdUzivatel());
+    
+                if (zastupyUzivatele != null) {
+                    odpovidajiciUzivateleSeZastupy.addAll(zastupyUzivatele);
+                };
+            }
+        }
+    
+        return new ArrayList<>(odpovidajiciUzivateleSeZastupy);
+    }
+    
 
     private String vytvorOznameniProObsluhu(PovoleniVjezduVozidla povoleniVjezduVozidla) {
         String celeJmenoZadatele = povoleniVjezduVozidla.getJmenoZadatele() + " " + povoleniVjezduVozidla.getPrijmeniZadatele();

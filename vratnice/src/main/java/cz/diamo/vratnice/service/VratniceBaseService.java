@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,21 @@ public class VratniceBaseService {
 
         TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
         query.setParameter("idZavod", nastavenaVratnice.getZavod().getIdZavod());
+
+        return query.getResultList();
+    }
+
+    public List<Uzivatel> getZastupujiciUzivatele(String idUzivatel) {
+        String hql = "SELECT u FROM Uzivatel u " +
+        "JOIN Zastup z ON z.uzivatelZastupce.idUzivatel = u.idUzivatel " +
+        "WHERE z.uzivatel.idUzivatel = :idUzivatel " +
+        "AND z.platnostOd <= :currentDate " +
+        "AND z.platnostDo >= :currentDate " +
+        "AND z.aktivita = true";
+
+        TypedQuery<Uzivatel> query = entityManager.createQuery(hql, Uzivatel.class);
+        query.setParameter("idUzivatel", idUzivatel); 
+        query.setParameter("currentDate", new Date()); 
 
         return query.getResultList();
     }
