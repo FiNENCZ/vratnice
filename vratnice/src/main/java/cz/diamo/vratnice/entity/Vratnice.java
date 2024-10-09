@@ -47,6 +47,9 @@ public class Vratnice implements Serializable {
 
     private Boolean osobni = false;
 
+    @Column(name = "id_snimac")
+    private String idSnimac;
+
     private Boolean navstevni = false;
     
     private Boolean vjezdova = false;

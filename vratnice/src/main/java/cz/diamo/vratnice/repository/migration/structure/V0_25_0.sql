@@ -1,0 +1,2 @@
+insert into vratnice.zdrojovy_text (hash, text) values ('EDOS_SPRAVA_RUCNI_ZAZNAMY_SNIMACE_OKRUH_2','Ruční záznamy snímače - 2. okruh');
+insert into vratnice.role (authority, nazev_resx) values ('EDOS_SPRAVA_RUCNI_ZAZNAMY_SNIMACE_OKRUH_2', 'EDOS_SPRAVA_RUCNI_ZAZNAMY_SNIMACE_OKRUH_2');

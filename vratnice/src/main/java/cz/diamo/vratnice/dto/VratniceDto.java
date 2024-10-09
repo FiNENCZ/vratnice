@@ -31,6 +31,8 @@ public class VratniceDto implements Serializable {
 
     private Boolean osobni = false;
 
+    private String idSnimac;
+
     private Boolean navstevni = false;
 
     private Boolean vjezdova = false;
@@ -53,6 +55,7 @@ public class VratniceDto implements Serializable {
         this.zavod = new ZavodDto(vratnice.getZavod());
         this.lokalita = new LokalitaDto(vratnice.getLokalita());
         this.osobni = vratnice.getOsobni();
+        this.idSnimac = vratnice.getIdSnimac();
         this.navstevni = vratnice.getNavstevni();
         this.vjezdova = vratnice.getVjezdova();
 
@@ -71,6 +74,7 @@ public class VratniceDto implements Serializable {
         vratnice.setZavod(getZavod().getZavod(null, false));
         vratnice.setLokalita(getLokalita().getLokalita(null, false));
         vratnice.setOsobni(this.osobni);
+        vratnice.setIdSnimac(this.idSnimac);
         vratnice.setNavstevni(this.navstevni);
         vratnice.setVjezdova(this.vjezdova);
 
