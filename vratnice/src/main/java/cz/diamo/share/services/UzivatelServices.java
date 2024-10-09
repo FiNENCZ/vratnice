@@ -1,5 +1,6 @@
 package cz.diamo.share.services;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -29,6 +31,7 @@ import cz.diamo.share.entity.UzivatelModul;
 import cz.diamo.share.entity.UzivatelOpravneni;
 import cz.diamo.share.entity.UzivatelZavod;
 import cz.diamo.share.entity.Zavod;
+import cz.diamo.share.events.UkonceniUzivateleEvent;
 import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.UniqueValueException;
@@ -73,6 +76,9 @@ public class UzivatelServices {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @TransactionalROE
     public Uzivatel getDetail(String idUzivatel) throws RecordNotFoundException, NoSuchMessageException {
@@ -347,6 +353,18 @@ public class UzivatelServices {
             uzivatel.setCasZmn(Utils.getCasZmn());
             uzivatel.setZmenuProvedl(Utils.getZmenuProv());
             uzivatel = uzivatelRepository.save(uzivatel);
+
+            // vyvolám událost pro ukončení uživatele
+            try {
+                applicationEventPublisher.publishEvent(new UkonceniUzivateleEvent(this, uzivatel));
+            } catch (UndeclaredThrowableException ute) {
+                //získám výjimku, ke které došlo u posluchače
+                Exception e = ute;
+                if (ute.getCause() != null)
+                    e = new Exception(ute.getCause());
+                logger.error(e);
+                throw e;
+            }
 
         }
 

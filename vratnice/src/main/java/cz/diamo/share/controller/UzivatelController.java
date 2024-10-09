@@ -215,7 +215,7 @@ public class UzivatelController extends BaseController {
 	@PreAuthorize("isFullyAuthenticated()")
 	public List<UzivatelDto> listDleOpravneniCelyPodnik(HttpServletRequest request,
 			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-			@RequestParam List<RoleEnum> role) {
+			@RequestParam List<RoleEnum> role, @RequestParam boolean zobrazitUkoncene) {
 
 		try {
 
@@ -233,8 +233,14 @@ public class UzivatelController extends BaseController {
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
 			if (roleNew.size() == 0)
 				return result;
-			List<Uzivatel> list = uzivatelServices.getList(null,
-					new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
+			List<Uzivatel> list = null;
+
+			if (zobrazitUkoncene)
+				list = uzivatelServices.getList(null,
+						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew), null, true, null);
+			else
+				list = uzivatelServices.getList(null,
+						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
 			if (list != null && list.size() > 0) {
 				for (Uzivatel uzivatel : list) {
 					result.add(new UzivatelDto(uzivatel));
