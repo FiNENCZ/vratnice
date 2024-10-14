@@ -111,16 +111,9 @@ public class ZadostKlicService {
             return zadostKlic;
     }
 
-    public List<ZadostKlic> getZadostiByStav(Integer idZadostStav) {
-        return zadostiKlicRepository.getZadostiByStav(idZadostStav, true);
-    }
 
     public List<ZadostKlic> findByKlic(Klic klic) {
         return zadostiKlicRepository.findByKlic(klic);
-    }
-
-    public List<ZadostKlic> findByUzivatel(Uzivatel uzivatel) {
-        return zadostiKlicRepository.findByUzivatel(uzivatel);
     }
 
     public long countByUzivatel(Uzivatel uzivatel) {

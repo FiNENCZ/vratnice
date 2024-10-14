@@ -29,10 +29,6 @@ public class SpolecnostService {
         return spolecnostRepository.findAll();
     }
 
-    public Spolecnost detail(String idSpolecnost) {
-        return spolecnostRepository.getDetail(idSpolecnost);
-    }
-
     public Spolecnost getByNazev(String nazev) {
         return spolecnostRepository.getByNazev(nazev);
     }

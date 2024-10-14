@@ -2,6 +2,7 @@ package cz.diamo.vratnice.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -9,7 +10,9 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,8 +27,10 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.services.UzivatelServices;
 import cz.diamo.vratnice.dto.SluzebniVozidloDto;
 import cz.diamo.vratnice.entity.SluzebniVozidlo;
+import cz.diamo.vratnice.entity.Vratnice;
 import cz.diamo.vratnice.service.HistorieSluzebniVozidloService;
 import cz.diamo.vratnice.service.SluzebniVozidloService;
+import cz.diamo.vratnice.service.UzivatelVratniceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
@@ -48,6 +53,12 @@ public class SluzebniVozidloController extends BaseController {
 
     @Autowired
     private UzivatelServices uzivatelServices;
+
+    @Autowired
+    private UzivatelVratniceService uzivatelVratniceService;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @PostMapping("/sluzebni-vozidlo/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_SLUZEBNI_VOZIDLO')")
@@ -115,10 +126,23 @@ public class SluzebniVozidloController extends BaseController {
         return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));
     }
 
-    @GetMapping("/sluzebni-vozidlo/get-by-rz")
+    @GetMapping("/sluzebni-vozidlo/muze-vjet")
     @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<SluzebniVozidloDto> getByRz(@RequestParam String rz) {
-        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getByRz(rz);
-        return ResponseEntity.ok(new SluzebniVozidloDto(sluzebniVozidlo));
+    public ResponseEntity<Optional<SluzebniVozidloDto>> muzeVjet(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, @RequestParam String rzVozidla) throws RecordNotFoundException, NoSuchMessageException {
+        Vratnice nastavenaVratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+        if (nastavenaVratnice == null) 
+            throw new RecordNotFoundException(
+                String.format(messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
+        
+
+        Boolean muzeVjet = sluzebniVozidloService.muzeSluzebniVozidloProjetVratnici(rzVozidla, nastavenaVratnice.getIdVratnice());
+
+        if (muzeVjet) {
+            SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloService.getByRz(rzVozidla);
+            return ResponseEntity.ok(Optional.of(new SluzebniVozidloDto(sluzebniVozidlo)));
+        } else {
+            return ResponseEntity.ok(Optional.empty());
+        }
     }
+    
 }

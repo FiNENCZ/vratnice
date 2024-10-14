@@ -45,11 +45,9 @@ public class RzVozidlaDetektorService {
     public RzDetectedMessageDto checkIfRzVozidlaCanLeaveAndSendWs(String idVratnice, String rzVozidla, Boolean vjezd) throws JSONException {
         Optional<VyjezdVozidla> result = vyjezdVozidlaService.jeMozneVyjet(rzVozidla);
 
-        if (result.isPresent()) {
-            return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO, vjezd);
-        } else {
-            return sendWebSocketMessage(idVratnice, rzVozidla, RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO, vjezd);
-        }
+        RzDetectedMessageStatusEnum stav = result.isPresent() ? RzDetectedMessageStatusEnum.POVOLENE_VOZIDLO : RzDetectedMessageStatusEnum.NEPOVOLENE_VOZIDLO;
+ 
+        return sendWebSocketMessage(idVratnice, rzVozidla, stav, vjezd); 
     }
 
     public RzDetectedMessageDto sendWebSocketMessage(String idVratnice, String rzVozidla, RzDetectedMessageStatusEnum status, Boolean vjezd) throws JSONException {

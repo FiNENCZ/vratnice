@@ -7,10 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cz.diamo.share.controller.BaseController;
@@ -31,6 +31,7 @@ public class SpolecnostController extends BaseController {
     private SpolecnostService spolecnostService;
 
     @GetMapping("/spolecnost/list")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<SpolecnostDto>> list() {
         List<SpolecnostDto> result = new ArrayList<SpolecnostDto>();
         List<Spolecnost> list = spolecnostService.getList();
@@ -44,19 +45,10 @@ public class SpolecnostController extends BaseController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/spolecnost/detail")
-    public ResponseEntity<SpolecnostDto> detail(@RequestParam String idSpolecnost) {
-        Spolecnost spolecnost = spolecnostService.detail(idSpolecnost);
-        return ResponseEntity.ok(new SpolecnostDto(spolecnost));
-    }
-
     @PostMapping("/spolecnost/save")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<SpolecnostDto> save(@RequestBody @Valid SpolecnostDto spolecnostDto) {
         Spolecnost spolecnost = spolecnostService.save(spolecnostDto.toEntity());
         return ResponseEntity.ok(new SpolecnostDto(spolecnost));
     }
-    
-    
-    
-
 }

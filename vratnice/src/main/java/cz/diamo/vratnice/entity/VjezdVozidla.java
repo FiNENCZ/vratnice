@@ -69,16 +69,4 @@ public class VjezdVozidla implements Serializable {
     public VjezdVozidla(String idVjezdVozidla){
         setIdVjezdVozidla(idVjezdVozidla);
     }
-
-// Jméno (povinná nebo nepovinná položka dle konfigurace vrátnice – doplněno z rozhraní čtečky OP nebo ručním vstupem z klávesnice)
-// Příjmení (povinná nebo nepovinná položka dle konfigurace vrátnice – doplněno z rozhraní čtečky OP nebo ručním vstupem z klávesnice)
-// Číslo OP (povinná nebo nepovinná položka dle konfigurace vrátnice – doplněno z rozhraní čtečky OP nebo ručním vstupem z klávesnice)
-// Firma (nepovinná položka) – ruční vstup, volné textové pole
-// Datum poučení – barevně (červeně nebo zeleně) bude vysvíceno políčko s datem posledního podpisu poučení pro vjezd (bezpečnost, PO/BOZP apod.). Platnost poučení (změna podbarvení) bude konfigurovatelná. V současnosti je platnost 1 rok (12 měsíců). Bude zadáván počet měsíců.
-// RZ (povinná položka) – doplněno z rozhraní kamery, případně ruční vstup
-// Druh vozidla (povinná položka) – u schválených vjezdů předvyplněno ze schválení
-// Opakovaný vjezd – Pro případ tzv. koloběhu se vyplňuje číslo přidělené tabule.
-// Čas příjezdu
-
-
 }

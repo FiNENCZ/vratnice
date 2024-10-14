@@ -64,7 +64,7 @@ public class VjezdVozidlaService {
 
         if (list != null) {
             for (VjezdVozidla vjezdVozidla : list) {
-                vjezdVozidla = translatVjezdVozidla(vjezdVozidla);
+                vjezdVozidla = translateVjezdVozidla(vjezdVozidla);
             }
         }
 
@@ -72,7 +72,7 @@ public class VjezdVozidlaService {
         return list;
     }
 
-    private VjezdVozidla translatVjezdVozidla(VjezdVozidla vjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
+    private VjezdVozidla translateVjezdVozidla(VjezdVozidla vjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
         if (vjezdVozidla.getTypVozidla() != null)
             vjezdVozidla.getTypVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vjezdVozidla.getTypVozidla().getNazevResx()));
 
@@ -84,13 +84,9 @@ public class VjezdVozidlaService {
         VjezdVozidla vjezdVozidla = vjezdVozidlaRepository.getDetail(idVjezdVozidla);
 
         if (vjezdVozidla != null) 
-            vjezdVozidla = translatVjezdVozidla(vjezdVozidla);
+            vjezdVozidla = translateVjezdVozidla(vjezdVozidla);
         
         return vjezdVozidla;
-    }
-
-    public List<VjezdVozidla> getByRzVozidla(String rzVozidla) {
-        return vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
     @Transactional
@@ -106,6 +102,6 @@ public class VjezdVozidlaService {
 
             
         VjezdVozidla saveVjezdVozidla =  vjezdVozidlaRepository.save(vjezdVozidla);
-        return translatVjezdVozidla(saveVjezdVozidla);
+        return translateVjezdVozidla(saveVjezdVozidla);
     }
 }

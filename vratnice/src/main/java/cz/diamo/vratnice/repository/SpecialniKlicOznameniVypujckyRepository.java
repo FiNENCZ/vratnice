@@ -13,8 +13,8 @@ public interface SpecialniKlicOznameniVypujckyRepository extends JpaRepository<S
     @Query(sqlSelect + "where s.idSpecialniKlicOznameniVypujcky = :idSpecialniKlicOznameniVypujcky")
     SpecialniKlicOznameniVypujcky getDetail(String idSpecialniKlicOznameniVypujcky);
 
-    @Query(sqlSelect + "where s.klic = :klic")
-    SpecialniKlicOznameniVypujcky getByKlic(Klic klic);
+    @Query(sqlSelect + "where s.klic = :klic AND s.aktivita = :aktivita")
+    SpecialniKlicOznameniVypujcky getByKlic(Klic klic, Boolean aktivita);
 
     @Query("select case when count(u) > 0 then true else false end from SpecialniKlicOznameniVypujcky u where u.klic.idKlic = :idKlic")
     boolean existsByIdKlic(String idKlic);

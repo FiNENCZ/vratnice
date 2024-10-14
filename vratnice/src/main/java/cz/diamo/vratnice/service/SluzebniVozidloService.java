@@ -183,8 +183,8 @@ public class SluzebniVozidloService {
             if (sluzebniVozidlo.getFunkce().getNazevResx() != null)
                 sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getFunkce().getNazevResx()));
             else {
-                    Optional<SluzebniVozidloFunkce> sluzebniVozidloFunkce = sluzebniVozidloFunkceRepository.findById(sluzebniVozidlo.getFunkce().getIdSluzebniVozidloFunkce());
-                    sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloFunkce.get().getNazevResx()));
+                Optional<SluzebniVozidloFunkce> sluzebniVozidloFunkce = sluzebniVozidloFunkceRepository.findById(sluzebniVozidlo.getFunkce().getIdSluzebniVozidloFunkce());
+                sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloFunkce.get().getNazevResx()));
             }
         }
 
@@ -207,7 +207,7 @@ public class SluzebniVozidloService {
                 String.format(messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
         
 
-        Lokalita zavodKameryLokalita = vratniceKamery.getLokalita();
+        Lokalita lokalitaKamery = vratniceKamery.getLokalita();
 
         
         SluzebniVozidlo sluzebniVozidlo = getByRz(rz);
@@ -220,11 +220,10 @@ public class SluzebniVozidloService {
         
         if (sluzebniVozidlo.getLokality() != null) {
             for (Lokalita lokalita : sluzebniVozidlo.getLokality()) {
-                if (lokalita.getIdLokalita().equals(zavodKameryLokalita.getIdLokalita()))
+                if (lokalita.getIdLokalita().equals(lokalitaKamery.getIdLokalita()))
                     return true;
             }
         }
-
 
         return false;
     }

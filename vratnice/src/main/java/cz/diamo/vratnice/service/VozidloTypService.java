@@ -28,7 +28,7 @@ public class VozidloTypService {
     @Autowired
     private MessageSource messageSource;
 
-   public List<VozidloTyp> getList(Boolean withIZS) {
+    public List<VozidloTyp> getList(Boolean withIZS) {
 
         StringBuilder queryString = new StringBuilder();
 
@@ -55,7 +55,7 @@ public class VozidloTypService {
         return vozidloTypRepository.getDetail(idVozidloTyp);
     }
 
-    public VozidloTyp getDetailBVozidloTyp(String vozidloTypEnumString) {
+    public VozidloTyp getDetailByVozidloTyp(String vozidloTypEnumString) {
         return vozidloTypRepository.getDetailByNazevResx(vozidloTypEnumString);
     }
 

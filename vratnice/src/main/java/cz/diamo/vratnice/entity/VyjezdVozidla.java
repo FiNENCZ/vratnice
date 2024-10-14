@@ -64,12 +64,4 @@ public class VyjezdVozidla implements Serializable{
     public VyjezdVozidla(String idVyjezdVozidla){
         setIdVyjezdVozidla(idVyjezdVozidla);
     }
-
-
-
-//     RZ vozidla – vstup z kamery nebo vyhledání nad DB vjezdů (nemůže vyjet nic, co nevjede)
-// Náklad (ano/ne)
-// Číslo průchodky – pouze pokud je zaškrtnuto ano v položce Náklad. Do budoucna bude zdigitalizováno.
-// Opakovaný výjezd – vrácení tabule pro opakovaný výjezd (check box)
-
 }

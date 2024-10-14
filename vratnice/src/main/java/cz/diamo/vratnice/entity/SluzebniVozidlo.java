@@ -57,7 +57,7 @@ public class SluzebniVozidlo implements Serializable {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="id_zavod")
-    private Zavod zavod; // výběr z číselníku (i vícenásobný), kam může vozidlo jet, manažerské může kamkoliv, ostatní jen závod, jinak se žádá sekretariát
+    private Zavod zavod;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

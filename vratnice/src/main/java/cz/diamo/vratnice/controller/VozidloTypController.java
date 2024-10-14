@@ -68,7 +68,7 @@ public class VozidloTypController extends BaseController {
         if (idVozidloTyp != null) {
             vozidloTyp = vozidloTypService.detail(idVozidloTyp);
         } else {
-            vozidloTyp = vozidloTypService.getDetailBVozidloTyp(vozidloTypEnum.toString());
+            vozidloTyp = vozidloTypService.getDetailByVozidloTyp(vozidloTypEnum.toString());
         }
             
 

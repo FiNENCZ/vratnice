@@ -95,7 +95,6 @@ public class SpecialniKlicOznameniVypujckyService {
         else { 
             SpecialniKlicOznameniVypujcky alreadySavedOznameniVypujcky = specialniKlicOznameniVypujckyRepository.getDetail(specialniKlicOznameniVypujcky.getIdSpecialniKlicOznameniVypujcky());
             if (!alreadySavedOznameniVypujcky.getKlic().getIdKlic().equals(specialniKlicOznameniVypujcky.getKlic().getIdKlic())) {
-                logger.info("klíče jsou rozdílné");
                 if (specialniKlicOznameniVypujckyRepository.existsByIdKlic(specialniKlicOznameniVypujcky.getKlic().getIdKlic())) {
                     throw new UniqueValueException(
                         messageSource.getMessage("specialni_klic_oznameni_vypujcky.klic.unique", null, LocaleContextHolder.getLocale()), null, true);
@@ -119,7 +118,7 @@ public class SpecialniKlicOznameniVypujckyService {
             return;
         }
 
-        SpecialniKlicOznameniVypujcky oznameniVypujcky = specialniKlicOznameniVypujckyRepository.getByKlic(klic);
+        SpecialniKlicOznameniVypujcky oznameniVypujcky = specialniKlicOznameniVypujckyRepository.getByKlic(klic, true);
         if (oznameniVypujcky == null) {
             return;
         }

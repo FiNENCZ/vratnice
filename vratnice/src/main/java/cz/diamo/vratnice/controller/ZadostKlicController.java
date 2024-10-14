@@ -2,7 +2,6 @@ package cz.diamo.vratnice.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +24,6 @@ import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
-import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -93,14 +91,7 @@ public class ZadostKlicController extends BaseController{
         return ResponseEntity.ok(new ZadostKlicDto(zadostKlic));
     }
 
-    @GetMapping("/zadost-klic/zadosti-dle-stavu")
-    @PreAuthorize("isFullyAuthenticated()")
-    public  ResponseEntity<List<ZadostKlicDto>> getZadostiByKlic(@RequestParam ZadostStavEnum zadostStavEnum) {
-        List<ZadostKlicDto> zadostiKlic = zadostKlicService.getZadostiByStav(zadostStavEnum.getValue()).stream()
-            .map(ZadostKlicDto::new)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(zadostiKlic);
-    }
+
     @GetMapping("/zadost-klic/get-uzivatel-by-rfid")
     @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UzivatelDto> getUzivatelByRfid(@RequestParam String rfid) throws RecordNotFoundException, NoSuchMessageException {
