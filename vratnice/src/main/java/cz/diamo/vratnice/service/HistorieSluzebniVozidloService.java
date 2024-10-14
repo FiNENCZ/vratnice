@@ -5,8 +5,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -26,8 +24,6 @@ import jakarta.transaction.Transactional;
 @Service
 public class HistorieSluzebniVozidloService {
 
-    final static Logger logger = LogManager.getLogger(HistorieSluzebniVozidloService.class);
-
     @Autowired
     private HistorieSluzebniVozidloRepository historieSluzebniVozidloRepository;
 
@@ -40,8 +36,6 @@ public class HistorieSluzebniVozidloService {
         HistorieSluzebniVozidlo historieSluzebniVozidlo = new HistorieSluzebniVozidlo();
         historieSluzebniVozidlo.setSluzebniVozidlo(newSluzebniVozidlo);
 
-        logger.info(newSluzebniVozidlo);
-        logger.info(oldSluzebniVozidlo);
 
         if (oldSluzebniVozidlo.getIdSluzebniVozidlo() != null) {
 

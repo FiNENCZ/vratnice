@@ -239,12 +239,12 @@ public class EdosService {
             logger.info("-------");
             logger.info(e);
 
-            throw new BaseException(extractMessage(e.getMessage())); 
+            throw new BaseException(extractErrorMessageFromRest(e.getMessage())); 
 
         }
     }
 
-    public String extractMessage(String errorMessage) throws JSONException {
+    public String extractErrorMessageFromRest(String errorMessage) throws JSONException {
         try {
             if (errorMessage != null) {
                 // Pokud zpráva začíná číslem (jako HTTP status), oddělí se až JSON část
@@ -266,8 +266,4 @@ public class EdosService {
 
         return messageSource.getMessage("edos.nelze.spojit", null, LocaleContextHolder.getLocale());
     }
-
-
-
-
 }

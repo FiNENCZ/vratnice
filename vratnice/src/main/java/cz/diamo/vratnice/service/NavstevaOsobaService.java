@@ -48,7 +48,7 @@ public class NavstevaOsobaService {
         return navstevaOsobaRepository.getDetail(idNavstevaOsoba);
     }
 
-    public NavstevaOsoba getRidicByCisloOp(String cisloOp) {
+    public NavstevaOsoba getByCisloOp(String cisloOp) {
         return navstevaOsobaRepository.geByCisloOp(cisloOp);
     }
 }

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 public class VratniceKameryController extends BaseController{
     
-    private static final Logger logger = LogManager.getLogger(KonfiguraceController.class);
+    private static final Logger logger = LogManager.getLogger(VratniceKameryController.class);
 
     @Autowired
     private VratniceKameryService vratniceKameryService;

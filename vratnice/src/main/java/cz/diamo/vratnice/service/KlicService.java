@@ -194,7 +194,11 @@ public class KlicService {
     }
 
     public Boolean jeDostupny(ZadostKlic zadost) {
-
+        /* Return STATEMENTS
+            false - je možné vrátit klíč (poslední akce byla vypůjčení)
+            true - je možné klíč vypůjčit
+            null - není možné klíč vypůjčit, ani vrátit (neaktivita, platnost vypršela, atd...)
+         */
 
         HistorieVypujcekAkce vypujckaAkce = historieVypujcekRepository.findLastAkceByIdKlic(zadost.getKlic().getIdKlic());
 
@@ -204,7 +208,6 @@ public class KlicService {
                 return false;
             }
         }
-
 
         // Zkontroluj, zda je žádost schválená
         if (zadost.getZadostStav().getZadostStavEnum() != ZadostStavEnum.SCHVALENO) {
@@ -231,12 +234,6 @@ public class KlicService {
         }
 
         return null;
-
-        /* Return STATEMENTS
-        false - je možné vrátit klíč (poslední akce byla vypůjčení)
-        true - je možné klíč vypůjčit
-        null - není možné klíč vypůjčit, ani vrátit (neaktivita, platnost vypršela, atd...)
-         */
     }
 
 } 

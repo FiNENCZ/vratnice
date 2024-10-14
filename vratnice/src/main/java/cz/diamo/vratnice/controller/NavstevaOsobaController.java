@@ -61,7 +61,7 @@ public class NavstevaOsobaController extends BaseController {
     @GetMapping("/navsteva-osoba/list-by-cislo-op")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_NAVSTEVNI_LISTEK')")
     public ResponseEntity<NavstevaOsobaDto> getByCisloOp(@RequestParam String cisloOp) {
-        NavstevaOsoba navstevaOsoba = navstevaOsobaService.getRidicByCisloOp(cisloOp);
+        NavstevaOsoba navstevaOsoba = navstevaOsobaService.getByCisloOp(cisloOp);
         if (navstevaOsoba == null) {
             return ResponseEntity.notFound().build();
         }

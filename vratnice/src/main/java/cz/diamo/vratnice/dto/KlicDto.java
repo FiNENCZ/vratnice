@@ -120,5 +120,39 @@ public class KlicDto implements Serializable {
     public boolean isPoschodiValid() {
         return poschodi != null && poschodi.getId() != null && !poschodi.getId().isEmpty();
     }
+
+    @AssertTrue(message = "{klic.vratnice.invalid}")
+    private boolean isVratniceHaveSameLokalita() {
+        if (lokalita == null || vratnice == null) 
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+
+        if (!lokalita.getId().equals(vratnice.getLokalita().getId())) 
+            return false;
+
+        return true;
+    }
+
+    @AssertTrue(message = "{klic.budova.invalid}")
+    private boolean isBudovaHaveSameLokalita() {
+        if (lokalita == null || budova == null) 
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+        
+        if (!lokalita.getId().equals(budova.getLokalita().getId())) 
+            return false;
+        
+        return true;
+    }
+
+    @AssertTrue(message = "{klic.poschodi.invalid}")
+    private boolean isPoschodiHaveSameBudova() {
+        if (budova == null || poschodi == null) 
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+        
+        if (!budova.getId().equals(poschodi.getBudova().getId())) 
+            return false;
+        
+        return true;
+    }
+
 }
 

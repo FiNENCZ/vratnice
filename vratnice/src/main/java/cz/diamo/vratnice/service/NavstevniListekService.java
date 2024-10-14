@@ -74,6 +74,7 @@ public class NavstevniListekService {
     public NavstevniListek create(HttpServletRequest request, AppUserDto appUserDto,
                 NavstevniListekDto navstevniListekDto, Vratnice vratnice) throws AccessDeniedException, NoSuchMessageException, BaseException {
 
+        // Zamezení editace
         if (navstevniListekDto.getIdNavstevniListek() != null) 
             throw new AccessDeniedException(messageSource.getMessage("navstevni_listek.cannot_be_edited", null, LocaleContextHolder.getLocale()));
 

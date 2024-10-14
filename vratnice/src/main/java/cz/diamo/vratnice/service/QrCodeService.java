@@ -24,7 +24,7 @@ import java.util.Map;
 public class QrCodeService {
 
     public byte[] generateQRCodeImage(NavstevniListek navstevniListek) throws WriterException, IOException {
-        String content = generateContent(navstevniListek);
+        String content = generateQrNavstevniListek(navstevniListek);
         int width = 300;
         int height = 300;
 
@@ -39,7 +39,7 @@ public class QrCodeService {
         return pngOutputStream.toByteArray();
     }
 
-    private String generateContent(NavstevniListek navstevniListek) {
+    private String generateQrNavstevniListek(NavstevniListek navstevniListek) {
         StringBuilder sb = new StringBuilder();
         
         // Informace o navštěvním lístku

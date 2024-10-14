@@ -144,5 +144,22 @@ public class SluzebniVozidloDto implements Serializable {
         }
         return !(!kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE) && (lokality == null));
     }
+
+    @AssertTrue(message = "{povoleni.vjezdu.vozidla.lokalita.invalid}")
+    private boolean isLokalityHaveSameZavod() {
+        if (lokality == null || zavod == null) 
+            return true; // null není validace anotace, použití @NotNull to vyřeší
+        
+
+        if (kategorie.getSluzebniVozidloKategorieEnum().equals(SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE))
+            return true;
+
+        for (LokalitaDto lokalita : lokality) {
+            if (!zavod.getId().equals(lokalita.getZavod().getId())) {
+                return false;
+            }
+        }
+        return true;
+    }
     
 }

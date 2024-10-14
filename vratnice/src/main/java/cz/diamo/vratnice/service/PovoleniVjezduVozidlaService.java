@@ -311,7 +311,6 @@ public class PovoleniVjezduVozidlaService {
             throw new IllegalArgumentException("Povoleni nebo jeho klicove udaje nemohou byt null.");
         }
 
-        // Pouziti pomoci metody s daty z povoleni
         return pocetVjezduProInterval(povoleni.getRzVozidla(), povoleni.getDatumOd(), povoleni.getDatumDo());
     }
 
@@ -322,7 +321,6 @@ public class PovoleniVjezduVozidlaService {
             throw new IllegalArgumentException("Povoleni, jeho klicove udaje nebo datumy od a do nemohou byt null.");
         }
 
-        // Pouziti pomoci metody s poskytnutymi daty
         return pocetVjezduProInterval(povoleni.getRzVozidla(), datumOd, datumDo);
     }
 
