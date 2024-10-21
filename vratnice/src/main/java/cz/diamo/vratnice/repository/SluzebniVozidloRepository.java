@@ -11,7 +11,7 @@ public interface SluzebniVozidloRepository extends JpaRepository<SluzebniVozidlo
     @Query(sqlSelect + "where s.idSluzebniVozidlo = :idSluzebniVozidlo")
     SluzebniVozidlo getDetail(String idSluzebniVozidlo);
 
-    @Query(sqlSelect + "where s.rz = :rz")
+    @Query(sqlSelect + "where UPPER(s.rz) = UPPER(:rz)")
     SluzebniVozidlo getByRz(String rz);
 
     Boolean existsByRz(String rz);

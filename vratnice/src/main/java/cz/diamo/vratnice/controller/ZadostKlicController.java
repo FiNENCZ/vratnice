@@ -23,7 +23,9 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
+import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.KlicService;
 import cz.diamo.vratnice.service.ZadostKlicService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,10 +64,10 @@ public class ZadostKlicController extends BaseController{
     @GetMapping("/zadosti-klic/list")
     @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<List<ZadostKlicDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-        @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel ) throws RecordNotFoundException, NoSuchMessageException {
+        @RequestParam @Nullable Boolean aktivni, @RequestParam @Nullable String idUzivatel, @RequestParam @Nullable ZadostStavEnum zadostStavEnum ) throws RecordNotFoundException, NoSuchMessageException {
 
         List<ZadostKlicDto> result = new ArrayList<ZadostKlicDto>();
-        List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel, appUserDto);
+        List<ZadostKlic> list = zadostKlicService.getList(aktivni, idUzivatel, zadostStavEnum, appUserDto);
 
         if (list != null && list.size() > 0) {
             for (ZadostKlic zadostKlic : list) {

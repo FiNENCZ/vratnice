@@ -27,7 +27,6 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.Ws02EmailDto;
 import cz.diamo.share.entity.Lokalita;
-import cz.diamo.share.entity.Role;
 import cz.diamo.share.entity.Uzivatel;
 import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;

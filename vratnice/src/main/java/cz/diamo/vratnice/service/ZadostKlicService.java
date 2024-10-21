@@ -19,6 +19,7 @@ import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.vratnice.entity.Klic;
 import cz.diamo.vratnice.entity.ZadostKlic;
+import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.ZadostKlicRepository;
 import jakarta.persistence.EntityManager;
@@ -43,7 +44,7 @@ public class ZadostKlicService {
 
 
 
-    public List<ZadostKlic> getList(Boolean aktivita, String idUzivatel, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+    public List<ZadostKlic> getList(Boolean aktivita, String idUzivatel, ZadostStavEnum zadostStavEnum, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
         String idVratny = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
@@ -55,7 +56,10 @@ public class ZadostKlicService {
             queryString.append("AND s.aktivita = :aktivita ");
         
         if (idUzivatel != null)
-            queryString.append("AND s.uzivatel.idUzivatel = :idUzivatel ");
+            queryString.append("AND s.uzivatel.idUzivatel = :idUzivatelVypujcky ");
+            
+        if (zadostStavEnum != null) 
+            queryString.append("AND s.zadostStav.idZadostStav = :stav ");
 
         queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.klic.vratnice.idVratnice"));
 
@@ -68,7 +72,10 @@ public class ZadostKlicService {
             vysledek.setParameter("aktivita", aktivita);
 
         if (idUzivatel != null)
-            vysledek.setParameter("idUzivatel", idUzivatel);
+            vysledek.setParameter("idUzivatelVypujcky", idUzivatel);
+
+        if (zadostStavEnum != null) 
+            vysledek.setParameter("stav", zadostStavEnum.getValue());
 
         @SuppressWarnings("unchecked")
         List<ZadostKlic> list = vysledek.getResultList();
