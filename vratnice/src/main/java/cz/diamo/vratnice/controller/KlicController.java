@@ -49,7 +49,7 @@ public class KlicController extends BaseController {
     private UzivatelServices uzivatelServices;
 
     @PostMapping("/klic/save")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                 @RequestBody @Valid KlicDto klicDto) throws InterruptedException, ExecutionException, RecordNotFoundException, NoSuchMessageException {
             // Je nutné provádět asynchronně, jinak dochází k nekonzistenci dat 
@@ -106,7 +106,7 @@ public class KlicController extends BaseController {
 
 
     @GetMapping("/klic/detail")
-    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_KLICU')")
     public ResponseEntity<KlicDto> getDetail(@RequestParam String idKey) throws RecordNotFoundException, NoSuchMessageException {
         Klic key = klicService.getDetail(idKey);
         if (key == null) {

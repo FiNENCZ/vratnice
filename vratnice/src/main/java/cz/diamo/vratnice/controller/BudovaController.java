@@ -115,7 +115,7 @@ public class BudovaController extends BudovaBaseController {
 	}
 
 	@GetMapping("/list-dle-pristupu")
-	@PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_BUDOV')")
+	@PreAuthorize("isFullyAuthenticated()")
 	public ResponseEntity<Set<BudovaDto>> listDlePristupu(
 			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
 			@RequestParam @Nullable Boolean aktivita,

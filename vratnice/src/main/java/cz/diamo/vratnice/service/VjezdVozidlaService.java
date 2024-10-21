@@ -73,7 +73,7 @@ public class VjezdVozidlaService {
     }
 
     private VjezdVozidla translateVjezdVozidla(VjezdVozidla vjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
-        if (vjezdVozidla.getTypVozidla() != null)
+        if (vjezdVozidla.getTypVozidla().getNazevResx() != null)
             vjezdVozidla.getTypVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vjezdVozidla.getTypVozidla().getNazevResx()));
 
         return vjezdVozidla;
