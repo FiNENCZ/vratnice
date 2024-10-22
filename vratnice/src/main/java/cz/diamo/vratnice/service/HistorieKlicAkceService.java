@@ -16,20 +16,26 @@ public class HistorieKlicAkceService {
     @PersistenceContext
     private EntityManager entityManager;
 
-
+    /**
+     * Vrátí seznam akcí historie klíče
+     *
+     * @param uzivatelskeAkce
+     * @return Seznam {@link HistorieKlicAkce} objektů. Pokud nejsou nalezeny žádné
+     *         akce, vrátí se prázdný seznam.
+     */
     public List<HistorieKlicAkce> getList(Boolean uzivatelskeAkce) {
-            StringBuilder queryString = new StringBuilder();
+        StringBuilder queryString = new StringBuilder();
 
         queryString.append("select s from HistorieKlicAkce s");
         queryString.append(" where 1 = 1");
 
         if (uzivatelskeAkce != null)
             if (uzivatelskeAkce)
-                queryString.append(" and s.nazevResx <> :vytvoren and s.nazevResx <> :obnoven and s.nazevResx <> :blokovan and s.nazevResx <> :odstranen and s.nazevResx <> :upraven");
+                queryString.append(
+                        " and s.nazevResx <> :vytvoren and s.nazevResx <> :obnoven and s.nazevResx <> :blokovan and s.nazevResx <> :odstranen and s.nazevResx <> :upraven");
 
- 
         Query vysledek = entityManager.createQuery(queryString.toString());
-        if (uzivatelskeAkce != null){
+        if (uzivatelskeAkce != null) {
             if (uzivatelskeAkce) {
                 vysledek.setParameter("vytvoren", HistorieKlicAkceEnum.HISTORIE_KLIC_AKCE_VYTVOREN.toString());
                 vysledek.setParameter("obnoven", HistorieKlicAkceEnum.HISTORIE_KLIC_AKCE_OBNOVEN.toString());
@@ -38,7 +44,7 @@ public class HistorieKlicAkceService {
                 vysledek.setParameter("upraven", HistorieKlicAkceEnum.HISTORIE_KLIC_AKCE_UPRAVEN.toString());
             }
         }
-        
+
         @SuppressWarnings("unchecked")
         List<HistorieKlicAkce> list = vysledek.getResultList();
         return list;

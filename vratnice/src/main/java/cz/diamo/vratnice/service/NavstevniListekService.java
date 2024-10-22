@@ -70,18 +70,36 @@ public class NavstevniListekService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * Vytváří nový {@link NavstevniListek} a ukládá ho do databáze.
+     *
+     * @param request            HTTP požadavek.
+     * @param appUserDto         DTO uživatele.
+     * @param navstevniListekDto DTO objekt, který obsahuje informace o návštěvním
+     *                           lístku.
+     * @param vratnice           Objekt {@link Vratnice}, který se má přiřadit k
+     *                           návštěvnímu lístku.
+     * @return Uložený objekt {@link NavstevniListek}.
+     * @throws AccessDeniedException  Pokud se pokusíte upravit existující návštěvní
+     *                                lístek.
+     * @throws NoSuchMessageException Pokud dojde k chybě při získávání zprávy.
+     * @throws BaseException          Pokud dojde k jiné chybě během zpracování.
+     */
     @Transactional
     public NavstevniListek create(HttpServletRequest request, AppUserDto appUserDto,
-                NavstevniListekDto navstevniListekDto, Vratnice vratnice) throws AccessDeniedException, NoSuchMessageException, BaseException {
+            NavstevniListekDto navstevniListekDto, Vratnice vratnice)
+            throws AccessDeniedException, NoSuchMessageException, BaseException {
 
         // Zamezení editace
-        if (navstevniListekDto.getIdNavstevniListek() != null) 
-            throw new AccessDeniedException(messageSource.getMessage("navstevni_listek.cannot_be_edited", null, LocaleContextHolder.getLocale()));
+        if (navstevniListekDto.getIdNavstevniListek() != null)
+            throw new AccessDeniedException(messageSource.getMessage("navstevni_listek.cannot_be_edited", null,
+                    LocaleContextHolder.getLocale()));
 
         // Vytvoření NavstevaOsoba jako entity (záznam v databázi)
         List<NavstevaOsoba> savedNavstevyOsoby = createNavstevyOsobyIfPresent(navstevniListekDto.getNavstevaOsoba());
 
-        NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypDleVsechUzivatelu(navstevniListekDto.getUzivateleStav());
+        NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypDleVsechUzivatelu(
+                navstevniListekDto.getUzivateleStav());
 
         NavstevniListek navstevniListek = navstevniListekDto.toEntity();
         navstevniListek.setTyp(navstevniListekTyp);
@@ -96,42 +114,58 @@ public class NavstevniListekService {
 
         NavstevniListek savedNavstevniListek = navstevniListekRepository.save(navstevniListek);
 
-
         List<NavstevniListekUzivatelStav> savedUzivateleStav = createNavstevniListekUzivatelStavy(savedNavstevniListek);
         savedNavstevniListek.setUzivateleStav(savedUzivateleStav);
 
-        //TODO: -- ŽÁDOSTI -- napojit na žádosti
-        //zadostiServices.saveNavstevniListek(request, appUserDto, new NavstevniListekDto(savedNavstevniListek));
+        // TODO: -- ŽÁDOSTI -- napojit na žádosti
+        // zadostiServices.saveNavstevniListek(request, appUserDto, new
+        // NavstevniListekDto(savedNavstevniListek));
 
         return savedNavstevniListek;
     }
 
+    /**
+     * Vytváří seznam {@link NavstevaOsoba} na základě zadaného seznamu DTO objektů.
+     *
+     * @param navstevyOsobyDto Seznam DTO objektů {@link NavstevaOsobaDto}, které se
+     *                         mají vytvořit.
+     * @return Seznam uložených objektů {@link NavstevaOsoba}.
+     */
     private List<NavstevaOsoba> createNavstevyOsobyIfPresent(List<NavstevaOsobaDto> navstevyOsobyDto) {
         if (navstevyOsobyDto == null || navstevyOsobyDto.isEmpty()) {
             return new ArrayList<NavstevaOsoba>();
         }
 
         List<NavstevaOsoba> navstevaOsobaEntities = navstevyOsobyDto.stream()
-            .map(NavstevaOsobaDto::toEntity)
-            .collect(Collectors.toList());
+                .map(NavstevaOsobaDto::toEntity)
+                .collect(Collectors.toList());
 
         List<NavstevaOsoba> savedNavstevaOsoby = navstevaOsobaEntities.stream()
-        .map(navstevaOsoba -> {
-            try {
-                return navstevaOsobaService.create(navstevaOsoba);
-            } catch (UniqueValueException | NoSuchMessageException e) {
-                throw new RuntimeException(e);
-            }
-        })
-        .collect(Collectors.toList());
+                .map(navstevaOsoba -> {
+                    try {
+                        return navstevaOsobaService.create(navstevaOsoba);
+                    } catch (UniqueValueException | NoSuchMessageException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
 
         return savedNavstevaOsoby;
 
     }
 
+    /**
+     * Vytváří a ukládá seznam {@link NavstevniListekUzivatelStav} pro daný
+     * návštěvní lístek.
+     * 
+     * @param navstevniListek Objekt {@link NavstevniListek}, pro který se mají
+     *                        vytvořit stavy uživatelů.
+     * @return Seznam uložených objektů {@link NavstevniListekUzivatelStav}.
+     */
     private List<NavstevniListekUzivatelStav> createNavstevniListekUzivatelStavy(NavstevniListek navstevniListek) {
 
-        List<NavstevniListekUzivatelStav> savedUzivateleStavy = new ArrayList<NavstevniListekUzivatelStav>();;
+        List<NavstevniListekUzivatelStav> savedUzivateleStavy = new ArrayList<NavstevniListekUzivatelStav>();
+        ;
 
         for (NavstevniListekUzivatelStav uzivatelStav : navstevniListek.getUzivateleStav()) {
             uzivatelStav.setNavstevniListek(new NavstevniListek(navstevniListek.getIdNavstevniListek()));
@@ -143,11 +177,23 @@ public class NavstevniListekService {
 
     }
 
-    private NavstevniListekTyp getNavstevniListekTypDleVsechUzivatelu(List<NavstevniListekUzivatelStavDto> uzivateleStavDto) {
+    /**
+     * Získává typ návštěvního lístku na základě stavů uživatelů.
+     *
+     * @param uzivateleStavDto Seznam DTO objektů
+     *                         {@link NavstevniListekUzivatelStavDto},
+     *                         které obsahují informace o uživatelích a jejich
+     *                         stavech.
+     * @return Objekt {@link NavstevniListekTyp} odpovídající určenému typu
+     *         návštěvního lístku.
+     */
+    private NavstevniListekTyp getNavstevniListekTypDleVsechUzivatelu(
+            List<NavstevniListekUzivatelStavDto> uzivateleStavDto) {
         NavstevniListekTypEnum currentNavstevniListekTypEnum = NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY;
 
-        //Pokud nějaký z návštěvníků má nastaven papirový návštěvní lístek, tak ním stává automaticky pro všechny (navstevní listek je tedy papírový)
-        for (NavstevniListekUzivatelStavDto uzivatelDto: uzivateleStavDto) {
+        // Pokud nějaký z návštěvníků má nastaven papirový návštěvní lístek, tak ním
+        // stává automaticky pro všechny (navstevní listek je tedy papírový)
+        for (NavstevniListekUzivatelStavDto uzivatelDto : uzivateleStavDto) {
             NavstevniListekTyp navstevniListekTyp = getNavstevniListekTypByUzivatel(uzivatelDto.getUzivatel().getId());
             if (navstevniListekTyp.getNavstevniListekTypEnum() == NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY) {
                 currentNavstevniListekTypEnum = NavstevniListekTypEnum.NAVSTEVNI_LISTEK_PAPIROVY;
@@ -158,7 +204,20 @@ public class NavstevniListekService {
         return new NavstevniListekTyp(currentNavstevniListekTypEnum);
     }
 
-    public List<NavstevniListek> getList(Boolean aktivita, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+    /**
+     * Vrací seznam {@link NavstevniListek} na základě zadané aktivity a
+     * uživatelského kontextu.
+     * 
+     * @param aktivita   Boolean hodnota.
+     * @param appUserDto DTO objekt uživatele.
+     * @return Seznam objektů {@link NavstevniListek} odpovídajících zadaným
+     *         kritériím.
+     * @throws RecordNotFoundException Pokud nebyly nalezeny žádné záznamy.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+
+    public List<NavstevniListek> getList(Boolean aktivita, AppUserDto appUserDto)
+            throws RecordNotFoundException, NoSuchMessageException {
         String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
@@ -169,9 +228,8 @@ public class NavstevniListekService {
         if (aktivita != null)
             queryString.append("AND s.aktivita = :aktivita ");
 
-        
         queryString.append(FilterPristupuVratnice.filtrujDlePrirazeneVratnice("s.vratnice.idVratnice"));
-        
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         vysledek.setParameter("idUzivatel", idUzivatel);
@@ -179,41 +237,61 @@ public class NavstevniListekService {
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
 
-        
         @SuppressWarnings("unchecked")
         List<NavstevniListek> list = vysledek.getResultList();
 
         if (list != null) {
             for (NavstevniListek navstevniListek : list) {
-                navstevniListek.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListek.getTyp().getNazevResx()));
-                navstevniListek.setUzivateleStav(navstevniListekUzivatelStavService.getByNavstevniListek(navstevniListek.getIdNavstevniListek()));
+                navstevniListek.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                        navstevniListek.getTyp().getNazevResx()));
+                navstevniListek.setUzivateleStav(navstevniListekUzivatelStavService
+                        .getByNavstevniListek(navstevniListek.getIdNavstevniListek()));
             }
         }
 
         return list;
     }
 
-
+    /**
+     * Vrací detail {@link NavstevniListek} na základě zadaného ID.
+     *
+     * @param idNavstevniListek ID objektu {@link NavstevniListek}, jehož detail se
+     *                          má vrátit.
+     * @return Objekt {@link NavstevniListek} odpovídající zadanému ID.
+     * @throws RecordNotFoundException Pokud nebyl nalezen žádný záznam s daným ID.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
     public NavstevniListek getDetail(String idNavstevniListek) throws RecordNotFoundException, NoSuchMessageException {
         NavstevniListek navstevniListek = navstevniListekRepository.getDetail(idNavstevniListek);
-        navstevniListek.setUzivateleStav(navstevniListekUzivatelStavService.getByNavstevniListek(navstevniListek.getIdNavstevniListek()));
+        navstevniListek.setUzivateleStav(
+                navstevniListekUzivatelStavService.getByNavstevniListek(navstevniListek.getIdNavstevniListek()));
         return navstevniListek;
     }
 
-
+    /**
+     * Získává typ návštěvního lístku pro daného uživatele na základě jeho ID.
+     *
+     * @param idUzivatel ID uživatele, pro kterého se má získat typ návštěvního
+     *                   lístku.
+     * @return Objekt {@link NavstevniListekTyp} odpovídající uživatelskému ID.
+     * @throws ResponseStatusException Pokud dojde k chybě při získávání typu
+     *                                 návštěvního lístku.
+     */
     public NavstevniListekTyp getNavstevniListekTypByUzivatel(String idUzivatel) {
-        NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository.findNavstevniListekTypByUzivatelId(idUzivatel);
+        NavstevniListekTyp navstevniListekTypUzivatele = uzivatelNavstevniListekTypRepository
+                .findNavstevniListekTypByUzivatelId(idUzivatel);
 
         try {
             if (navstevniListekTypUzivatele == null) // pokud není nalezen, nastaví se ELEKTRONICKY jako výchozí
-                navstevniListekTypUzivatele = navstevniListekTypRepository.getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY.getValue());
-                
-            navstevniListekTypUzivatele.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), navstevniListekTypUzivatele.getNazevResx()));
-            return navstevniListekTypUzivatele; 
+                navstevniListekTypUzivatele = navstevniListekTypRepository
+                        .getDetail(NavstevniListekTypEnum.NAVSTEVNI_LISTEK_ELEKTRONICKY.getValue());
+
+            navstevniListekTypUzivatele.setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    navstevniListekTypUzivatele.getNazevResx()));
+            return navstevniListekTypUzivatele;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
         }
     }
-
 
 }

@@ -26,28 +26,57 @@ public class NavstevaOsobaService {
     @Autowired
     private SpolecnostService spolecnostService;
 
+    /**
+     * Vytváří novou instanci {@link NavstevaOsoba} a ukládá ji do databáze.
+     *
+     * @param navstevaOsoba Objekt {@link NavstevaOsoba}, který se má vytvořit.
+     * @return Uložený objekt {@link NavstevaOsoba}.
+     * @throws UniqueValueException   Pokud již existuje záznam se stejným číslem
+     *                                OP.
+     * @throws NoSuchMessageException Pokud dojde k chybě při získávání zprávy.
+     */
     @Transactional
     public NavstevaOsoba create(NavstevaOsoba navstevaOsoba) throws UniqueValueException, NoSuchMessageException {
         Spolecnost savedSpolecnost = spolecnostService.save(navstevaOsoba.getSpolecnost());
         navstevaOsoba.setSpolecnost((savedSpolecnost));
 
-        if (navstevaOsoba.getIdNavstevaOsoba() == null || navstevaOsoba.getIdNavstevaOsoba().isEmpty()){
-            if(navstevaOsobaRepository.existsByCisloOp(navstevaOsoba.getCisloOp())){
+        if (navstevaOsoba.getIdNavstevaOsoba() == null || navstevaOsoba.getIdNavstevaOsoba().isEmpty()) {
+            if (navstevaOsobaRepository.existsByCisloOp(navstevaOsoba.getCisloOp())) {
                 throw new UniqueValueException(
-                        messageSource.getMessage("navsteva_osoba.cislo_op.unique", null, LocaleContextHolder.getLocale()));
+                        messageSource.getMessage("navsteva_osoba.cislo_op.unique", null,
+                                LocaleContextHolder.getLocale()));
             }
         }
         return navstevaOsobaRepository.save(navstevaOsoba);
     }
 
+    /**
+     * Vrací seznam všech {@link NavstevaOsoba} z databáze.
+     *
+     * @return Seznam objektů {@link NavstevaOsoba}.
+     */
     public List<NavstevaOsoba> list() {
         return navstevaOsobaRepository.findAll();
     }
 
+    /**
+     * Vrací detail {@link NavstevaOsoba} na základě zadaného ID.
+     *
+     * @param idNavstevaOsoba ID objektu {@link NavstevaOsoba},
+     *                        jehož detail se má vrátit.
+     * @return Objekt {@link NavstevaOsoba} odpovídající zadanému ID.
+     */
     public NavstevaOsoba getDetail(String idNavstevaOsoba) {
         return navstevaOsobaRepository.getDetail(idNavstevaOsoba);
     }
 
+    /**
+     * Vrací {@link NavstevaOsoba} na základě čísla OP.
+     *
+     * @param cisloOp Číslo OP, podle kterého se má vyhledat objekt
+     *                {@link NavstevaOsoba}.
+     * @return Objekt {@link NavstevaOsoba} odpovídající zadanému číslu OP.
+     */
     public NavstevaOsoba getByCisloOp(String cisloOp) {
         return navstevaOsobaRepository.geByCisloOp(cisloOp);
     }

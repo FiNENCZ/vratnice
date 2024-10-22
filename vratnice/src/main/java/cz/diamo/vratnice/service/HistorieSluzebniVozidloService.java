@@ -30,34 +30,52 @@ public class HistorieSluzebniVozidloService {
     @Autowired
     private ResourcesComponent resourcesComponent;
 
-
+    /**
+     * Vytváří a ukládá záznam historie služebního vozidla na základě nového a
+     * starého vozidla a uživatele.
+     *
+     * @param newSluzebniVozidlo Nové služební vozidlo, které se má uložit do
+     *                           historie.
+     * @param oldSluzebniVozidlo Staré služební vozidlo, které se porovnává s novým
+     *                           vozidlem.
+     * @param vratny             Uživatel, který provádí akci.
+     * @return Uložený {@link HistorieSluzebniVozidlo} objekt.
+     */
     @Transactional
-    public HistorieSluzebniVozidlo create(SluzebniVozidlo newSluzebniVozidlo, SluzebniVozidlo oldSluzebniVozidlo, Uzivatel vratny) {
+    public HistorieSluzebniVozidlo create(SluzebniVozidlo newSluzebniVozidlo, SluzebniVozidlo oldSluzebniVozidlo,
+            Uzivatel vratny) {
         HistorieSluzebniVozidlo historieSluzebniVozidlo = new HistorieSluzebniVozidlo();
         historieSluzebniVozidlo.setSluzebniVozidlo(newSluzebniVozidlo);
 
-
         if (oldSluzebniVozidlo.getIdSluzebniVozidlo() != null) {
 
-
-            historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_UPRAVENO));
-            if(oldSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE
-                && newSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_AKTIVNI){
-                    historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_OBNOVENO));
+            historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                    HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_UPRAVENO));
+            if (oldSluzebniVozidlo.getStav()
+                    .getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE
+                    && newSluzebniVozidlo.getStav()
+                            .getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_AKTIVNI) {
+                historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                        HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_OBNOVENO));
             }
-            if(oldSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_AKTIVNI
-                && newSluzebniVozidlo.getStav().getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE){
-                    historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_BLOKOVANO));
+            if (oldSluzebniVozidlo.getStav()
+                    .getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_AKTIVNI
+                    && newSluzebniVozidlo.getStav()
+                            .getSluzebniVozidloStavEnum() == SluzebniVozidloStavEnum.SLUZEBNI_VOZIDLO_STAV_BLOKOVANE) {
+                historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                        HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_BLOKOVANO));
             }
-            if(oldSluzebniVozidlo.getAktivita() && !newSluzebniVozidlo.getAktivita()){
-                    historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_ODSTRANENO));
+            if (oldSluzebniVozidlo.getAktivita() && !newSluzebniVozidlo.getAktivita()) {
+                historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                        HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_ODSTRANENO));
             }
-            if(!oldSluzebniVozidlo.getAktivita() && newSluzebniVozidlo.getAktivita()) {
-                historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_OBNOVENO));
+            if (!oldSluzebniVozidlo.getAktivita() && newSluzebniVozidlo.getAktivita()) {
+                historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                        HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_OBNOVENO));
             }
-        }
-        else {
-            historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_VYTVORENO));
+        } else {
+            historieSluzebniVozidlo.setAkce(new HistorieSluzebniVozidloAkce(
+                    HistorieSluzebniVozidloAkceEnum.HISTORIE_SLUZEBNI_VOZIDLO_AKCE_VYTVORENO));
         }
 
         historieSluzebniVozidlo.setDatum(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
@@ -66,12 +84,25 @@ public class HistorieSluzebniVozidloService {
         return historieSluzebniVozidloRepository.save(historieSluzebniVozidlo);
     }
 
-    public List<HistorieSluzebniVozidlo> findBySluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
-        List<HistorieSluzebniVozidlo> list =  historieSluzebniVozidloRepository.findBySluzebniVozidlo(sluzebniVozidlo);
+    /**
+     * Vyhledává záznamy historie služebního vozidla podle zadaného služebního
+     * vozidla.
+     *
+     * @param sluzebniVozidlo Služební vozidlo, podle kterého se vyhledávají záznamy
+     *                        historie.
+     * @return Seznam {@link HistorieSluzebniVozidlo} objektů odpovídajících
+     *         zadanému služebnímu vozidlu.
+     * @throws RecordNotFoundException Pokud není nalezeno žádné záznamy historie.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+    public List<HistorieSluzebniVozidlo> findBySluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo)
+            throws RecordNotFoundException, NoSuchMessageException {
+        List<HistorieSluzebniVozidlo> list = historieSluzebniVozidloRepository.findBySluzebniVozidlo(sluzebniVozidlo);
 
         if (list != null) {
             for (HistorieSluzebniVozidlo historieSluzebniVozidlo : list) {
-                historieSluzebniVozidlo.getAkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), historieSluzebniVozidlo.getAkce().getNazevResx()));
+                historieSluzebniVozidlo.getAkce().setNazev(resourcesComponent.getResources(
+                        LocaleContextHolder.getLocale(), historieSluzebniVozidlo.getAkce().getNazevResx()));
             }
         }
 
