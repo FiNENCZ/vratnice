@@ -26,6 +26,7 @@ public class Wso2UzivatelExtDto implements Serializable {
     @Size(max = 100, message = "{sapid.max.100}")
     private String sapId;
 
+    @NotNull(message = "{zavod.require}")
     private Wso2ZavodDto zavod;
 
     @Size(max = 1000, message = "{nazev.max.1000}")
@@ -86,6 +87,8 @@ public class Wso2UzivatelExtDto implements Serializable {
             uzivatel = new Uzivatel();
             uzivatel.setZmena(true);
             uzivatel.setExterni(true);
+            uzivatel.setPruznaPracDoba(true);
+            uzivatel.setZavod(new Zavod());
         }
 
         if (!StringUtils.equals(getSapId(), uzivatel.getSapId())) {
@@ -94,9 +97,7 @@ public class Wso2UzivatelExtDto implements Serializable {
         }
 
         if (!StringUtils.equals(getZavod().getSapId(), uzivatel.getZavod().getSapId())) {
-            Zavod zavod = new Zavod();
-            zavod.setSapId(getZavod().getSapId());
-            uzivatel.setZavod(zavod);
+            uzivatel.getZavod().setSapId(getZavod().getSapId());
             uzivatel.setZmena(true);
         }
         if (!StringUtils.equals(getNazev(), uzivatel.getNazev())) {

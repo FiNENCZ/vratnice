@@ -29,12 +29,15 @@ import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.dto.Wso2UzivatelExtDto;
 import cz.diamo.share.dto.opravneni.FilterOpravneniDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.entity.Zavod;
 import cz.diamo.share.enums.RoleEnum;
 import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.BaseException;
 import cz.diamo.share.repository.UzivatelRepository;
+import cz.diamo.share.repository.ZavodRepository;
 import cz.diamo.share.services.OpravneniServices;
 import cz.diamo.share.services.UzivatelServices;
+import cz.diamo.share.services.Wso2Services;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -57,6 +60,12 @@ public class UzivatelController extends BaseController {
 
 	@Autowired
 	private UzivatelRepository uzivatelRepository;
+
+	@Autowired
+	private ZavodRepository zavodRepository;
+
+	@Autowired
+	private Wso2Services wso2Services;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -131,8 +140,9 @@ public class UzivatelController extends BaseController {
 					UzivatelDto uzivatelDto = new UzivatelDto(uzivatel);
 
 					// varování
-					if (uzivatel.getPlatnostKeDni() == null || uzivatel.getPlatnostKeDni().compareTo(date) == -1
-							&& (uzivatel.getDatumDo() == null || uzivatel.getDatumDo().compareTo(date) == 1)) {
+					if (!uzivatel.getExterni() && (uzivatel.getPlatnostKeDni() == null
+							|| uzivatel.getPlatnostKeDni().compareTo(date) == -1
+									&& (uzivatel.getDatumDo() == null || uzivatel.getDatumDo().compareTo(date) == 1))) {
 						uzivatelDto.setVarovani(true);
 						uzivatelDto.setVarovaniText(
 								String.format(
@@ -205,7 +215,7 @@ public class UzivatelController extends BaseController {
 	@PreAuthorize("isFullyAuthenticated()")
 	public List<UzivatelDto> listDleOpravneniCelyPodnik(HttpServletRequest request,
 			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-			@RequestParam List<RoleEnum> role) {
+			@RequestParam List<RoleEnum> role, @RequestParam boolean zobrazitUkoncene) {
 
 		try {
 
@@ -223,8 +233,14 @@ public class UzivatelController extends BaseController {
 			List<UzivatelDto> result = new ArrayList<UzivatelDto>();
 			if (roleNew.size() == 0)
 				return result;
-			List<Uzivatel> list = uzivatelServices.getList(null,
-					new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
+			List<Uzivatel> list = null;
+
+			if (zobrazitUkoncene)
+				list = uzivatelServices.getList(null,
+						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew), null, true, null);
+			else
+				list = uzivatelServices.getList(null,
+						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
 			if (list != null && list.size() > 0) {
 				for (Uzivatel uzivatel : list) {
 					result.add(new UzivatelDto(uzivatel));
@@ -342,10 +358,18 @@ public class UzivatelController extends BaseController {
 				List<Wso2UzivatelExtDto> listWso2UzivatelExtDto = new ArrayList<Wso2UzivatelExtDto>();
 
 				for (Uzivatel uzivatel : listUzivatel) {
+					uzivatel.setZavod(zavodRepository.getDetail(uzivatel.getZavod().getIdZavod()));
+					if (uzivatel.getOstatniZavody() != null) {
+						for (Zavod zavod : uzivatel.getOstatniZavody()) {
+							Zavod z = zavodRepository.getDetail(zavod.getIdZavod());
+							zavod.setSapId(z.getSapId());
+							zavod.setNazev(z.getNazev());
+						}
+					}
 					listWso2UzivatelExtDto.add(new Wso2UzivatelExtDto(uzivatel));
-				}
 
-				uzivatelServices.aktualizovatExterniUzivatele(listWso2UzivatelExtDto);
+				}
+				wso2Services.uzivateleExterni(listWso2UzivatelExtDto);
 			}
 
 		} catch (BaseException e) {

@@ -219,6 +219,7 @@ public class OpravneniServices {
                     " and opravneni.id_opravneni in (select v.id_opravneni from " + Constants.SCHEMA + ".opravneni_zavod v where v.id_zavod = :idZavod)");
         queryString.append(" order by");
         queryString.append(" opravneni.nazev ASC,");
+        queryString.append(" opravneni.id_opravneni ASC,");
         queryString.append(" zavod.nazev ASC,");
         queryString.append(" uzivatel.prijmeni ASC,");
         queryString.append(" uzivatel.jmeno ASC,");
