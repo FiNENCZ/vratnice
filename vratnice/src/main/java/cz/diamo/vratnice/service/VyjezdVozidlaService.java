@@ -34,7 +34,19 @@ public class VyjezdVozidlaService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<VyjezdVozidla> getList(Boolean aktivita, Boolean nevyporadaneVyjezdy, AppUserDto appUserDto) throws RecordNotFoundException, NoSuchMessageException {
+    /**
+     * Vrací seznam objektů {@link VyjezdVozidla} na základě zadaných filtrů.
+     *
+     * @param aktivita            Boolean hodnota.
+     * @param nevyporadaneVyjezdy Boolean hodnota.
+     * @param appUserDto          Objekt {@link AppUserDto} obsahující informace o
+     *                            uživateli.
+     * @return Seznam objektů {@link VyjezdVozidla} odpovídajících zadaným filtrům.
+     * @throws RecordNotFoundException Pokud nebyly nalezeny žádné záznamy.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+    public List<VyjezdVozidla> getList(Boolean aktivita, Boolean nevyporadaneVyjezdy, AppUserDto appUserDto)
+            throws RecordNotFoundException, NoSuchMessageException {
         String idUzivatel = appUserDto.getIdUzivatel();
 
         StringBuilder queryString = new StringBuilder();
@@ -62,50 +74,86 @@ public class VyjezdVozidlaService {
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
 
-        
         @SuppressWarnings("unchecked")
         List<VyjezdVozidla> list = vysledek.getResultList();
         return list;
     }
+
+    /**
+     * Vrací detailní informace o objektu {@link VyjezdVozidla} na základě jeho ID.
+     *
+     * @param idVyjezdVozidla ID objektu {@link VyjezdVozidla}, jehož detail se má
+     *                        vrátit.
+     * @return Objekt {@link VyjezdVozidla} s detailními informacemi.
+     */
     public VyjezdVozidla getDetail(String idVyjezdVozidla) {
         return vyjezdVozidlaRepository.getDetail(idVyjezdVozidla);
     }
 
+    /**
+     * Vrací seznam objektů {@link VyjezdVozidla} na základě registrační značky
+     * vozidla.
+     *
+     * @param rzVozidla Registrační značka vozidla, podle které se mají vyhledat
+     *                  výjezdy.
+     * @return Seznam objektů {@link VyjezdVozidla} odpovídajících zadané
+     *         registrační značce.
+     */
     public List<VyjezdVozidla> getByRzVozidla(String rzVozidla) {
         return vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
     }
 
+    /**
+     * Kontroluje, zda je možné vyjet s vozidlem na základě jeho registrační značky.
+     *
+     * @param rzVozidla Registrační značka vozidla, které se má zkontrolovat.
+     * @return Volitelný objekt {@link VyjezdVozidla}, pokud je možné vyjet; jinak
+     *         prázdný.
+     */
     public Optional<VyjezdVozidla> jeMozneVyjet(String rzVozidla) {
         List<VjezdVozidla> vjezdVozidel = vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
         List<VyjezdVozidla> vyjezdVozidel = vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
-    
+
         if (vjezdVozidel.isEmpty()) {
             return Optional.empty();
         }
-    
+
         VjezdVozidla posledniVjezdVozidla = vjezdVozidel.get(vjezdVozidel.size() - 1);
-    
+
         if (vjezdVozidel.size() > vyjezdVozidel.size() || vyjezdVozidel.isEmpty()) {
             return Optional.of(mapToVyjezdVozidla(posledniVjezdVozidla));
         }
-    
+
         return Optional.empty();
     }
-    
+
+    /**
+     * Mapuje objekt {@link VjezdVozidla} na objekt {@link VyjezdVozidla}.
+     *
+     * @param posledniVjezdVozidla Objekt {@link VjezdVozidla}, který se má převést.
+     * @return Nový objekt {@link VyjezdVozidla} s informacemi z posledního vjezdu.
+     */
     private VyjezdVozidla mapToVyjezdVozidla(VjezdVozidla posledniVjezdVozidla) {
         VyjezdVozidla vyjezdVozidla = new VyjezdVozidla();
-        
+
         if (posledniVjezdVozidla.getOpakovanyVjezd() != null) {
             vyjezdVozidla.setOpakovanyVjezd(true);
         }
-        
+
         vyjezdVozidla.setRzVozidla(posledniVjezdVozidla.getRzVozidla());
         return vyjezdVozidla;
     }
 
+    /**
+     * Vytváří nový objekt {@link VyjezdVozidla} a ukládá ho do databáze.
+     *
+     * @param vyjezdVozidla Objekt {@link VyjezdVozidla}, který se má vytvořit.
+     * @param vratnice      Objekt {@link Vratnice}, který se má přiřadit k výjezdu.
+     * @return Uložený objekt {@link VyjezdVozidla} s aktualizovanými informacemi.
+     */
     @Transactional
     public VyjezdVozidla create(VyjezdVozidla vyjezdVozidla, Vratnice vratnice) {
-        if (vyjezdVozidla.getZmenuProvedl() == null ) {        
+        if (vyjezdVozidla.getZmenuProvedl() == null) {
             vyjezdVozidla.setCasZmn(Utils.getCasZmn());
             vyjezdVozidla.setZmenuProvedl(Utils.getZmenuProv());
         }
@@ -117,6 +165,14 @@ public class VyjezdVozidlaService {
         return vyjezdVozidlaRepository.save(vyjezdVozidla);
     }
 
+    /**
+     * Vytváří nový objekt {@link VyjezdVozidla} pro IZS a ukládá ho do databáze.
+     *
+     * @param rzVozidla Registrační značka vozidla, které se má přiřadit k novému
+     *                  výjezdu.
+     * @param vratnice  Objekt {@link Vratnice}, který se má přiřadit k výjezdu.
+     * @return Uložený objekt {@link VyjezdVozidla} s aktualizovanými informacemi.
+     */
     @Transactional
     public VyjezdVozidla createIZSVyjezdVozidla(String rzVozidla, Vratnice vratnice) {
         VyjezdVozidla vyjezdVozidlaIZS = new VyjezdVozidla();
@@ -125,6 +181,5 @@ public class VyjezdVozidlaService {
 
         return create(vyjezdVozidlaIZS, vratnice);
     }
-
 
 }

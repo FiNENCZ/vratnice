@@ -17,14 +17,20 @@ import jakarta.persistence.Query;
 
 @Service
 public class PoschodiService {
-    
+
     @Autowired
     private PoschodiRepository poschodiRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
-   
 
+    /**
+     * Získává seznam poschodí na základě ID budovy a stavu aktivity.
+     *
+     * @param idBudova ID budovy, pro kterou se mají získat poschodí.
+     * @param aktivita Stav aktivity.
+     * @return Seznam objektů {@link Poschodi} odpovídající zadaným parametrům.
+     */
     public List<Poschodi> getList(String idBudova, Boolean aktivita) {
         StringBuilder queryString = new StringBuilder();
 
@@ -45,16 +51,29 @@ public class PoschodiService {
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
-            
+
         @SuppressWarnings("unchecked")
         List<Poschodi> list = vysledek.getResultList();
         return list;
     }
 
+    /**
+     * Získává detail poschodí na základě jeho ID.
+     *
+     * @param idPoschodi ID poschodí, jehož detail se má získat.
+     * @return Objekt {@link Poschodi} odpovídající zadanému ID
+     */
     public Poschodi getDetail(String idPoschodi) {
         return poschodiRepository.getDetail(idPoschodi);
     }
 
+    /**
+     * Ukládá objekt poschodí do databáze.
+     *
+     * @param poschodi Objekt {@link Poschodi}, který se má uložit.
+     * @return Uložený objekt {@link Poschodi} s aktualizovanými informacemi.
+     * @throws BaseException Pokud dojde k chybě při validaci nebo ukládání objektu.
+     */
     @TransactionalWrite
     public Poschodi save(Poschodi poschodi) throws BaseException {
 
@@ -69,10 +88,11 @@ public class PoschodiService {
     }
 
     /**
-     * Odstranění zázmamu
-     * 
-     * @param idPoschodi
-     * @throws EpoRequiredFieldException
+     * Odstraňuje záznam poschodí z databáze.
+     *
+     * @param idPoschodi Identifikátor {@link Poschodi}, který se má odstranit.
+     * @throws EpoRequiredFieldException Pokud je identifikátor prázdný nebo
+     *                                   neplatný.
      */
     @TransactionalWrite
     public void odstranit(String idPoschodi) {
@@ -80,10 +100,11 @@ public class PoschodiService {
     }
 
     /**
-     * Obnovení záznamu
-     * 
-     * @param idPoschodi
-     * @throws EpoRequiredFieldException
+     * Obnovuje záznam poschodí v databázi.
+     *
+     * @param idPoschodi Identifikátor {@link Poschodi}, který se má obnovit.
+     * @throws EpoRequiredFieldException Pokud je identifikátor prázdný nebo
+     *                                   neplatný.
      */
     @TransactionalWrite
     public void obnovit(String idPoschodi) {

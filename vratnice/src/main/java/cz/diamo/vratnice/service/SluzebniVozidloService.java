@@ -42,15 +42,15 @@ import jakarta.transaction.Transactional;
 public class SluzebniVozidloService {
 
     final static Logger logger = LogManager.getLogger(SluzebniVozidloController.class);
-    
+
     @Autowired
     private SluzebniVozidloRepository sluzebniVozidloRepository;
-    
+
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-	private MessageSource messageSource;
+    private MessageSource messageSource;
 
     @Autowired
     private ResourcesComponent resourcesComponent;
@@ -73,8 +73,20 @@ public class SluzebniVozidloService {
     @Autowired
     private SluzebniVozidloStavRepository sluzebniVozidloStavRepository;
 
-    public List<SluzebniVozidlo> getList(AppUserDto appUserDto, Boolean aktivita) throws RecordNotFoundException, NoSuchMessageException {
-        List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(appUserDto.getIdUzivatel(), null);
+    /**
+     * Vrací seznam služebních vozidel na základě uživatelského přístupu a aktivity.
+     *
+     * @param appUserDto Objekt {@link AppUserDto} obsahující informace o uživateli.
+     * @param aktivita   Boolean hodnota určující, zda se mají vrátit pouze aktivní
+     *                   vozidla.
+     * @return Seznam {@link SluzebniVozidlo} odpovídajících kritériím.
+     * @throws RecordNotFoundException Pokud nebyly nalezeny žádné záznamy.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+    public List<SluzebniVozidlo> getList(AppUserDto appUserDto, Boolean aktivita)
+            throws RecordNotFoundException, NoSuchMessageException {
+        List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(appUserDto.getIdUzivatel(),
+                null);
 
         logger.info(zavodyUzivatele);
 
@@ -86,24 +98,22 @@ public class SluzebniVozidloService {
         if (aktivita != null)
             queryString.append(" AND s.aktivita = :aktivita");
 
-        if (!zavodyUzivatele.isEmpty()) 
+        if (!zavodyUzivatele.isEmpty())
             queryString.append(" AND (s.zavod.idZavod IN :zavody OR s.zavod.idZavod IS NULL) ");
-            
-        
+
         Query vysledek = entityManager.createQuery(queryString.toString());
 
         if (aktivita != null)
             vysledek.setParameter("aktivita", aktivita);
-        
+
         if (!zavodyUzivatele.isEmpty()) {
             // Převod závodů na seznam jejich ID
             List<String> zavodIds = zavodyUzivatele.stream()
-                                        .map(Zavod::getIdZavod)
-                                        .collect(Collectors.toList());
+                    .map(Zavod::getIdZavod)
+                    .collect(Collectors.toList());
             vysledek.setParameter("zavody", zavodIds);
         }
-        
-        
+
         @SuppressWarnings("unchecked")
         List<SluzebniVozidlo> list = vysledek.getResultList();
 
@@ -113,16 +123,30 @@ public class SluzebniVozidloService {
             }
         }
 
-
         return list;
     }
 
+    /**
+     * Vytváří nové služební vozidlo a ukládá ho do databáze.
+     *
+     * @param appUserDto      Objekt {@link AppUserDto} obsahující informace o
+     *                        uživateli.
+     * @param sluzebniVozidlo Objekt {@link SluzebniVozidlo}, který se má vytvořit.
+     * @return Uložený objekt {@link SluzebniVozidlo} s aktualizovanými informacemi.
+     * @throws UniqueValueException    Pokud již existuje vozidlo se stejným
+     *                                 registračním číslem.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     * @throws RecordNotFoundException Pokud nebyl nalezen záznam.
+     * @throws AccessDeniedException   Pokud uživatel nemá přístup k danému vozidlu.
+     */
     @Transactional
-    public SluzebniVozidlo create(AppUserDto appUserDto, SluzebniVozidlo sluzebniVozidlo) throws UniqueValueException, NoSuchMessageException, RecordNotFoundException, AccessDeniedException {
-        if (sluzebniVozidlo.getKategorie().getSluzebniVozidloKategorieEnum() != SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
+    public SluzebniVozidlo create(AppUserDto appUserDto, SluzebniVozidlo sluzebniVozidlo)
+            throws UniqueValueException, NoSuchMessageException, RecordNotFoundException, AccessDeniedException {
+        if (sluzebniVozidlo.getKategorie()
+                .getSluzebniVozidloKategorieEnum() != SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
             zkontrolujPristupKeSluzebnimVozidlu(sluzebniVozidlo.getZavod().getIdZavod(), appUserDto.getIdUzivatel());
-        
-        if (sluzebniVozidlo.getIdSluzebniVozidlo() == null || sluzebniVozidlo.getIdSluzebniVozidlo().isEmpty()){
+
+        if (sluzebniVozidlo.getIdSluzebniVozidlo() == null || sluzebniVozidlo.getIdSluzebniVozidlo().isEmpty()) {
             if (sluzebniVozidloRepository.existsByRz(sluzebniVozidlo.getRz()))
                 throw new UniqueValueException(
                         messageSource.getMessage("sluzebni_vozidlo.rz.unique", null, LocaleContextHolder.getLocale()));
@@ -135,10 +159,22 @@ public class SluzebniVozidloService {
         return translateSluzebniVozidlo(savedSluzebniVozidlo);
     }
 
-    public SluzebniVozidlo getDetail(AppUserDto appUserDto, String id) throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
-        SluzebniVozidlo sluzebniVozidlo =  sluzebniVozidloRepository.getDetail(id);
+    /**
+     * Vrací detail služebního vozidla na základě jeho ID.
+     *
+     * @param appUserDto Objekt {@link AppUserDto} obsahující informace o uživateli.
+     * @param id         ID služebního vozidla, jehož detail se má vrátit.
+     * @return Objekt {@link SluzebniVozidlo} s detaily vozidla.
+     * @throws RecordNotFoundException Pokud nebyl nalezen záznam o vozidle.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     * @throws AccessDeniedException   Pokud uživatel nemá přístup k danému vozidlu.
+     */
+    public SluzebniVozidlo getDetail(AppUserDto appUserDto, String id)
+            throws RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
+        SluzebniVozidlo sluzebniVozidlo = sluzebniVozidloRepository.getDetail(id);
 
-        if (sluzebniVozidlo.getKategorie().getSluzebniVozidloKategorieEnum() != SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
+        if (sluzebniVozidlo.getKategorie()
+                .getSluzebniVozidloKategorieEnum() != SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
             zkontrolujPristupKeSluzebnimVozidlu(sluzebniVozidlo.getZavod().getIdZavod(), appUserDto.getIdUzivatel());
 
         if (sluzebniVozidlo != null) {
@@ -148,76 +184,114 @@ public class SluzebniVozidloService {
         return sluzebniVozidlo;
     }
 
-    private void zkontrolujPristupKeSluzebnimVozidlu(String idZavodSluzebniVozidlo, String idUzivatel) throws AccessDeniedException, NoSuchMessageException {
+    /**
+     * Kontroluje, zda má uživatel přístup k danému služebnímu vozidlu na základě
+     * jeho ID závodu.
+     *
+     * @param idZavodSluzebniVozidlo ID závodu služebního vozidla, ke kterému se
+     *                               kontroluje přístup.
+     * @param idUzivatel             ID uživatele, jehož přístup se kontroluje.
+     * @throws AccessDeniedException  Pokud uživatel nemá přístup k danému vozidlu.
+     * @throws NoSuchMessageException Pokud dojde k chybě při získávání zprávy.
+     */
+    private void zkontrolujPristupKeSluzebnimVozidlu(String idZavodSluzebniVozidlo, String idUzivatel)
+            throws AccessDeniedException, NoSuchMessageException {
         List<Zavod> zavodyUzivatele = vratniceBaseService.getAllZavodyUzivateleByPristup(idUzivatel, null);
 
         boolean povoleniNalezeno = zavodyUzivatele.stream()
-            .anyMatch(zavod -> zavod.getIdZavod().equals(idZavodSluzebniVozidlo));
+                .anyMatch(zavod -> zavod.getIdZavod().equals(idZavodSluzebniVozidlo));
 
         if (!povoleniNalezeno) {
             throw new AccessDeniedException(
-						messageSource.getMessage("sluzebni_vozidlo.not_access", null, LocaleContextHolder.getLocale()));
+                    messageSource.getMessage("sluzebni_vozidlo.not_access", null, LocaleContextHolder.getLocale()));
         }
     }
 
-    private SluzebniVozidlo translateSluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo) throws RecordNotFoundException, NoSuchMessageException {
+    /**
+     * Převádí objekt služebního vozidla na jeho lokalizovanou verzi.
+     *
+     * @param sluzebniVozidlo Objekt {@link SluzebniVozidlo}, který se má převést.
+     * @return Převáděný objekt {@link SluzebniVozidlo} s lokalizovanými názvy.
+     * @throws RecordNotFoundException Pokud nebyl nalezen záznam.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+    private SluzebniVozidlo translateSluzebniVozidlo(SluzebniVozidlo sluzebniVozidlo)
+            throws RecordNotFoundException, NoSuchMessageException {
         if (sluzebniVozidlo.getTyp().getNazevResx() != null)
-            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getTyp().getNazevResx()));
+            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidlo.getTyp().getNazevResx()));
         else {
-            Optional<VozidloTyp> sluzebniVozidloTyp = vozidloTypRepository.findById(sluzebniVozidlo.getTyp().getIdVozidloTyp());
-            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloTyp.get().getNazevResx()));
+            Optional<VozidloTyp> sluzebniVozidloTyp = vozidloTypRepository
+                    .findById(sluzebniVozidlo.getTyp().getIdVozidloTyp());
+            sluzebniVozidlo.getTyp().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidloTyp.get().getNazevResx()));
         }
-
-            
 
         if (sluzebniVozidlo.getKategorie().getNazevResx() != null)
-            sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getKategorie().getNazevResx()));
+            sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidlo.getKategorie().getNazevResx()));
         else {
-                Optional<SluzebniVozidloKategorie> sluzebniVozidloKategorie = sluzebniVozidloKategorieRepository.findById(sluzebniVozidlo.getKategorie().getIdSluzebniVozidloKategorie());
-                sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloKategorie.get().getNazevResx()));
+            Optional<SluzebniVozidloKategorie> sluzebniVozidloKategorie = sluzebniVozidloKategorieRepository
+                    .findById(sluzebniVozidlo.getKategorie().getIdSluzebniVozidloKategorie());
+            sluzebniVozidlo.getKategorie().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidloKategorie.get().getNazevResx()));
         }
 
-
-
-        if (sluzebniVozidlo.getFunkce() != null ) {
+        if (sluzebniVozidlo.getFunkce() != null) {
             if (sluzebniVozidlo.getFunkce().getNazevResx() != null)
-                sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getFunkce().getNazevResx()));
+                sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                        sluzebniVozidlo.getFunkce().getNazevResx()));
             else {
-                Optional<SluzebniVozidloFunkce> sluzebniVozidloFunkce = sluzebniVozidloFunkceRepository.findById(sluzebniVozidlo.getFunkce().getIdSluzebniVozidloFunkce());
-                sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloFunkce.get().getNazevResx()));
+                Optional<SluzebniVozidloFunkce> sluzebniVozidloFunkce = sluzebniVozidloFunkceRepository
+                        .findById(sluzebniVozidlo.getFunkce().getIdSluzebniVozidloFunkce());
+                sluzebniVozidlo.getFunkce().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                        sluzebniVozidloFunkce.get().getNazevResx()));
             }
         }
 
-
         if (sluzebniVozidlo.getStav().getNazevResx() != null)
-            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidlo.getStav().getNazevResx()));
+            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidlo.getStav().getNazevResx()));
         else {
-            Optional<SluzebniVozidloStav> sluzebniVozidloStav = sluzebniVozidloStavRepository.findById(sluzebniVozidlo.getStav().getIdSluzebniVozidloStav());
-            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), sluzebniVozidloStav.get().getNazevResx()));
+            Optional<SluzebniVozidloStav> sluzebniVozidloStav = sluzebniVozidloStavRepository
+                    .findById(sluzebniVozidlo.getStav().getIdSluzebniVozidloStav());
+            sluzebniVozidlo.getStav().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(),
+                    sluzebniVozidloStav.get().getNazevResx()));
         }
 
         return sluzebniVozidlo;
     }
 
-    public Boolean muzeSluzebniVozidloProjetVratnici(String rz, String idVratnice) throws RecordNotFoundException, NoSuchMessageException {
+    /**
+     * Kontroluje, zda může služební vozidlo projet vratnicí na základě
+     * registračního čísla a ID vratnice.
+     *
+     * @param rz         Registrační číslo služebního vozidla.
+     * @param idVratnice ID vratnice, kterou se kontroluje.
+     * @return Boolean hodnota určující, zda může vozidlo projet vratnicí.
+     * @throws RecordNotFoundException Pokud nebyla nalezena vratnice nebo vozidlo.
+     * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
+     */
+    public Boolean muzeSluzebniVozidloProjetVratnici(String rz, String idVratnice)
+            throws RecordNotFoundException, NoSuchMessageException {
         Vratnice vratniceKamery = vratniceService.getDetail(idVratnice);
 
-        if (vratniceKamery == null) 
+        if (vratniceKamery == null)
             throw new RecordNotFoundException(
-                String.format(messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
-        
+                    String.format(
+                            messageSource.getMessage("vratnice.not_found", null, LocaleContextHolder.getLocale())));
 
         Lokalita lokalitaKamery = vratniceKamery.getLokalita();
 
-        
         SluzebniVozidlo sluzebniVozidlo = getByRz(rz);
 
-        if (sluzebniVozidlo == null) 
+        if (sluzebniVozidlo == null)
             return false;
-        
-        if (sluzebniVozidlo.getKategorie().getSluzebniVozidloKategorieEnum() == SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
+
+        if (sluzebniVozidlo.getKategorie()
+                .getSluzebniVozidloKategorieEnum() == SluzebniVozidloKategorieEnum.SLUZEBNI_VOZIDLO_KATEGORIE_MANAZERSKE)
             return true;
-        
+
         if (sluzebniVozidlo.getLokality() != null) {
             for (Lokalita lokalita : sluzebniVozidlo.getLokality()) {
                 if (lokalita.getIdLokalita().equals(lokalitaKamery.getIdLokalita()))
@@ -228,6 +302,13 @@ public class SluzebniVozidloService {
         return false;
     }
 
+    /**
+     * Vrací služební vozidlo na základě jeho registračního čísla.
+     *
+     * @param rz Registrační číslo služebního vozidla.
+     * @return Objekt {@link SluzebniVozidlo} odpovídající danému registračnímu
+     *         číslu.
+     */
     public SluzebniVozidlo getByRz(String rz) {
         return sluzebniVozidloRepository.getByRz(rz);
     }
