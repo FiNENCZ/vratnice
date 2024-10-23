@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,6 +115,15 @@ public class VyjezdVozidlaService {
                 vyjezdVozidla.setVratnice(vratnice);
 
         return vyjezdVozidlaRepository.save(vyjezdVozidla);
+    }
+
+    @Transactional
+    public VyjezdVozidla createIZSVyjezdVozidla(String rzVozidla, Vratnice vratnice) {
+        VyjezdVozidla vyjezdVozidlaIZS = new VyjezdVozidla();
+        vyjezdVozidlaIZS.setRzVozidla(rzVozidla);
+        vyjezdVozidlaIZS.setCasOdjezdu(ZonedDateTime.now());
+
+        return create(vyjezdVozidlaIZS, vratnice);
     }
 
 

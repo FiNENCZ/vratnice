@@ -38,12 +38,23 @@ public class VyjezdVozidlaController extends BaseController {
 
     @PostMapping("/vyjezd-vozidla/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYJEZD_VOZIDEL')")
-    public ResponseEntity<VyjezdVozidlaDto> saveVjezdVozidla(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+    public ResponseEntity<VyjezdVozidlaDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
                         @RequestBody @Valid VyjezdVozidlaDto vyjezdVozidlaDto) throws RecordNotFoundException, NoSuchMessageException {
         
         Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
 
         VyjezdVozidla vyjezdVozidla = vyjezdVozidlaService.create(vyjezdVozidlaDto.toEntity(), vratnice);
+        return ResponseEntity.ok(new VyjezdVozidlaDto(vyjezdVozidla));
+    }
+
+    @PostMapping("/vyjezd-vozidla/save-izs")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VYJEZD_VOZIDEL')")
+    public ResponseEntity<VyjezdVozidlaDto> saveIZS(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                        @RequestParam String rzVozidla) throws RecordNotFoundException, NoSuchMessageException {
+        
+        Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
+        VyjezdVozidla vyjezdVozidla = vyjezdVozidlaService.createIZSVyjezdVozidla(rzVozidla, vratnice);
         return ResponseEntity.ok(new VyjezdVozidlaDto(vyjezdVozidla));
     }
 

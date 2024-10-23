@@ -1,5 +1,6 @@
 package cz.diamo.vratnice.service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,9 @@ import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.vratnice.entity.VjezdVozidla;
+import cz.diamo.vratnice.entity.VozidloTyp;
 import cz.diamo.vratnice.entity.Vratnice;
+import cz.diamo.vratnice.enums.VozidloTypEnum;
 import cz.diamo.vratnice.filter.FilterPristupuVratnice;
 import cz.diamo.vratnice.repository.VjezdVozidlaRepository;
 import jakarta.persistence.EntityManager;
@@ -73,7 +76,7 @@ public class VjezdVozidlaService {
     }
 
     private VjezdVozidla translateVjezdVozidla(VjezdVozidla vjezdVozidla) throws RecordNotFoundException, NoSuchMessageException {
-        if (vjezdVozidla.getTypVozidla().getNazevResx() != null)
+        if (vjezdVozidla.getTypVozidla() != null && vjezdVozidla.getTypVozidla().getNazevResx() != null)
             vjezdVozidla.getTypVozidla().setNazev(resourcesComponent.getResources(LocaleContextHolder.getLocale(), vjezdVozidla.getTypVozidla().getNazevResx()));
 
         return vjezdVozidla;
@@ -103,5 +106,15 @@ public class VjezdVozidlaService {
             
         VjezdVozidla saveVjezdVozidla =  vjezdVozidlaRepository.save(vjezdVozidla);
         return translateVjezdVozidla(saveVjezdVozidla);
+    }
+
+    @Transactional
+    public VjezdVozidla createIZSVjezdVozidla(String rzVozidla, Vratnice vratnice) throws RecordNotFoundException, NoSuchMessageException {
+        VjezdVozidla vjezdVozidlaIZS = new VjezdVozidla();
+        vjezdVozidlaIZS.setRzVozidla(rzVozidla);
+        vjezdVozidlaIZS.setCasPrijezdu(ZonedDateTime.now());
+        vjezdVozidlaIZS.setTypVozidla(new VozidloTyp(VozidloTypEnum.VOZIDLO_IZS));
+
+        return create(vjezdVozidlaIZS, vratnice);
     }
 }

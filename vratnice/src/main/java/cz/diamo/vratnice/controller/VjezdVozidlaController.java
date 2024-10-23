@@ -61,6 +61,17 @@ public class VjezdVozidlaController extends BaseController{
         return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
     }
 
+    @PostMapping("/vjezd-vozidla/save-izs")
+    @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
+    public ResponseEntity<VjezdVozidlaDto> saveIZS(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+                @RequestParam String rzVozidla) throws RecordNotFoundException, NoSuchMessageException, UniqueValueException {
+
+        Vratnice vratnice = uzivatelVratniceService.getNastavenaVratniceByUzivatel(appUserDto);
+
+        VjezdVozidla vjezdVozidla = vjezdVozidlaService.createIZSVjezdVozidla(rzVozidla, vratnice);
+        return ResponseEntity.ok(new VjezdVozidlaDto(vjezdVozidla));
+    }
+
     @GetMapping("/vjezd-vozidla/list")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_VJEZD_VOZIDEL')")
     public ResponseEntity<List<VjezdVozidlaDto>> list(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
