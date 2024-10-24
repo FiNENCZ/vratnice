@@ -134,7 +134,7 @@ public class UzivatelServices {
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Boolean aktivita)
             throws RecordNotFoundException {
-        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), aktivita, null);
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), aktivita, null, null, null);
     }
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni) throws RecordNotFoundException {
@@ -143,11 +143,11 @@ public class UzivatelServices {
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni)
             throws RecordNotFoundException {
-        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), null, null);
+        return getList(idZavod, opravneni, Calendar.getInstance().getTime(), null, null, null, null);
     }
 
     public List<Uzivatel> getList(String idZavod, FilterOpravneniDto opravneni, Date platnostKeDni, Boolean aktivita,
-            Boolean externi)
+            Boolean externi, Boolean kmenovy, String idZavodKmenovy)
             throws RecordNotFoundException {
         StringBuilder queryString = new StringBuilder();
 
@@ -168,7 +168,12 @@ public class UzivatelServices {
         if (platnostKeDni != null)
             queryString.append(
                     " and (s.datumOd is null or s.datumOd <= :platnostKeDni) and (s.datumDo is null or s.datumDo >= :platnostKeDni)");
-        queryString.append(" and s.aktivita = true");
+        if (kmenovy != null && !StringUtils.isBlank(idZavodKmenovy)) {
+            if (kmenovy)
+                queryString.append(" and s.externi = false and zavod.idZavod = :idZavodKmenovy");
+            else
+                queryString.append(" and (s.externi = true or zavod.idZavod != :idZavodKmenovy)");
+        }
 
         queryString.append(" order by s.prijmeni ASC, s.jmeno ASC");
 
@@ -182,6 +187,8 @@ public class UzivatelServices {
             vysledek.setParameter("externi", externi);
         if (opravneni != null)
             vysledek.setParameter("idVedouci", opravneni.getIdVedouci());
+        if (kmenovy != null && !StringUtils.isBlank(idZavodKmenovy))
+            vysledek.setParameter("idZavodKmenovy", idZavodKmenovy);
         if (platnostKeDni != null)
             vysledek.setParameter("platnostKeDni", platnostKeDni);
 
@@ -358,7 +365,7 @@ public class UzivatelServices {
             try {
                 applicationEventPublisher.publishEvent(new UkonceniUzivateleEvent(this, uzivatel));
             } catch (UndeclaredThrowableException ute) {
-                //získám výjimku, ke které došlo u posluchače
+                // získám výjimku, ke které došlo u posluchače
                 Exception e = ute;
                 if (ute.getCause() != null)
                     e = new Exception(ute.getCause());
