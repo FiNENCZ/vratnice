@@ -33,7 +33,7 @@ public class RidicService {
      *              má být vytvořen.
      * @return Uložený objekt {@link Ridic} s aktualizovanými informacemi.
      * @throws UniqueValueException   Pokud již existuje řidič se stejným číslem OP.
-     * @throws NoSuchMessageException Pokud není nalezena zpráva pro daný klíč.
+     * @throws NoSuchMessageException Pokud není nalezena zpráva pro daného řidiče.
      */
     @Transactional
     public Ridic create(Ridic ridic) throws UniqueValueException, NoSuchMessageException {
