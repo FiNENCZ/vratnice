@@ -215,7 +215,8 @@ public class UzivatelController extends BaseController {
 	@PreAuthorize("isFullyAuthenticated()")
 	public List<UzivatelDto> listDleOpravneniCelyPodnik(HttpServletRequest request,
 			@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto,
-			@RequestParam List<RoleEnum> role, @RequestParam boolean zobrazitUkoncene) {
+			@RequestParam List<RoleEnum> role, @RequestParam boolean zobrazitUkoncene,
+			@RequestParam @Nullable Boolean kmenovyUzivatel) {
 
 		try {
 
@@ -235,12 +236,14 @@ public class UzivatelController extends BaseController {
 				return result;
 			List<Uzivatel> list = null;
 
+			Date platnostKeDni = Calendar.getInstance().getTime();
 			if (zobrazitUkoncene)
-				list = uzivatelServices.getList(null,
-						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew), null, true, null);
-			else
-				list = uzivatelServices.getList(null,
-						new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew));
+				platnostKeDni = null;
+
+			list = uzivatelServices.getList(null,
+					new FilterOpravneniDto(appUserDto.getIdUzivatel(), roleNew), platnostKeDni, true, null,
+					kmenovyUzivatel, appUserDto.getIdKmenovehoZavodu());
+
 			if (list != null && list.size() > 0) {
 				for (Uzivatel uzivatel : list) {
 					result.add(new UzivatelDto(uzivatel));
@@ -352,7 +355,7 @@ public class UzivatelController extends BaseController {
 		try {
 
 			// seznam externích uživatelů
-			List<Uzivatel> listUzivatel = uzivatelServices.getList(null, null, null, null, true);
+			List<Uzivatel> listUzivatel = uzivatelServices.getList(null, null, null, null, true, null, null);
 
 			if (listUzivatel != null && listUzivatel.size() > 0) {
 				List<Wso2UzivatelExtDto> listWso2UzivatelExtDto = new ArrayList<Wso2UzivatelExtDto>();
