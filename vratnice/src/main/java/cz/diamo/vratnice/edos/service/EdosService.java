@@ -60,6 +60,14 @@ public class EdosService {
     @Autowired
     private RestOperations restEdos;
 
+    /**
+     * Získává HTTP hlavičky pro autentizaci pomocí tokenu z cookie.
+     * 
+     * @param request HTTP požadavek, ze kterého se získávají cookies.
+     * @return {@link HttpHeaders} obsahující cookie pro autentizaci, nebo null,
+     *         pokud
+     *         nebyla nalezena platná cookie nebo došlo k chybě.
+     */
     @TransactionalROE
     public HttpHeaders getEdosHttpHeaders(HttpServletRequest request) {
 
@@ -87,6 +95,16 @@ public class EdosService {
         }
         return null;
     }
+
+    /**
+     * Nastavuje zástupce pro uživatele na základě poskytnutých informací.
+     *
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli
+     *                   a jeho zástupci.
+     */
     @TransactionalRO
     public void nastavitZastup(HttpServletRequest request, AppUserDto appUserDto) {
 
@@ -119,7 +137,20 @@ public class EdosService {
         }
     }
 
-    public ResponseEntity<List<SnimacVratniceDto>> listSnimac(AppUserDto appUserDto, HttpServletRequest request) throws BaseException {
+    /**
+     * Vrací seznam snímačů vratnic pro daného uživatele.
+     *
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @return {@link ResponseEntity} obsahující seznam {@link SnimacVratniceDto}
+     *         snímačů.
+     * @throws BaseException Pokud dojde k chybě při získávání seznamu snímačů
+     *                       nebo při volání externí služby.
+     */
+    public ResponseEntity<List<SnimacVratniceDto>> listSnimac(AppUserDto appUserDto, HttpServletRequest request)
+            throws BaseException {
         try {
 
             // nastavení zástupu
@@ -128,13 +159,12 @@ public class EdosService {
             HttpEntity<Void> requestEntity = new HttpEntity<>(getEdosHttpHeaders(request));
 
             ResponseEntity<List<SnimacVratniceDto>> result = restEdos.exchange(
-                    "/vratnice/snimac/list", 
-                    HttpMethod.GET, 
-                    requestEntity, 
-                    new ParameterizedTypeReference<List<SnimacVratniceDto>>() {}, 
-                    new HashMap<>()
-            );
-
+                    "/vratnice/snimac/list",
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<List<SnimacVratniceDto>>() {
+                    },
+                    new HashMap<>());
 
             if (result.getStatusCode().isError())
                 throw new BaseException(
@@ -159,7 +189,20 @@ public class EdosService {
         }
     }
 
-    public ResponseEntity<List<SnimacAkceVratniceDto>> listSnimacAkce(AppUserDto appUserDto, HttpServletRequest request) throws BaseException {
+    /**
+     * Vrací seznam akcí snímačů vratnic pro daného uživatele.
+     *
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @return {@link ResponseEntity} obsahující seznam
+     *         {@link SnimacAkceVratniceDto} akcí snímačů.
+     * @throws BaseException Pokud dojde k chybě při získávání seznamu akcí snímačů
+     *                       nebo při volání externí služby.
+     */
+    public ResponseEntity<List<SnimacAkceVratniceDto>> listSnimacAkce(AppUserDto appUserDto, HttpServletRequest request)
+            throws BaseException {
         try {
 
             // nastavení zástupu
@@ -168,13 +211,12 @@ public class EdosService {
             HttpEntity<Void> requestEntity = new HttpEntity<>(getEdosHttpHeaders(request));
 
             ResponseEntity<List<SnimacAkceVratniceDto>> result = restEdos.exchange(
-                    "/vratnice/snimac-akce/list", 
-                    HttpMethod.GET, 
-                    requestEntity, 
-                    new ParameterizedTypeReference<List<SnimacAkceVratniceDto>>() {}, 
-                    new HashMap<>()
-            );
-
+                    "/vratnice/snimac-akce/list",
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<List<SnimacAkceVratniceDto>>() {
+                    },
+                    new HashMap<>());
 
             if (result.getStatusCode().isError())
                 throw new BaseException(
@@ -200,8 +242,21 @@ public class EdosService {
         }
     }
 
-
-    public void zaznamSnimaceSave(AppUserDto appUserDto, HttpServletRequest request, RucniZaznamSnimaceDto detail) throws BaseException, JSONException {
+    /**
+     * Ukládá ruční záznam snímače vratnice pro daného uživatele.
+     *
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @param detail     Objekt {@link RucniZaznamSnimaceDto}, který obsahuje
+     *                   detaily záznamu snímače, který se má uložit.
+     * @throws BaseException Pokud dojde k chybě při ukládání záznamu snímače
+     *                       nebo při volání externí služby.
+     * @throws JSONException Pokud dojde k chybě při zpracování JSON odpovědi.
+     */
+    public void zaznamSnimaceSave(AppUserDto appUserDto, HttpServletRequest request, RucniZaznamSnimaceDto detail)
+            throws BaseException, JSONException {
         // volání aplikace Žádosti
         try {
 
@@ -209,8 +264,8 @@ public class EdosService {
             nastavitZastup(request, appUserDto);
 
             HttpEntity<RucniZaznamSnimaceDto> requestEntity = new HttpEntity<RucniZaznamSnimaceDto>(
-                detail,
-                getEdosHttpHeaders(request));
+                    detail,
+                    getEdosHttpHeaders(request));
 
             ResponseEntity<Void> result = restEdos
                     .exchange("/vratnice/zaznam-snimace/save", HttpMethod.POST,
@@ -239,11 +294,18 @@ public class EdosService {
             logger.info("-------");
             logger.info(e);
 
-            throw new BaseException(extractErrorMessageFromRest(e.getMessage())); 
+            throw new BaseException(extractErrorMessageFromRest(e.getMessage()));
 
         }
     }
 
+    /**
+     * Extrahuje chybovou zprávu z REST odpovědi.
+     *
+     * @param errorMessage Chybová zpráva, která se má zpracovat.
+     * @return Extrahovaná chybová zpráva nebo výchozí chybová zpráva.
+     * @throws JSONException Pokud dojde k chybě při parsování JSON.
+     */
     public String extractErrorMessageFromRest(String errorMessage) throws JSONException {
         try {
             if (errorMessage != null) {
@@ -253,7 +315,7 @@ public class EdosService {
                     String jsonPart = errorMessage.substring(jsonStartIndex);
                     JSONObject json = new JSONObject(jsonPart);
                     String message = json.optString("message", "Chyba zpráva nenalezena");
-                    
+
                     // Pokud existuje message v JSON
                     if (message != null && !message.isEmpty()) {
                         return message;

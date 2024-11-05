@@ -90,6 +90,18 @@ public class ZadostiServices extends ZadostiExterniServices {
     @Autowired
     private MessageSource messageSource;
 
+    /**
+     * Vrací seznam poschodí pro danou budovu.
+     *
+     * Tato metoda načte seznam poschodí z databáze na základě ID budovy
+     * a vrátí jej jako seznam objektů {@link PoschodiDto}.
+     *
+     * @param idBudova   ID budovy, pro kterou se mají načíst poschodí.
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @return Seznam {@link PoschodiDto} obsahující poschodí pro danou budovu.
+     * @throws BaseException Pokud dojde k chybě při načítání poschodí z databáze.
+     */
     @TransactionalROE
     public List<PoschodiDto> seznamPoschodi(String idBudova, AppUserDto appUserDto) throws BaseException {
         List<Poschodi> poschodiList = poschodiRepository.getList(idBudova, true);
@@ -102,8 +114,24 @@ public class ZadostiServices extends ZadostiExterniServices {
         return poschodiDtos;
     }
 
+    /**
+     * Vrací seznam klíčů pro danou lokalitu, budovu a poschodí.
+     *
+     * Tato metoda načte seznam klíčů z databáze na základě ID lokality,
+     * ID budovy a ID poschodí a vrátí jej jako seznam objektů {@link KlicDto}.
+     *
+     * @param idLokalita ID lokality, pro kterou se mají načíst klíče.
+     * @param idBudova   ID budovy, pro kterou se mají načíst klíče.
+     * @param idPoschodi ID poschodí, pro které se mají načíst klíče.
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @return Seznam {@link KlicDto} obsahující klíče pro danou lokalitu, budovu a
+     *         poschodí.
+     * @throws BaseException Pokud dojde k chybě při načítání klíčů z databáze.
+     */
     @TransactionalROE
-    public List<KlicDto> seznamKlic(String idLokalita, String idBudova, String idPoschodi, AppUserDto appUserDto) throws BaseException {
+    public List<KlicDto> seznamKlic(String idLokalita, String idBudova, String idPoschodi, AppUserDto appUserDto)
+            throws BaseException {
         List<Klic> klicList = klicService.getList(idLokalita, idBudova, idPoschodi, true, null);
 
         List<KlicDto> klicDtos = new ArrayList<KlicDto>(klicList.size());
@@ -114,8 +142,24 @@ public class ZadostiServices extends ZadostiExterniServices {
         return klicDtos;
     }
 
+    /**
+     * Ukládá žádost o klíč pro zaměstnance.
+     *
+     * Tato metoda nejprve ověří existenci uživatele na základě SAP ID
+     * a poté buď aktualizuje existující žádost, nebo vytvoří novou žádost
+     * o klíč. Uloží informace o žádosti a externí žádosti do databáze.
+     *
+     * @param zadostKlicDto Objekt {@link ZadostKlicExtDto}, který obsahuje detaily
+     *                      žádosti o klíč.
+     * @param appUserDto    Objekt {@link AppUserDto}, který obsahuje informace o
+     *                      uživateli.
+     * @throws ValidationException Pokud dojde k chybě při validaci žádosti.
+     * @throws BaseException       Pokud dojde k chybě při ukládání žádosti nebo
+     *                             při volání externí služby.
+     */
     @TransactionalWrite
-    public void saveZadostKlic(ZadostKlicExtDto zadostKlicDto, AppUserDto appUserDto) throws ValidationException, BaseException {
+    public void saveZadostKlic(ZadostKlicExtDto zadostKlicDto, AppUserDto appUserDto)
+            throws ValidationException, BaseException {
         Uzivatel uzivatel = uzivatelRepository.getDetailBySapId(zadostKlicDto.getSapIdZamestnance());
         if (uzivatel == null)
             throw new RecordNotFoundException(
@@ -153,7 +197,20 @@ public class ZadostiServices extends ZadostiExterniServices {
         save(zadostExterni, List.of(zadost.getIdZadostKlic()));
     }
 
-    public void saveBudova(BudovaDto budovaDto, HttpServletRequest request, AppUserDto appUserDto) throws BaseException {
+    /**
+     * Ukládá informace o budově.
+     *
+     * @param budovaDto  Objekt {@link BudovaDto}, který obsahuje informace o
+     *                   budově.
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     * @throws BaseException Pokud dojde k chybě při ukládání budovy nebo
+     *                       při volání externí služby.
+     */
+    public void saveBudova(BudovaDto budovaDto, HttpServletRequest request, AppUserDto appUserDto)
+            throws BaseException {
 
         // volání aplikace Žádosti
         try {
@@ -194,7 +251,20 @@ public class ZadostiServices extends ZadostiExterniServices {
         }
     }
 
-    public void saveLokalita(LokalitaDto lokalitaDto, HttpServletRequest request, AppUserDto appUserDto) throws BaseException {
+    /**
+     * Ukládá informace o lokalitě.
+     * 
+     * @param lokalitaDto Objekt {@link LokalitaDto}, který obsahuje informace o
+     *                    lokalitě.
+     * @param request     HTTP požadavek, který obsahuje informace o uživatelském
+     *                    kontextu.
+     * @param appUserDto  Objekt {@link AppUserDto}, který obsahuje informace o
+     *                    uživateli.
+     * @throws BaseException Pokud dojde k chybě při ukládání lokality nebo
+     *                       při volání externí služby.
+     */
+    public void saveLokalita(LokalitaDto lokalitaDto, HttpServletRequest request, AppUserDto appUserDto)
+            throws BaseException {
 
         // volání aplikace Žádosti
         try {
@@ -202,7 +272,8 @@ public class ZadostiServices extends ZadostiExterniServices {
             // nastavení zástupu
             nastavitZastup(request, appUserDto);
 
-            HttpEntity<LokalitaDto> requestEntity = new HttpEntity<LokalitaDto>(lokalitaDto, getZadostiHttpHeaders(request));
+            HttpEntity<LokalitaDto> requestEntity = new HttpEntity<LokalitaDto>(lokalitaDto,
+                    getZadostiHttpHeaders(request));
 
             ResponseEntity<Void> result = restZadosti
                     .exchange("/vratnice/lokalita/save", HttpMethod.POST,
@@ -233,6 +304,13 @@ public class ZadostiServices extends ZadostiExterniServices {
         }
     }
 
+    /**
+     * Získává HTTP hlavičky pro žádosti o autentizaci.
+     *
+     * @param request HTTP požadavek, ze kterého se získávají cookies.
+     * @return {@link HttpHeaders} obsahující cookie pro autentizaci, nebo null,
+     *         pokud nebyla nalezena platná cookie nebo došlo k chybě.
+     */
     public HttpHeaders getZadostiHttpHeaders(HttpServletRequest request) {
 
         AuthCookieDto authCookieDto = null;
@@ -260,6 +338,14 @@ public class ZadostiServices extends ZadostiExterniServices {
         return null;
     }
 
+    /**
+     * Nastavuje zástupce pro uživatele na základě informací z {@link AppUserDto}.
+     *
+     * @param request    HTTP požadavek, který obsahuje informace o uživatelském
+     *                   kontextu.
+     * @param appUserDto Objekt {@link AppUserDto}, který obsahuje informace o
+     *                   uživateli.
+     */
     public void nastavitZastup(HttpServletRequest request, AppUserDto appUserDto) {
 
         // volání aplikace Žádosti
@@ -291,9 +377,21 @@ public class ZadostiServices extends ZadostiExterniServices {
         }
     }
 
-
-    //TODO:  -- ŽÁDOSTI -- upravit dle potřeby
-    public void saveNavstevniListek(HttpServletRequest request, AppUserDto appUserDto, NavstevniListekDto navstevniListekdDto) throws BaseException {
+    /**
+     * Ukládá návštěvní lístek.
+     *
+     * @param request             HTTP požadavek, který obsahuje informace o
+     *                            uživatelském kontextu.
+     * @param appUserDto          Objekt {@link AppUserDto}, který obsahuje
+     *                            informace o uživateli.
+     * @param navstevniListekdDto Objekt {@link NavstevniListekDto}, který obsahuje
+     *                            detaily návštěvního lístku, který se má uložit.
+     * @throws BaseException Pokud dojde k chybě při ukládání návštěvního lístku
+     *                       nebo při volání externí služby.
+     */
+    // TODO: -- ŽÁDOSTI -- upravit dle potřeby
+    public void saveNavstevniListek(HttpServletRequest request, AppUserDto appUserDto,
+            NavstevniListekDto navstevniListekdDto) throws BaseException {
 
         // volání aplikace Žádosti
         try {
@@ -334,8 +432,22 @@ public class ZadostiServices extends ZadostiExterniServices {
         }
     }
 
-    //TODO:  -- ŽÁDOSTI -- upravit dle potřeby - metoda například pro odůvodnění, proč neproběhla návštěva
-    public void navstevniListekPridatPoznamku(HttpServletRequest request, AppUserDto appUserDto, NavstevniListekUzivatelStavDto uzivatelStavDto) throws BaseException {
+    /**
+     * Přidává poznámku k návštěvnímu lístku.
+     *
+     * @param request         HTTP požadavek, který obsahuje informace o
+     *                        uživatelském kontextu.
+     * @param appUserDto      Objekt {@link AppUserDto}, který obsahuje informace o
+     *                        uživateli.
+     * @param uzivatelStavDto Objekt {@link NavstevniListekUzivatelStavDto}, který
+     *                        obsahuje detaily stavu uživatele návštěvního lístku.
+     * @throws BaseException Pokud dojde k chybě při přidávání poznámky nebo
+     *                       při volání externí služby.
+     */
+    // TODO: -- ŽÁDOSTI -- upravit dle potřeby - metoda například pro odůvodnění,
+    // proč neproběhla návštěva
+    public void navstevniListekPridatPoznamku(HttpServletRequest request, AppUserDto appUserDto,
+            NavstevniListekUzivatelStavDto uzivatelStavDto) throws BaseException {
 
         // volání aplikace Žádosti
         try {
@@ -375,7 +487,5 @@ public class ZadostiServices extends ZadostiExterniServices {
                     messageSource.getMessage("zadosti.nelze.spojit", null, LocaleContextHolder.getLocale()));
         }
     }
-
-
 
 }
