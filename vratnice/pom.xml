@@ -7,7 +7,7 @@
 		<version>3.2.5</version> 
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent> 
-	<groupId>cz.diamo</groupId> 
+	<groupId>cz.dp</groupId> 
 	<artifactId>vratnice</artifactId>
 	<version>${revision}${git.branch}</version>
 	<name>vratnice</name>
@@ -43,7 +43,7 @@
 						</excludes>
 					</resource>
 					<resource>
-						<directory>src/main/java/cz/diamo/share/resources</directory>
+						<directory>src/main/java/cz/dp/share/resources</directory>
 					</resource>
 					<resource>
 						<directory>src/main/resources</directory>
@@ -66,7 +66,7 @@
 						<directory>src/main/resources</directory>
 					</resource>
 					<resource>
-						<directory>src/main/java/cz/diamo/share/resources</directory>
+						<directory>src/main/java/cz/dp/share/resources</directory>
 					</resource>
 				</resources>
 			</build>
@@ -249,8 +249,8 @@
 		<resources>
 		<resource>
 			<!-- For [Flyway] - Copy sql scripts to target/classes/cz/pragodata/ospapi/repository/migration/structure  -->
-			<directory>src/main/java/cz/diamo/vratnice/repository/migration/structure</directory>
-			<targetPath>cz/diamo/vratnice/repository/migration/structure</targetPath>
+			<directory>src/main/java/cz/dp/vratnice/repository/migration/structure</directory>
+			<targetPath>cz/dp/vratnice/repository/migration/structure</targetPath>
 			<includes>
 				<include>*.sql</include>
 			</includes>
