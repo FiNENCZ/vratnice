@@ -15,6 +15,7 @@ import cz.diamo.share.base.Utils;
 import cz.diamo.share.component.ResourcesComponent;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.vratnice.entity.Klic;
@@ -32,6 +33,9 @@ public class ZadostKlicService {
 
     @Autowired
     private ZadostKlicRepository zadostiKlicRepository;
+
+    @Autowired
+    private BudovaVratniceService budovaVratniceService;
 
     @Autowired
     private MessageSource messageSource;
@@ -109,13 +113,18 @@ public class ZadostKlicService {
      *                                 ale není poskytnut.
      * @throws RecordNotFoundException Pokud dojde k chybě při hledání záznamu.
      * @throws NoSuchMessageException  Pokud dojde k chybě při získávání zprávy.
-     */
+     * @throws AccessDeniedException  Pokud uživatel nemá oprávnění */
     @TransactionalWrite
-    public ZadostKlic save(ZadostKlic zadostKlic)
-            throws ValidationException, RecordNotFoundException, NoSuchMessageException {
+    public ZadostKlic save(ZadostKlic zadostKlic, AppUserDto appUserDto)
+                 throws ValidationException, RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
         if (zadostKlic.getKlic().isSpecialni() && StringUtils.isBlank(zadostKlic.getDuvod()))
             throw new ValidationException(
                     messageSource.getMessage("klic.duvod.required", null, LocaleContextHolder.getLocale()));
+
+        Boolean maUzivatelPristupKBudove = budovaVratniceService.maUzivatelPristupKBudove(zadostKlic.getKlic().getBudova(), appUserDto);
+         if (!maUzivatelPristupKBudove)
+            throw new AccessDeniedException(
+                    messageSource.getMessage("zadost_klic.klic.save.no_access_budova", null, LocaleContextHolder.getLocale()));
 
         zadostKlic.setCasZmn(Utils.getCasZmn());
         zadostKlic.setZmenuProvedl(Utils.getZmenuProv());

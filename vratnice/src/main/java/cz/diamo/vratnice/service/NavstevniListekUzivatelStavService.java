@@ -94,8 +94,7 @@ public class NavstevniListekUzivatelStavService {
         NavstevniListekUzivatelStav savedNavstevniListekUzivatelStav = create(navstevniListekUzivatelStav);
 
         // TODO: -- ŽÁDOSTI -- napojit na žádosti
-        // zadostiServices.navstevniListekPridatPoznamku(request, appUserDto, new
-        // NavstevniListekUzivatelStavDto(savedNavstevniListekUzivatelStav));
+        // zadostiServices.navstevniListekPridatPoznamku(request, appUserDto, new NavstevniListekUzivatelStavDto(savedNavstevniListekUzivatelStav));
 
         return savedNavstevniListekUzivatelStav;
     }

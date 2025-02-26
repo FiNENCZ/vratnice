@@ -113,17 +113,25 @@ public class VyjezdVozidlaService {
     public Optional<VyjezdVozidla> jeMozneVyjet(String rzVozidla) {
         List<VjezdVozidla> vjezdVozidel = vjezdVozidlaRepository.getByRzVozidla(rzVozidla);
         List<VyjezdVozidla> vyjezdVozidel = vyjezdVozidlaRepository.getByRzVozidla(rzVozidla);
-
+    
         if (vjezdVozidel.isEmpty()) {
             return Optional.empty();
         }
-
+    
         VjezdVozidla posledniVjezdVozidla = vjezdVozidel.get(vjezdVozidel.size() - 1);
-
-        if (vjezdVozidel.size() > vyjezdVozidel.size() || vyjezdVozidel.isEmpty()) {
+    
+        // Pokud neexistuje žádný záznam o výjezdu, může vozidlo vyjet
+        if (vyjezdVozidel.isEmpty()) {
             return Optional.of(mapToVyjezdVozidla(posledniVjezdVozidla));
         }
-
+    
+        VyjezdVozidla posledniVyjezdVozidla = vyjezdVozidel.get(vyjezdVozidel.size() - 1);
+    
+        // Porovnání časů posledního vjezdu a výjezdu
+        if (posledniVjezdVozidla.getCasPrijezdu().isAfter(posledniVyjezdVozidla.getCasOdjezdu())) {
+            return Optional.of(mapToVyjezdVozidla(posledniVjezdVozidla));
+        }
+    
         return Optional.empty();
     }
 

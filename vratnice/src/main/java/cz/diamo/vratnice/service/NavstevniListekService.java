@@ -118,8 +118,7 @@ public class NavstevniListekService {
         savedNavstevniListek.setUzivateleStav(savedUzivateleStav);
 
         // TODO: -- ŽÁDOSTI -- napojit na žádosti
-        // zadostiServices.saveNavstevniListek(request, appUserDto, new
-        // NavstevniListekDto(savedNavstevniListek));
+        // zadostiServices.saveNavstevniListek(request, appUserDto, new NavstevniListekDto(savedNavstevniListek));
 
         return savedNavstevniListek;
     }

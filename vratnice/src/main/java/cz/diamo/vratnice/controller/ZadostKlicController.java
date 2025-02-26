@@ -19,11 +19,11 @@ import cz.diamo.share.controller.BaseController;
 import cz.diamo.share.dto.AppUserDto;
 import cz.diamo.share.dto.UzivatelDto;
 import cz.diamo.share.entity.Uzivatel;
+import cz.diamo.share.exceptions.AccessDeniedException;
 import cz.diamo.share.exceptions.RecordNotFoundException;
 import cz.diamo.share.exceptions.ValidationException;
 import cz.diamo.share.repository.UzivatelRepository;
 import cz.diamo.vratnice.dto.ZadostKlicDto;
-import cz.diamo.vratnice.dto.ZadostStavDto;
 import cz.diamo.vratnice.entity.ZadostKlic;
 import cz.diamo.vratnice.enums.ZadostStavEnum;
 import cz.diamo.vratnice.service.KlicService;
@@ -55,8 +55,10 @@ public class ZadostKlicController extends BaseController{
 
     @PostMapping("/zadost-klic/save")
     @PreAuthorize("hasAnyAuthority('ROLE_SPRAVA_ZADOSTI_KLICU')")
-    public ResponseEntity<ZadostKlicDto> save(@RequestBody @Valid ZadostKlicDto zadostKlicDto) throws ValidationException, RecordNotFoundException, NoSuchMessageException {
-        ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicDto.toEntity());
+    public ResponseEntity<ZadostKlicDto> save(@Parameter(hidden = true) @AuthenticationPrincipal AppUserDto appUserDto, 
+        @RequestBody @Valid ZadostKlicDto zadostKlicDto) throws ValidationException, RecordNotFoundException, NoSuchMessageException, AccessDeniedException {
+
+        ZadostKlic newZadostKlic = zadostKlicService.save(zadostKlicDto.toEntity(), appUserDto);
         return ResponseEntity.ok(new ZadostKlicDto(newZadostKlic));
     }
 

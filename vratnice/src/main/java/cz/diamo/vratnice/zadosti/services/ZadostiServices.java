@@ -185,7 +185,7 @@ public class ZadostiServices extends ZadostiExterniServices {
         zadost.setUzivatel(uzivatel);
         zadost.setTrvala(zadostKlicDto.getDatumDo() == null);
 
-        zadost = zadostKlicService.save(zadost);
+        zadost = zadostKlicService.save(zadost, appUserDto);
 
         ZadostExterni zadostExterni = new ZadostExterni();
         zadostExterni.setIdZadostExterni(zadostKlicDto.getId());
