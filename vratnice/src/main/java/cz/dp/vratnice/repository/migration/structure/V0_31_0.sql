@@ -1,0 +1,2 @@
+INSERT INTO vratnice.budova VALUES ('XXBK0000000001', 'XXBK0000000001', 'XXLK0000000001', 'Administrativní budova', NULL, true, '2025-03-06 08:52:27.876', 'pgAdmin' );
+INSERT INTO vratnice.poschodi VALUES ('XXPK0000000001', 'Přízemní', 'XXBK0000000001', true, '2025-03-06 08:52:27.876', 'pgAdmin' );

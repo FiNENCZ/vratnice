@@ -49,3 +49,6 @@ Thumbs.db
 *.wmv
 
 postgres_data/
+keycloak_data/
+vratnice_data/
+keycloak-config/

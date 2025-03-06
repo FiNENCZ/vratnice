@@ -1,8 +1,7 @@
 services:
-  postgres:
+  vratnice_postgres:
     image: postgres:15
-    container_name: vratnice_db
-    restart: always
+    container_name: vratnice_postgres
     environment:
       POSTGRES_DB: vratnicedb
       POSTGRES_USER: vratnice
@@ -10,8 +9,4 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-
-
-volumes:
-  postgres_data:
+      - ./vratnice_data:/var/lib/postgresql/data
