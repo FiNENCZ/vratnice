@@ -1376,10 +1376,10 @@ INSERT INTO vratnice.vozidlo_typ VALUES (3, 'VOZIDLO_NAKLADNI');
 INSERT INTO vratnice.vozidlo_typ VALUES (4, 'VOZIDLO_SPECIALNI');
 INSERT INTO vratnice.vozidlo_typ VALUES (5, 'VOZIDLO_IZS');
 
-INSERT INTO vratnice.zavod VALUES ('XXZA0000000001', 'ŘSP', 'D100', '#8bb875', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
-INSERT INTO vratnice.zavod VALUES ('XXZA0000000006', 'HBZS', 'D600', '#f9c5af', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
-INSERT INTO vratnice.zavod VALUES ('XXZA0000000008', 'PKÚ', 'D800', '#7f9bcb', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
-INSERT INTO vratnice.zavod VALUES ('XXZA0000000007', 'Darkov', 'D700', '#333831', '#ffffff', NULL, true, '2024-07-04 10:50:00.377', 'TKUZ0000000004');
+INSERT INTO vratnice.zavod VALUES ('XXZA0000000001', 'Centrála', 'D100', '#8bb875', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
+INSERT INTO vratnice.zavod VALUES ('XXZA0000000006', 'Sklárna', 'D600', '#f9c5af', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
+INSERT INTO vratnice.zavod VALUES ('XXZA0000000008', 'Technika', 'D800', '#7f9bcb', '#ffffff', NULL, true, '2024-05-09 13:01:23.020108', NULL);
+INSERT INTO vratnice.zavod VALUES ('XXZA0000000007', 'Vývoj', 'D700', '#333831', '#ffffff', NULL, true, '2024-07-04 10:50:00.377', 'TKUZ0000000004');
 
 INSERT INTO vratnice.zdrojovy_text VALUES (1, 'cs', 'ROLE_ZAMESTNANEC', 'Zaměstnanec');
 INSERT INTO vratnice.zdrojovy_text VALUES (2, 'cs', 'ROLE_SPRAVA_OPRAVNENI', 'Správa oprávnění');
